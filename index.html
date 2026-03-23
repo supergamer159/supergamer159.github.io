@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ashen Hollow</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Spectral:wght@400;500;600;700&display=swap">
+<title>Infinite Inscryption Act 1</title>
 <link rel="stylesheet" href="styles/game.css">
 </head>
 <body>
@@ -16,227 +13,228 @@
   <div id="drag-card" class="drag-card hidden" aria-hidden="true"></div>
 
   <section id="title-screen" class="screen active">
-    <div class="title-frame">
-      <div class="title-kicker">A Static Browser Occult Deckbuilder</div>
-      <h1>ASHEN HOLLOW</h1>
-      <p class="title-copy">
-        Build a living deck, read the telegraphs, and survive three candlelit regions of ritual combat.
-      </p>
-      <div class="title-actions">
-        <button id="new-run-btn" class="ash-btn ash-btn-primary">Begin New Run</button>
-        <button id="continue-run-btn" class="ash-btn ash-btn-secondary">Continue Run</button>
-        <button id="open-codex-btn" class="ash-btn ash-btn-secondary">Open Codex</button>
+    <div class="screen-stage title-stage">
+      <div class="title-main">
+        <div id="menu-startscreen" class="menu-startscreen pixel-image" aria-hidden="true"></div>
+        <div id="title-menu-cards" class="menu-card-cluster"></div>
       </div>
-      <div class="title-meta">
-        <div class="meta-panel">
-          <div class="section-label">Best Record</div>
-          <div id="title-best-stats" class="meta-copy"></div>
+      <aside class="title-side">
+        <div class="ledger-panel">
+          <div class="panel-kicker">Run Record</div>
+          <div id="profile-summary"></div>
         </div>
-        <div class="meta-panel">
-          <div class="section-label">Recovered Pages</div>
-          <div id="title-discovery-stats" class="meta-copy"></div>
+        <div class="ledger-panel">
+          <div class="panel-kicker">Unlocks</div>
+          <div id="unlock-summary"></div>
         </div>
-      </div>
+      </aside>
     </div>
   </section>
 
-  <section id="starter-screen" class="screen">
-    <div class="screen-panel screen-panel-wide">
-      <div class="screen-head">
-        <div>
-          <div class="section-label">Choose Your First Rite</div>
-          <h2>Starter Deck</h2>
+  <section id="setup-screen" class="screen">
+    <div class="screen-stage setup-stage">
+      <div class="setup-topbar">
+        <button id="setup-back-btn" class="stone-btn" type="button">Back</button>
+        <div class="setup-heading">
+          <div class="panel-kicker">Kaycee Selection</div>
+          <h2>Choose Your Deck</h2>
         </div>
-        <button id="starter-back-btn" class="ash-btn ash-btn-secondary">Back</button>
+        <button id="setup-options-btn" class="stone-btn" type="button">Options</button>
       </div>
-      <div class="starter-layout">
-        <div id="starter-decks" class="starter-decks"></div>
-        <aside id="starter-detail" class="panel detail-panel"></aside>
+      <div class="setup-columns">
+        <div class="ledger-panel">
+          <div class="panel-kicker">Starter Decks</div>
+          <div id="setup-deck-list" class="selection-stack"></div>
+        </div>
+        <div class="parchment-panel setup-center">
+          <div id="setup-deck-detail"></div>
+          <div id="setup-deck-preview" class="card-preview-strip"></div>
+        </div>
+        <div class="ledger-panel">
+          <div class="panel-kicker">Challenges</div>
+          <div id="setup-challenge-list" class="selection-stack compact"></div>
+        </div>
       </div>
-      <div class="screen-actions">
-        <button id="starter-begin-btn" class="ash-btn ash-btn-primary">Enter The Hollow</button>
+      <div class="setup-footer">
+        <div id="setup-requirements" class="setup-requirements"></div>
+        <button id="setup-start-btn" class="inscry-btn" type="button">Begin Run</button>
       </div>
     </div>
   </section>
 
   <section id="map-screen" class="screen">
-    <div class="screen-panel screen-panel-wide">
-      <div class="screen-head">
-        <div>
-          <div id="map-region-kicker" class="section-label">Region I</div>
-          <h2 id="map-region-title">The Ashen Rise</h2>
+    <div class="screen-stage map-stage">
+      <aside class="map-rail">
+        <div class="stone-panel">
+          <div class="panel-kicker">Run</div>
+          <div id="map-run-summary" class="stat-column"></div>
         </div>
-        <div class="head-actions">
-          <button id="map-codex-btn" class="ash-btn ash-btn-secondary">Codex</button>
-          <button id="map-save-btn" class="ash-btn ash-btn-secondary">Save &amp; Quit</button>
+        <div class="stone-panel">
+          <div class="panel-kicker">Bosses</div>
+          <div id="map-boss-order" class="boss-order"></div>
+        </div>
+        <div class="map-actions">
+          <button id="map-codex-btn" class="stone-btn" type="button">Ledger</button>
+          <button id="map-pause-btn" class="stone-btn" type="button">Pause</button>
+        </div>
+      </aside>
+
+      <div class="map-board">
+        <div class="map-header">
+          <div class="panel-kicker" id="map-region-kicker">Map I</div>
+          <h2 id="map-region-title">Trail Of Smoke</h2>
+          <p id="map-region-copy" class="detail-copy"></p>
+        </div>
+        <div id="map-parchment" class="map-parchment">
+          <svg id="map-lines" class="map-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div id="map-node-layer" class="map-node-layer"></div>
         </div>
       </div>
-      <div class="run-strip">
-        <div class="run-pill">Candles <span id="map-lives">2</span></div>
-        <div class="run-pill">Deck <span id="map-deck-count">10</span></div>
-        <div class="run-pill">Items <span id="map-item-count">0</span></div>
-        <div class="run-pill">Bosses <span id="map-boss-count">0</span>/3</div>
-      </div>
-      <div class="map-layout">
-        <div id="map-stage" class="map-stage"></div>
-        <aside id="map-detail" class="panel detail-panel">
-          <div class="section-label">Route Detail</div>
-          <h3>Pick A Node</h3>
-          <p>Study the branches, then commit to a path.</p>
-        </aside>
-      </div>
+
+      <aside id="map-detail" class="note-panel"></aside>
     </div>
   </section>
 
   <section id="battle-screen" class="screen">
-    <div class="battle-shell">
-      <div class="battle-topbar">
-        <div class="topbar-block">
-          <div class="section-label">Scale</div>
-          <div id="scale-readout" class="value-copy">0 / 5</div>
+    <div class="screen-stage battle-stage">
+      <div class="battle-side left">
+        <div class="plaque-stack">
+          <div class="wood-plaque">
+            <div class="panel-kicker">Candles</div>
+            <div id="battle-candles" class="plaque-value">2</div>
+          </div>
+          <div class="wood-plaque">
+            <div class="panel-kicker">Teeth</div>
+            <div id="battle-teeth" class="plaque-value">0</div>
+          </div>
+          <div class="wood-plaque">
+            <div class="panel-kicker">Bones</div>
+            <div id="battle-bones" class="plaque-value">0</div>
+          </div>
+          <div class="wood-plaque">
+            <div class="panel-kicker">Deck</div>
+            <div id="battle-main-count" class="plaque-value">0</div>
+          </div>
+          <div class="wood-plaque">
+            <div class="panel-kicker">Squirrels</div>
+            <div id="battle-side-count" class="plaque-value">0</div>
+          </div>
         </div>
-        <div class="topbar-block">
-          <div class="section-label">Bones</div>
-          <div id="bones-readout" class="value-copy">0</div>
-        </div>
-        <div class="topbar-block">
-          <div class="section-label">Candles</div>
-          <div id="battle-lives" class="value-copy">2</div>
-        </div>
-        <div class="topbar-block">
-          <div class="section-label">Main Deck</div>
-          <div id="deck-readout" class="value-copy">10</div>
-        </div>
-        <div class="topbar-block">
-          <div class="section-label">Offering Deck</div>
-          <div id="offering-readout" class="value-copy">10</div>
-        </div>
-        <div class="topbar-actions">
-          <button id="draw-main-btn" class="ash-btn ash-btn-secondary">Draw Main</button>
-          <button id="draw-offering-btn" class="ash-btn ash-btn-secondary">Draw Offering</button>
-          <button id="end-turn-btn" class="ash-btn ash-btn-primary">End Turn [Space]</button>
-          <button id="battle-codex-btn" class="ash-btn ash-btn-secondary">Codex [Tab]</button>
-          <button id="pause-btn" class="ash-btn ash-btn-secondary">Pause [Esc]</button>
-        </div>
+        <div id="item-bar" class="item-bar"></div>
       </div>
 
-      <div id="selection-banner" class="selection-banner hidden">
-        <span id="selection-text">Select a lane.</span>
-        <button id="selection-cancel-btn" class="ash-btn ash-btn-secondary ash-btn-small">Cancel</button>
-      </div>
+      <div class="battle-table">
+        <div class="table-header">
+          <div>
+            <div id="battle-encounter-kicker" class="panel-kicker">Encounter</div>
+            <h2 id="battle-encounter-title">The Table Waits</h2>
+          </div>
+          <div class="table-actions">
+            <button id="draw-main-btn" class="stone-btn" type="button">Draw Deck</button>
+            <button id="draw-side-btn" class="stone-btn" type="button">Draw Squirrel</button>
+            <button id="ring-bell-btn" class="inscry-btn" type="button">Ring Bell</button>
+            <button id="battle-codex-btn" class="stone-btn" type="button">Ledger</button>
+            <button id="pause-btn" class="stone-btn" type="button">Pause</button>
+          </div>
+        </div>
 
-      <div class="battle-layout">
-        <div class="board-column">
-          <div class="board-panel">
-            <div class="section-label">Next Enemy Plays</div>
+        <div id="selection-banner" class="selection-banner hidden">
+          <span id="selection-text">Choose a lane.</span>
+          <button id="selection-cancel-btn" class="stone-btn" type="button">Cancel</button>
+        </div>
+
+        <div class="battle-surface">
+          <div class="queue-band">
+            <div class="panel-kicker">Enemy Telegraphs</div>
             <div id="enemy-queue" class="queue-row"></div>
           </div>
-
-          <div class="board-panel">
-            <div class="section-label">Enemy Lanes</div>
-            <div id="enemy-row" class="lane-row enemy-row"></div>
-          </div>
-
-          <div class="board-panel scale-panel">
-            <div class="section-label">Fate Scale</div>
+          <div id="enemy-row" class="lane-row enemy-row"></div>
+          <div class="scale-band">
+            <div class="panel-kicker">Scale</div>
             <div id="scale-track" class="scale-track"></div>
           </div>
-
-          <div class="board-panel">
-            <div class="section-label">Your Lanes</div>
-            <div id="player-row" class="lane-row player-row"></div>
-          </div>
-
-          <div class="board-panel">
-            <div class="section-label">Items</div>
-            <div id="item-bar" class="item-bar"></div>
-          </div>
-
-          <div class="board-panel">
-            <div class="section-label">Hand</div>
-            <div id="hand-row" class="hand-row"></div>
-          </div>
+          <div id="player-row" class="lane-row player-row"></div>
         </div>
 
-        <aside class="battle-aside">
-          <div id="inspect-panel" class="panel inspect-panel"></div>
-          <div class="panel log-panel">
-            <div class="section-label">Ritual Log</div>
-            <div id="battle-log" class="battle-log"></div>
-          </div>
-        </aside>
+        <div class="hand-band">
+          <div class="panel-kicker">Hand</div>
+          <div id="hand-row" class="hand-row"></div>
+        </div>
+      </div>
+
+      <div class="battle-side right">
+        <div id="inspect-panel" class="note-panel"></div>
+        <div class="ledger-panel battle-log-panel">
+          <div class="panel-kicker">Whispers</div>
+          <div id="battle-log" class="battle-log"></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="flow-screen" class="screen">
-    <div class="screen-panel flow-panel">
-      <div id="flow-kicker" class="section-label">Reward</div>
-      <h2 id="flow-title">A Choice Awaits</h2>
-      <p id="flow-description" class="flow-description"></p>
-      <div id="flow-card-grid" class="flow-card-grid"></div>
-      <div id="flow-deck-grid" class="flow-deck-grid"></div>
-      <div id="flow-button-row" class="flow-button-row"></div>
-      <div class="screen-actions">
-        <button id="flow-close-btn" class="ash-btn ash-btn-secondary hidden">Back</button>
-      </div>
+  <section id="event-screen" class="screen">
+    <div class="screen-stage event-stage">
+      <div id="event-panel" class="event-panel"></div>
     </div>
   </section>
 
-  <section id="deckbook-screen" class="screen">
-    <div class="screen-panel screen-panel-wide">
-      <div class="screen-head">
+  <section id="codex-screen" class="screen">
+    <div class="screen-stage codex-stage">
+      <div class="codex-topbar">
         <div>
-          <div class="section-label">Ritual Ledger</div>
-          <h2>Deckbook</h2>
+          <div class="panel-kicker">Ledger</div>
+          <h2>Bestiary And Deck</h2>
         </div>
-        <button id="deckbook-close-btn" class="ash-btn ash-btn-secondary">Close</button>
+        <div class="codex-actions">
+          <button id="codex-current-tab" class="stone-btn is-active" type="button">Current Run</button>
+          <button id="codex-discovered-tab" class="stone-btn" type="button">Collection</button>
+          <button id="codex-close-btn" class="inscry-btn" type="button">Close</button>
+        </div>
       </div>
-      <div class="deckbook-toolbar">
-        <button id="deckbook-current-tab" class="ash-btn ash-btn-secondary is-active">Current Deck</button>
-        <button id="deckbook-discovered-tab" class="ash-btn ash-btn-secondary">Recovered Pages</button>
-      </div>
-      <div id="deckbook-summary" class="deckbook-summary"></div>
-      <div id="deckbook-grid" class="deckbook-grid"></div>
+      <div id="codex-summary" class="note-panel codex-summary"></div>
+      <div id="codex-grid" class="codex-grid"></div>
     </div>
   </section>
 
-  <section id="gameover-screen" class="screen">
-    <div class="screen-panel end-panel">
-      <div class="section-label">The Last Candle Fails</div>
-      <h2>Game Over</h2>
-      <p id="gameover-copy" class="flow-description"></p>
-      <div id="gameover-stats" class="end-stats"></div>
-      <div class="screen-actions">
-        <button id="gameover-restart-btn" class="ash-btn ash-btn-primary">New Run</button>
-        <button id="gameover-codex-btn" class="ash-btn ash-btn-secondary">Codex</button>
+  <section id="ending-screen" class="screen">
+    <div class="screen-stage ending-stage">
+      <div class="ending-panel">
+        <div id="ending-kicker" class="panel-kicker">The Candle Fails</div>
+        <h2 id="ending-title">Run Over</h2>
+        <p id="ending-copy" class="detail-copy"></p>
+        <div id="ending-stats" class="ending-stats"></div>
+        <div class="ending-actions">
+          <button id="ending-new-run-btn" class="inscry-btn" type="button">Return To Menu</button>
+          <button id="ending-codex-btn" class="stone-btn" type="button">Ledger</button>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="victory-screen" class="screen">
-    <div class="screen-panel end-panel">
-      <div class="section-label">The Third Seal Is Broken</div>
-      <h2>Victory</h2>
-      <p id="victory-copy" class="flow-description"></p>
-      <div id="victory-stats" class="end-stats"></div>
-      <div class="screen-actions">
-        <button id="victory-new-run-btn" class="ash-btn ash-btn-primary">New Run</button>
-        <button id="victory-codex-btn" class="ash-btn ash-btn-secondary">Codex</button>
+  <div id="options-overlay" class="overlay hidden">
+    <div class="overlay-panel">
+      <div class="panel-kicker">Options</div>
+      <h3>Cabin Settings</h3>
+      <div id="options-list" class="options-list"></div>
+      <div class="overlay-actions">
+        <button id="reset-profile-btn" class="stone-btn warning" type="button">Reset Profile</button>
+        <button id="options-close-btn" class="inscry-btn" type="button">Close</button>
       </div>
     </div>
-  </section>
+  </div>
 
   <div id="pause-overlay" class="overlay hidden">
-    <div class="overlay-panel">
-      <div class="section-label">The Table Waits</div>
-      <h3>Paused</h3>
-      <p>Resume the ritual, inspect your deck, or preserve the run and return to the title screen.</p>
-      <div class="screen-actions">
-        <button id="resume-btn" class="ash-btn ash-btn-primary">Resume</button>
-        <button id="pause-codex-btn" class="ash-btn ash-btn-secondary">Codex</button>
-        <button id="save-quit-btn" class="ash-btn ash-btn-secondary">Save &amp; Quit</button>
+    <div class="overlay-panel pause-panel">
+      <div class="panel-kicker">Paused</div>
+      <h3>The Table Waits</h3>
+      <p class="detail-copy">Resume the run, inspect your ledger, alter options, or concede this journey.</p>
+      <div class="pause-actions">
+        <button id="resume-btn" class="inscry-btn" type="button">Resume</button>
+        <button id="pause-codex-btn" class="stone-btn" type="button">Ledger</button>
+        <button id="pause-options-btn" class="stone-btn" type="button">Options</button>
       </div>
+      <div id="pause-concede-card" class="pause-concede-card pixel-image" aria-hidden="true"></div>
+      <button id="concede-btn" class="concede-btn" type="button">Concede Run</button>
     </div>
   </div>
 </div>

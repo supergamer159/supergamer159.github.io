@@ -1,917 +1,2752 @@
-﻿const DOM_CACHE = Object.create(null);
-const STORAGE_KEYS = { run: "ashen_hollow_save_v1", best: "ashen_hollow_best_v1", discovered: "ashen_hollow_discovered_v1" };
-const PERSISTED_SCREENS = new Set(["map-screen", "battle-screen", "flow-screen"]);
+const STORAGE_KEYS = {
+  profile: "inscryption_profile_v2",
+  run: "inscryption_run_v2",
+};
+
+const MAX_LANES = 4;
+const SCALE_LIMIT = 5;
+const DOM_CACHE = Object.create(null);
+
+const ASSETS = Object.freeze({
+  menu: {
+    startscreen: "game assets/Menu/menucard_startscreen.png",
+    newGame: "game assets/Menu/menucard_newgame.png",
+    continue: "game assets/Menu/menucard_continue.png",
+    options: "game assets/Menu/menucard_options.png",
+    concede: "game assets/Menu/menucard_concede.png",
+    cursor: "game assets/Menu/p03_face_arrow.png",
+  },
+  frames: {
+    normal: "game assets/Base Card/card_empty.png",
+    rare: "game assets/Base Card/card_empty_rare.png",
+    noStats: "game assets/Base Card/card_empty_nostats.png",
+  },
+  backs: {
+    normal: "game assets/Base Card/card_back.png",
+    rare: "game assets/Base Card/card_back_rare.png",
+    squirrel: "game assets/Base Card/card_back_squirrel.png",
+    bee: "game assets/Base Card/card_back_bee.png",
+  },
+  slots: {
+    normal: "game assets/card_slot.png",
+    host: "game assets/Misc/card_slot_host.png",
+    sacrifice: "game assets/Misc/card_slot_sacrifice.png",
+  },
+  costs: {
+    "blood-1": "game assets/Costs/cost_1blood.png",
+    "blood-2": "game assets/Costs/cost_2blood.png",
+    "blood-3": "game assets/Costs/cost_3blood.png",
+    "blood-4": "game assets/Costs/cost_4blood.png",
+    "bone-1": "game assets/Costs/cost_1bone.png",
+    "bone-2": "game assets/Costs/cost_2bone.png",
+    "bone-3": "game assets/Costs/cost_3bone.png",
+    "bone-4": "game assets/Costs/cost_4bone.png",
+    "bone-5": "game assets/Costs/cost_5bone.png",
+    "bone-6": "game assets/Costs/cost_6bone.png",
+    "bone-7": "game assets/Costs/cost_7bone.png",
+    "bone-8": "game assets/Costs/cost_8bone.png",
+    "bone-9": "game assets/Costs/cost_9bone.png",
+    "bone-10": "game assets/Costs/cost_10bone.png",
+  },
+  misc: {
+    addedSigil: "game assets/Misc/card_added_ability.png",
+    sacrificeMark: "game assets/Misc/sacrifice_mark.png",
+    sacrificeSplatter: "game assets/Misc/sacrifice_splatter.png",
+    attackMark: "game assets/Misc/attack_mark.png",
+    fishhookMark: "game assets/Misc/fishhook_mark.png",
+    stampFrame: "game assets/Misc/ability_stamp_frame.png",
+    stampShadow: "game assets/Misc/ability_stamp_shadow.png",
+  },
+  decals: {
+    smoke: "game assets/Decals/decal_smoke.png",
+    blood1: "game assets/Decals/decal_blood_1.png",
+    blood2: "game assets/Decals/decal_blood_2.png",
+    paint1: "game assets/Decals/decal_paint_1.png",
+    paint2: "game assets/Decals/decal_paint_2.png",
+  },
+  trials: {
+    blood: "game assets/Trials and Boons/trial_blood.png",
+    bones: "game assets/Trials and Boons/trial_bones.png",
+    power: "game assets/Trials and Boons/trial_power.png",
+    health: "game assets/Trials and Boons/trial_toughness.png",
+    wisdom: "game assets/Trials and Boons/trial_abilities.png",
+    kin: "game assets/Trials and Boons/trial_tribes.png",
+  },
+  sigils: {
+    airborne: "game assets/Sigils/ability_flying.png",
+    "mighty-leap": "game assets/Sigils/ability_reach.png",
+    waterborne: "game assets/Sigils/ability_submerge.png",
+    guardian: "game assets/Sigils/ability_guarddog.png",
+    burrower: "game assets/Sigils/ability_whackamole.png",
+    sprinter: "game assets/Sigils/ability_strafe.png",
+    bifurcated: "game assets/Sigils/ability_splitstrike.png",
+    trifurcated: "game assets/Sigils/ability_tristrike.png",
+    "touch-of-death": "game assets/Sigils/ability_deathtouch.png",
+    "sharp-quills": "game assets/Sigils/ability_sharp.png",
+    stinky: "game assets/Sigils/ability_debuffenemy.png",
+    leader: "game assets/Sigils/ability_buffneighbours.png",
+    "worthy-sacrifice": "game assets/Sigils/ability_tripleblood.png",
+    "many-lives": "game assets/Sigils/ability_sacrificial.png",
+    "bone-king": "game assets/Sigils/ability_quadruplebones.png",
+    scavenger: "game assets/Sigils/ability_opponentbones.png",
+    fledgling: "game assets/Sigils/ability_evolve.png",
+    "bees-within": "game assets/Sigils/ability_beesonhit.png",
+    "rabbit-hole": "game assets/Sigils/ability_drawrabbits.png",
+    fecundity: "game assets/Sigils/ability_drawcopy.png",
+    "corpse-eater": "game assets/Sigils/ability_corpseeater.png",
+    unkillable: "game assets/Sigils/ability_apparition.png",
+    "dam-builder": "game assets/Sigils/ability_createdams.png",
+    "loose-tail": "game assets/Sigils/ability_tailonhit.png",
+    hoarder: "game assets/Sigils/ability_tutor.png",
+    "ant-spawner": "game assets/Sigils/ability_drawant.png",
+    "ant-power": "game assets/Sigils/ability_drawant.png",
+    hefty: "game assets/Sigils/ability_strafepush.png",
+    brittle: "game assets/Sigils/ability_brittle.png",
+    sentry: "game assets/Sigils/ability_sentry.png",
+    "steel-trap": "game assets/Sigils/ability_steeltrap.png",
+  },
+});
+
+const EMISSION_PORTRAITS = new Set([
+  "portrait_adder",
+  "portrait_amalgam",
+  "portrait_ant",
+  "portrait_antflying",
+  "portrait_antqueen",
+  "portrait_beaver",
+  "portrait_bee",
+  "portrait_beehive",
+  "portrait_bloodhound",
+  "portrait_bullfrog",
+  "portrait_cat",
+  "portrait_cockroach",
+  "portrait_coyote",
+  "portrait_fieldmice",
+  "portrait_geck",
+  "portrait_goat",
+  "portrait_goldnugget",
+  "portrait_grizzly",
+  "portrait_kingfisher",
+  "portrait_mantis",
+  "portrait_mantisgod",
+  "portrait_mole",
+  "portrait_moleman",
+  "portrait_moose",
+  "portrait_opossum",
+  "portrait_packrat",
+  "portrait_pelt_golden",
+  "portrait_porcupine",
+  "portrait_pronghorn",
+  "portrait_rabbit",
+  "portrait_ratking",
+  "portrait_raven",
+  "portrait_ravenegg",
+  "portrait_ringworm",
+  "portrait_shark",
+  "portrait_skink",
+  "portrait_skink_tailless",
+  "portrait_skunk",
+  "portrait_sparrow",
+  "portrait_squirrel",
+  "portrait_stoat",
+  "portrait_stoat_bloated",
+  "portrait_tadpole",
+  "portrait_urayuli",
+  "portrait_vulture",
+  "portrait_warren",
+  "portrait_wolf",
+  "portrait_wolfcub",
+]);
+
+const MENU_CARDS = [
+  { id: "new-game", title: "New Game", copy: "Open a fresh Kaycee run.", asset: ASSETS.menu.newGame },
+  { id: "continue", title: "Continue", copy: "Resume the current candle.", asset: ASSETS.menu.continue },
+  { id: "options", title: "Options", copy: "Tune motion, scaling, and profile data.", asset: ASSETS.menu.options },
+];
+
 const REGION_INFO = [
-  { id: "ashen-rise", name: "The Ashen Rise", kicker: "Region I", subtitle: "Open braziers and first devotions." },
-  { id: "waxen-cloister", name: "The Waxen Cloister", kicker: "Region II", subtitle: "Wax hymns and candle smoke." },
-  { id: "barrow-below", name: "The Barrow Below", kicker: "Region III", subtitle: "Roots split graves in the dark." },
+  { title: "The Woodland Trail", kicker: "Map I", copy: "A soot-marked route through campfires, traps, and stitched sacks." },
+  { title: "The Marsh Crossing", kicker: "Map II", copy: "Waterlogged paths where the telegraphs hide beneath the reeds." },
+  { title: "The Snow Line", kicker: "Map III", copy: "The last hunt climbs toward frost and hungrier silhouettes." },
+  { title: "The Cabin Door", kicker: "Final Map", copy: "Only Leshy remains beyond the lantern and the moon." },
 ];
-const NODE_LABELS = {
-  battle: { icon: "X", name: "Battle", copy: "A standard clash. Survive and take a card." },
-  elite: { icon: "!!", name: "Elite", copy: "Harder fight. Better spoils." },
-  campfire: { icon: "F", name: "Campfire", copy: "Temper one creature in the coals." },
-  trader: { icon: "$", name: "Trader", copy: "A stitched merchant offers a bargain." },
-  "sigil-shrine": { icon: "S", name: "Sigil Shrine", copy: "Graft a mark onto a survivor." },
-  "item-cache": { icon: "I", name: "Item Cache", copy: "Old tools wait under ash." },
-  boss: { icon: "B", name: "Boss", copy: "A named keeper of the region." },
-};
-const REGION_LAYOUTS = [
-  [["battle","battle","campfire"],["battle","item-cache","trader"],["battle","sigil-shrine","elite"],["battle","campfire","item-cache"],["battle","elite"],["boss"]],
-  [["battle","trader","sigil-shrine"],["battle","item-cache","elite"],["battle","campfire","trader"],["battle","sigil-shrine","elite"],["battle","campfire"],["boss"]],
-  [["battle","item-cache","campfire"],["elite","battle","trader"],["battle","sigil-shrine","elite"],["battle","campfire","item-cache"],["battle","elite"],["boss"]],
-];
-const SIGIL_POOLS = { sky: ["airborne","bifurcated","warded"], grave: ["scavenger","bone-king","brittle"], wild: ["guardian","thorn","sentry","skitter"] };
-const app = {
-  run: null,
-  visibleScreen: "title-screen",
-  selectedStarterId: "red-rite",
-  selectedMapNodeId: null,
-  deckbookTab: "current",
-  deckbookReturnScreen: "title-screen",
-  toastTimer: null,
-  drag: null,
-  inspect: null,
-  pauseVisible: false,
-  ending: null,
-  motes: [],
-  lastFrameTime: 0,
-  discovered: new Set(),
+
+const NODE_TYPE_META = {
+  battle: { label: "Fight", copy: "A standard encounter and a card reward." },
+  campfire: { label: "Fire", copy: "Warm one creature beside the survivors." },
+  backpack: { label: "Pack", copy: "Choose a fresh tool for the run." },
+  "sacrificial-stones": { label: "Stones", copy: "Transfer sigils from one creature to another." },
+  trapper: { label: "Trapper", copy: "Trade teeth for pelts." },
+  trader: { label: "Trader", copy: "Swap pelts for fresh creatures." },
+  "deck-trial": { label: "Trial", copy: "Reveal cards to test the deck." },
+  boss: { label: "Boss", copy: "A mask-bearing boss blocks the trail." },
 };
 
-function el(id) { return DOM_CACHE[id] || (DOM_CACHE[id] = document.getElementById(id)); }
-function clone(value) { return JSON.parse(JSON.stringify(value)); }
-function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
-function unique(values) { return [...new Set(values)]; }
-function titleCase(value) { return String(value).split(/[\s-]+/).filter(Boolean).map((part) => part[0].toUpperCase() + part.slice(1)).join(" "); }
-function makeSeed() { return ((Date.now() >>> 0) ^ (Math.random() * 0xffffffff >>> 0)) >>> 0; }
-function nextRandom(holder) { holder.rngState = ((holder.rngState * 1664525) + 1013904223) >>> 0; return holder.rngState / 0x100000000; }
-function randomInt(holder, min, maxExclusive) { return Math.floor(nextRandom(holder) * (maxExclusive - min)) + min; }
-function shuffleWithState(holder, values) { const copy = [...values]; for (let i = copy.length - 1; i > 0; i -= 1) { const j = randomInt(holder, 0, i + 1); [copy[i], copy[j]] = [copy[j], copy[i]]; } return copy; }
-function weightedPick(holder, entries) { const total = entries.reduce((sum, entry) => sum + entry.weight, 0); let roll = nextRandom(holder) * total; for (const entry of entries) { roll -= entry.weight; if (roll <= 0) return entry.value; } return entries[entries.length - 1].value; }
-function uid(run, prefix) { run.uidCounter = (run.uidCounter || 0) + 1; return `${prefix}-${run.uidCounter}`; }
-function sigil(id, name, description, timing, handlerKey) { return { id, name, description, timing, handlerKey }; }
-function card(id, name, costBlood, costBones, attack, health, sigils, tribe, rare, artGlyph, description, extra = {}) { return { id, name, costBlood, costBones, attack, health, sigils, tribe, rare, artGlyph, description, ...extra }; }
-function item(id, name, description, target, detail) { return { id, name, description, target, detail }; }
-function eventDef(id, nodeType, title, description, extra = {}) { return { id, nodeType, title, description, ...extra }; }
-function spawn(lane, cardId, extra = {}) { return { lane, cardId, ...extra }; }
-
-const SIGILS = [
-  sigil("airborne", "Airborne", "Strikes the scale instead of the opposing creature.", "strike", "airborne"),
-  sigil("guardian", "Guardian", "Slides into an empty lane when a foe appears opposite it.", "react", "guardian"),
-  sigil("brittle", "Brittle", "Perishes after striking.", "afterStrike", "brittle"),
-  sigil("skitter", "Skitter", "Moves sideways after combat.", "afterCombat", "skitter"),
-  sigil("sprout", "Sprout", "Transforms after surviving a turn.", "afterCombat", "sprout"),
-  sigil("thorn", "Thorn", "Deals 1 damage back when struck.", "damaged", "thorn"),
-  sigil("scavenger", "Scavenger", "You gain 1 extra bone whenever a creature dies.", "death", "scavenger"),
-  sigil("worthy", "Worthy", "Counts as 3 blood when sacrificed.", "sacrifice", "worthy"),
-  sigil("many-lives", "Many Lives", "Survives sacrifice.", "sacrifice", "manyLives"),
-  sigil("bifurcated", "Bifurcated", "Strikes the lanes beside its own.", "strike", "bifurcated"),
-  sigil("cleave", "Cleave", "Strikes left, forward, and right.", "strike", "cleave"),
-  sigil("bone-king", "Bone King", "Drops 3 extra bones on death.", "death", "boneKing"),
-  sigil("warded", "Warded", "Negates the first damage taken.", "damaged", "warded"),
-  sigil("sentry", "Sentry", "Deals 1 damage to the opposing lane when played.", "play", "sentry"),
-];
-const SIGIL_LOOKUP = Object.fromEntries(SIGILS.map((entry) => [entry.id, entry]));
-
-const PLAYER_CARDS = [
-  card("ember-initiate","Ember Initiate",0,0,1,1,[],"rite",false,"EI","Bleeds first.",{group:"red-rite"}),
-  card("altar-goat","Altar Goat",1,0,0,2,["worthy"],"rite",false,"AG","Bows to the knife.",{group:"red-rite"}),
-  card("pyre-cat","Pyre Cat",1,0,0,1,["many-lives"],"beast",false,"PC","Returns through smoke.",{group:"red-rite"}),
-  card("cinder-hound","Cinder Hound",1,0,2,1,["skitter"],"beast",false,"CH","Coal with teeth.",{group:"red-rite"}),
-  card("soot-falcon","Soot Falcon",1,0,1,1,["airborne"],"beast",false,"SF","Dives through sparks.",{group:"red-rite"}),
-  card("hearth-keeper","Hearth Keeper",1,0,1,2,["sentry"],"rite",false,"HK","Greets with a shard.",{group:"red-rite"}),
-  card("flame-ward","Flame Ward",1,0,1,3,["thorn"],"rite",false,"FW","Wrapped in coals.",{group:"red-rite"}),
-  card("red-maw","Red Maw",2,0,3,2,[],"beast",false,"RM","Cannot remember restraint.",{group:"red-rite"}),
-  card("wick-wolf","Wick Wolf",2,0,2,3,["guardian"],"beast",false,"WW","Lunges to guard.",{group:"red-rite"}),
-  card("ritual-stag","Ritual Stag",2,0,1,4,["worthy"],"beast",false,"RS","Three hearts beat.",{group:"red-rite"}),
-  card("brand-vulture","Brand Vulture",2,0,1,2,["airborne","bifurcated"],"beast",true,"BV","Marks two lanes.",{group:"red-rite"}),
-  card("coal-ox","Coal Ox",3,0,4,6,[],"beast",true,"CO","Pulls the rite forward.",{group:"red-rite"}),
-  card("marrow-scribe","Marrow Scribe",0,1,0,1,["scavenger"],"bone",false,"MS","Counts every death.",{group:"bone-choir"}),
-  card("choir-rib","Choir Rib",0,2,1,2,[],"bone",false,"CR","A ribcage taught to sing.",{group:"bone-choir"}),
-  card("grave-sapper","Grave Sapper",0,3,2,1,["bone-king"],"bone",false,"GS","Steals from graves.",{group:"bone-choir"}),
-  card("femur-mason","Femur Mason",0,4,1,4,["thorn"],"bone",false,"FM","Reinforces the line.",{group:"bone-choir"}),
-  card("ossuary-hound","Ossuary Hound",0,4,2,2,["skitter"],"bone",false,"OH","Digs where marrow steams.",{group:"bone-choir"}),
-  card("dirge-bat","Dirge Bat",0,5,1,2,["airborne"],"bone",false,"DB","Its cry lands first.",{group:"bone-choir"}),
-  card("crypt-mother","Crypt Mother",0,5,1,3,["sprout"],"bone",false,"CM","Given time, worsens.",{group:"bone-choir", sproutsTo:"ash-revenant"}),
-  card("reliquary-elk","Reliquary Elk",0,6,2,4,["warded"],"bone",false,"RE","A shrine on antlers.",{group:"bone-choir"}),
-  card("catacomb-giant","Catacomb Giant",0,8,4,5,[],"bone",true,"CG","The floor itself rises.",{group:"bone-choir"}),
-  card("grave-harrier","Grave Harrier",0,6,1,3,["airborne","scavenger"],"bone",true,"GH","Circles the dead.",{group:"bone-choir"}),
-  card("bone-usher","Bone Usher",0,3,0,3,["guardian","scavenger"],"bone",false,"BU","Makes room for corpses.",{group:"bone-choir"}),
-  card("ash-revenant","Ash Revenant",0,6,3,2,["warded"],"bone",true,"AR","Walks out hotter.",{group:"bone-choir"}),
-  card("moss-scout","Moss Scout",0,0,1,2,[],"moss",false,"MO","Knows soft places.",{group:"moss-covenant"}),
-  card("bark-guard","Bark Guard",1,0,0,4,["guardian"],"moss",false,"BG","A wall that notices.",{group:"moss-covenant"}),
-  card("sapling-host","Sapling Host",1,0,0,2,["sprout"],"moss",false,"SH","Patience becomes threat.",{group:"moss-covenant", sproutsTo:"briar-elk"}),
-  card("reed-stalker","Reed Stalker",1,0,1,3,["warded"],"moss",false,"RD","The first cut parts reeds.",{group:"moss-covenant"}),
-  card("hollow-tender","Hollow Tender",1,0,1,2,["scavenger"],"moss",false,"HT","Gathers what fell.",{group:"moss-covenant"}),
-  card("vine-cutter","Vine Cutter",1,0,2,1,["sentry"],"moss",false,"VC","The hook answers first.",{group:"moss-covenant"}),
-  card("briar-elk","Briar Elk",2,0,2,4,["thorn"],"moss",false,"BE","Antlers are not the limit.",{group:"moss-covenant"}),
-  card("mire-owl","Mire Owl",2,0,1,2,["airborne","warded"],"moss",true,"MO","Mist closes behind it.",{group:"moss-covenant"}),
-  card("thicket-matron","Thicket Matron",2,0,2,3,["cleave"],"moss",true,"TM","Tends the whole row.",{group:"moss-covenant"}),
-  card("root-hulk","Root Hulk",3,0,3,6,[],"moss",true,"RH","The board groans.",{group:"moss-covenant"}),
-  card("wilted-sage","Wilted Sage",2,0,1,3,["bifurcated"],"moss",false,"WS","Counsel in two lanes.",{group:"moss-covenant"}),
-  card("bloom-lantern","Bloom Lantern",2,0,0,3,["sprout","guardian"],"moss",true,"BL","Glows before it unfurls.",{group:"moss-covenant", sproutsTo:"root-hulk"}),
+const MAP_BLUEPRINTS = [
+  [
+    ["battle", "campfire", "backpack"],
+    ["battle", "trapper", "battle"],
+    ["battle", "sacrificial-stones", "deck-trial"],
+    ["battle", "trader", "campfire"],
+    ["battle", "battle"],
+    ["boss"],
+  ],
+  [
+    ["battle", "backpack", "battle"],
+    ["battle", "campfire", "trapper"],
+    ["battle", "deck-trial", "sacrificial-stones"],
+    ["battle", "trader", "battle"],
+    ["battle", "campfire"],
+    ["boss"],
+  ],
+  [
+    ["battle", "campfire", "battle"],
+    ["battle", "trapper", "backpack"],
+    ["battle", "sacrificial-stones", "deck-trial"],
+    ["battle", "trader", "campfire"],
+    ["battle", "battle"],
+    ["boss"],
+  ],
+  [["boss"]],
 ];
 
-const ENEMY_CARDS = [
-  card("hollow-scab","Hollow Scab",0,0,1,1,[],"enemy",false,"HS","Left too near the table."),
-  card("cinder-mite","Cinder Mite",0,0,1,2,["brittle"],"enemy",false,"CM","Burns out on impact."),
-  card("straw-bailiff","Straw Bailiff",0,0,1,3,["guardian"],"enemy",false,"SB","Jumps where ordered."),
-  card("ember-crow","Ember Crow",0,0,1,1,["airborne"],"enemy",false,"EC","Cuts the air orange."),
-  card("grave-maggot","Grave Maggot",0,0,1,1,["skitter"],"enemy",false,"GM","Never where expected."),
-  card("ash-usher","Ash Usher",0,0,0,2,["thorn"],"enemy",false,"AU","Points with pain."),
-  card("bone-raider","Bone Raider",0,0,2,2,[],"enemy",false,"BR","Heavy hands, simple hunger."),
-  card("wax-sister","Wax Sister",0,0,1,3,["warded"],"enemy",false,"WX","The first blow only dents."),
-  card("briar-wretch","Briar Wretch",0,0,2,2,["thorn"],"enemy",false,"BW","Pain both ways."),
-  card("tomb-warden","Tomb Warden",0,0,1,4,["guardian"],"enemy",false,"TW","Keeps old claims."),
-  card("rot-hound","Rot Hound",0,0,2,1,["skitter"],"enemy",false,"RH","A fast jaw."),
-  card("mire-spitter","Mire Spitter",0,0,1,2,["sentry"],"enemy",false,"MS","Nicks the lane first."),
-  card("wicker-judge","Wicker Judge",0,0,2,7,["guardian","cleave"],"boss",true,"WJ","Taxes the whole row.",{boss:true}),
-  card("candle-matron","Candle Matron",0,0,1,8,["warded","scavenger"],"boss",true,"CM","Feeds on extinguished wick.",{boss:true}),
-  card("buried-king","Buried King",0,0,3,8,["warded","cleave"],"boss",true,"BK","Demands tribute from graves.",{boss:true}),
+const SIGIL_DEFS = Object.freeze({
+  airborne: { name: "Airborne", text: "Strikes past creatures unless blocked by Mighty Leap." },
+  "mighty-leap": { name: "Mighty Leap", text: "Blocks Airborne strikes." },
+  waterborne: { name: "Waterborne", text: "Submerges during the opposing attack step." },
+  guardian: { name: "Guardian", text: "Moves to oppose a creature played across from it." },
+  burrower: { name: "Burrower", text: "Moves to defend an open lane before damage lands." },
+  sprinter: { name: "Sprinter", text: "Moves sideways after combat." },
+  bifurcated: { name: "Bifurcated Strike", text: "Strikes the lanes beside its own." },
+  trifurcated: { name: "Trifurcated Strike", text: "Strikes left, center, and right." },
+  "touch-of-death": { name: "Touch of Death", text: "Any amount of combat damage is lethal." },
+  "sharp-quills": { name: "Sharp Quills", text: "Deals 1 damage back when struck." },
+  stinky: { name: "Stinky", text: "Creatures opposing it lose 1 power." },
+  leader: { name: "Leader", text: "Adjacent allies gain 1 power." },
+  "worthy-sacrifice": { name: "Worthy Sacrifice", text: "Counts as three blood when sacrificed." },
+  "many-lives": { name: "Many Lives", text: "Survives being sacrificed." },
+  "bone-king": { name: "Bone King", text: "Drops three extra bones when it dies." },
+  scavenger: { name: "Scavenger", text: "Enemy deaths grant you extra bones." },
+  fledgling: { name: "Fledgling", text: "Transforms after surviving a full round." },
+  "bees-within": { name: "Bees Within", text: "When struck, a Bee enters your hand." },
+  "rabbit-hole": { name: "Rabbit Hole", text: "Adds a Rabbit to your hand when played." },
+  fecundity: { name: "Fecundity", text: "Adds a copy to your hand. The copy loses Fecundity." },
+  "corpse-eater": { name: "Corpse Eater", text: "Jumps from your hand into a freshly emptied lane." },
+  unkillable: { name: "Unkillable", text: "Returns to your hand when it dies." },
+  "dam-builder": { name: "Dam Builder", text: "Creates Dams in adjacent empty lanes." },
+  "loose-tail": { name: "Loose Tail", text: "Slips away on hit and leaves a tail behind." },
+  hoarder: { name: "Hoarder", text: "Draws one card from your main deck when played." },
+  "ant-spawner": { name: "Ant Spawner", text: "Creates a Worker Ant each round." },
+  "ant-power": { name: "Ant Power", text: "Power equals your live ants on the board." },
+  hefty: { name: "Hefty", text: "Pushes sideways after combat." },
+  brittle: { name: "Brittle", text: "Dies after striking." },
+  sentry: { name: "Sentry", text: "Pings the opposing lane for 1 damage on play." },
+  "steel-trap": { name: "Steel Trap", text: "Kills the creature that strikes it and leaves a pelt." },
+});
+
+function el(id) {
+  return DOM_CACHE[id] || (DOM_CACHE[id] = document.getElementById(id));
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function titleCase(value) {
+  return String(value)
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function unique(values) {
+  return [...new Set(values)];
+}
+
+function portraitPath(name) {
+  return `game assets/Portraits/${name}.png`;
+}
+
+function maybeEmission(name) {
+  return EMISSION_PORTRAITS.has(name) ? `game assets/Portraits/${name}_emission.png` : "";
+}
+
+function sigilSummary(sigils) {
+  if (!sigils || !sigils.length) return "No sigils.";
+  return sigils.map((sigil) => SIGIL_DEFS[sigil]?.name || titleCase(sigil)).join(" / ");
+}
+
+function createCard(id, name, portraitName, costBlood, costBones, attack, health, sigils = [], extra = {}) {
+  const portrait = extra.portraitPath || portraitPath(portraitName);
+  const emission = extra.emissionPath || (extra.disableEmission ? "" : maybeEmission(portraitName));
+  return {
+    id,
+    name,
+    portrait,
+    emission,
+    costBlood,
+    costBones,
+    attack,
+    health,
+    sigils,
+    tribe: extra.tribe || "none",
+    rare: Boolean(extra.rare),
+    frame: extra.frame || (extra.rare ? "rare" : "normal"),
+    text: extra.text || sigilSummary(sigils),
+    evolvesTo: extra.evolvesTo || null,
+    tags: extra.tags || [],
+    canSacrifice: extra.canSacrifice !== false,
+    playable: extra.playable !== false,
+    special: extra.special || null,
+  };
+}
+
+const CARD_LIST = [
+  createCard("squirrel", "Squirrel", "portrait_squirrel", 0, 0, 0, 1, [], { tribe: "none", text: "A side-deck body for blood costs." }),
+  createCard("bee", "Bee", "portrait_bee", 0, 0, 1, 1, ["airborne"], { tribe: "insect", text: "Airborne and eager to sting." }),
+  createCard("rabbit", "Rabbit", "portrait_rabbit", 0, 0, 0, 1, [], { text: "A free body from the Warren." }),
+  createCard("dam", "Dam", "portrait_dam", 0, 0, 0, 2, [], { text: "Built by beavers to block a lane.", tags: ["terrain"], canSacrifice: false }),
+  createCard("skink-tail", "Skink Tail", "portrait_skink_tail", 0, 0, 0, 1, [], { text: "Left behind when a skink slips free.", tags: ["terrain"], canSacrifice: false, disableEmission: true }),
+  createCard("gold-nugget", "Gold Nugget", "portrait_goldnugget", 0, 0, 0, 2, [], { text: "Dead weight from the Prospector.", tags: ["terrain"], canSacrifice: false }),
+  createCard("starvation", "Starvation", "portrait_starvingman", 0, 0, 1, 1, [], { text: "It comes when the main deck fails you.", special: "starvation", disableEmission: true }),
+  createCard("rabbit-pelt", "Rabbit Pelt", "portrait_pelt_hare", 0, 0, 0, 1, [], { text: "Traded away for new cards.", tags: ["pelt"], canSacrifice: false }),
+  createCard("wolf-pelt", "Wolf Pelt", "portrait_pelt_wolf", 0, 0, 0, 2, [], { text: "Traded for stronger offers.", tags: ["pelt"], canSacrifice: false }),
+  createCard("golden-pelt", "Golden Pelt", "portrait_pelt_golden", 0, 0, 0, 3, [], { text: "A gilded pelt fit for rare cards.", tags: ["pelt"], canSacrifice: false, rare: true }),
+  createCard("stoat", "Stoat", "portrait_stoat", 1, 0, 1, 3, [], { tribe: "canine", text: "A sturdy one-blood opener." }),
+  createCard("bullfrog", "Bullfrog", "portrait_bullfrog", 1, 0, 1, 2, ["mighty-leap"], { tribe: "reptile" }),
+  createCard("wolf", "Wolf", "portrait_wolf", 2, 0, 3, 2, [], { tribe: "canine", text: "Three power for two blood." }),
+  createCard("black-goat", "Black Goat", "portrait_goat", 1, 0, 0, 1, ["worthy-sacrifice"], { tribe: "hooved" }),
+  createCard("mole", "Mole", "portrait_mole", 1, 0, 0, 4, ["burrower"], { tribe: "none" }),
+  createCard("ant-queen", "Ant Queen", "portrait_antqueen", 2, 0, 0, 3, ["ant-spawner", "ant-power"], { tribe: "insect", text: "Its power rises with your ants." }),
+  createCard("flying-ant", "Flying Ant", "portrait_antflying", 1, 0, 0, 1, ["airborne", "ant-power"], { tribe: "insect" }),
+  createCard("skunk", "Skunk", "portrait_skunk", 1, 0, 0, 3, ["stinky"], { tribe: "none" }),
+  createCard("mantis-god", "Mantis God", "portrait_mantisgod", 1, 0, 1, 1, ["trifurcated"], { tribe: "insect", rare: true }),
+  createCard("ring-worm", "Ring Worm", "portrait_ringworm", 1, 0, 0, 1, [], { tribe: "insect", text: "Plain, but strangely important." }),
+  createCard("opossum", "Opossum", "portrait_opossum", 0, 2, 1, 1, [], { tribe: "canine", text: "A cheap bones creature." }),
+  createCard("rat-king", "Rat King", "portrait_ratking", 2, 0, 2, 1, ["bone-king"], { tribe: "none" }),
+  createCard("cockroach", "Cockroach", "portrait_cockroach", 0, 4, 1, 1, ["unkillable"], { tribe: "insect" }),
+  createCard("coyote", "Coyote", "portrait_coyote", 0, 4, 2, 1, [], { tribe: "canine" }),
+  createCard("tadpole", "Tadpole", "portrait_tadpole", 0, 0, 0, 1, ["waterborne", "fledgling"], { tribe: "reptile", evolvesTo: "bullfrog" }),
+  createCard("geck", "Geck", "portrait_geck", 0, 0, 1, 1, [], { tribe: "reptile", rare: true, text: "Free to play and surprisingly potent." }),
+  createCard("cat", "Cat", "portrait_cat", 1, 0, 0, 1, ["many-lives"], { tribe: "none" }),
+  createCard("sparrow", "Sparrow", "portrait_sparrow", 1, 0, 1, 2, ["airborne"], { tribe: "bird" }),
+  createCard("beaver", "Beaver", "portrait_beaver", 2, 0, 1, 4, ["dam-builder"], { tribe: "none" }),
+  createCard("wolf-cub", "Wolf Cub", "portrait_wolfcub", 1, 0, 1, 1, ["fledgling"], { tribe: "canine", evolvesTo: "wolf" }),
+  createCard("bloodhound", "Bloodhound", "portrait_bloodhound", 2, 0, 2, 3, ["guardian"], { tribe: "canine" }),
+  createCard("porcupine", "Porcupine", "portrait_porcupine", 1, 0, 1, 2, ["sharp-quills"], { tribe: "none" }),
+  createCard("pronghorn", "Pronghorn", "portrait_pronghorn", 2, 0, 1, 3, ["bifurcated"], { tribe: "hooved" }),
+  createCard("worker-ant", "Worker Ant", "portrait_ant", 1, 0, 0, 2, ["ant-power"], { tribe: "insect" }),
+  createCard("mantis", "Mantis", "portrait_mantis", 1, 0, 1, 1, ["bifurcated"], { tribe: "insect" }),
+  createCard("warren", "Warren", "portrait_warren", 1, 0, 0, 2, ["rabbit-hole"], { tribe: "none" }),
+  createCard("beehive", "Beehive", "portrait_beehive", 1, 0, 0, 2, ["bees-within"], { tribe: "insect" }),
+  createCard("kingfisher", "Kingfisher", "portrait_kingfisher", 1, 0, 1, 1, ["airborne", "waterborne"], { tribe: "bird" }),
+  createCard("river-otter", "River Otter", "portrait_otter", 1, 0, 1, 1, ["waterborne"], { tribe: "none" }),
+  createCard("skink", "Skink", "portrait_skink", 1, 0, 1, 2, ["loose-tail"], { tribe: "reptile" }),
+  createCard("adder", "Adder", "portrait_adder", 2, 0, 1, 1, ["touch-of-death"], { tribe: "reptile" }),
+  createCard("corpse-maggots", "Corpse Maggots", "portrait_maggots", 0, 5, 1, 2, ["corpse-eater"], { tribe: "insect", portraitPath: "game assets/Portraits/portrait_maggots.png", emissionPath: "" }),
+  createCard("rattler", "Rattler", "portrait_adder", 0, 6, 3, 1, [], { tribe: "reptile", text: "A brutal bones finisher." }),
+  createCard("turkey-vulture", "Turkey Vulture", "portrait_vulture", 0, 8, 3, 3, ["airborne"], { tribe: "bird" }),
+  createCard("moose-buck", "Moose Buck", "portrait_moose", 3, 0, 3, 7, ["hefty"], { tribe: "hooved" }),
+  createCard("raven-egg", "Raven Egg", "portrait_ravenegg", 1, 0, 0, 2, ["fledgling"], { tribe: "bird", evolvesTo: "raven" }),
+  createCard("raven", "Raven", "portrait_raven", 2, 0, 2, 3, ["airborne"], { tribe: "bird" }),
+  createCard("pack-rat", "Pack Rat", "portrait_packrat", 2, 0, 2, 2, ["hoarder"], { tribe: "none" }),
+  createCard("field-mice", "Field Mice", "portrait_fieldmice", 2, 0, 2, 2, ["fecundity"], { tribe: "none" }),
+  createCard("amalgam", "Amalgam", "portrait_amalgam", 2, 0, 3, 3, [], { rare: true, tribe: "none", text: "A stitched rare with reliable stats." }),
+  createCard("mole-man", "Mole Man", "portrait_moleman", 1, 0, 0, 6, ["burrower", "mighty-leap"], { rare: true, tribe: "none" }),
+  createCard("ouroboros", "Ouroboros", "portrait_ouroboros", 0, 2, 1, 1, ["unkillable"], { rare: true, text: "Returns stronger each time it dies.", disableEmission: true }),
+  createCard("grizzly", "Grizzly", "portrait_grizzly", 3, 0, 4, 6, [], { tribe: "none", rare: true }),
+  createCard("urayuli", "Urayuli", "portrait_urayuli", 4, 0, 7, 7, [], { tribe: "none", rare: true }),
+  createCard("pack-mule", "Pack Mule", "portrait_mule", 0, 0, 0, 5, [], { text: "On death, it spills more items onto the trail.", special: "pack-mule", tags: ["terrain"], canSacrifice: false, disableEmission: true }),
+  createCard("bait-bucket", "Bait Bucket", "portrait_baitbucket", 0, 0, 0, 1, [], { text: "Break it, and the water answers.", special: "bait-bucket", tags: ["terrain"], canSacrifice: false, disableEmission: true }),
+  createCard("great-white", "Great White", "portrait_shark", 0, 0, 4, 2, ["waterborne"], { text: "It waits under the waterline.", disableEmission: true }),
+  createCard("strange-frog", "Strange Frog", "portrait_trapfrog", 1, 0, 0, 2, [], { text: "It leaves a trap when it dies.", special: "strange-frog", disableEmission: true }),
+  createCard("leaping-trap", "Leaping Trap", "portrait_trap", 0, 0, 0, 1, ["mighty-leap", "steel-trap"], { text: "A trap that kills what strikes it.", tags: ["terrain"], canSacrifice: false, disableEmission: true }),
+  createCard("deathcard-woods", "Deathcard Of Wood", "portrait_stoat_bloated", 2, 0, 3, 4, ["guardian"], { rare: true, text: "A premade deathcard from Leshy's book." }),
+  createCard("deathcard-moon", "Deathcard Of Ash", "portrait_stoat_bloated", 2, 0, 2, 5, ["sharp-quills"], { rare: true, text: "A second deathcard carved for the finale." }),
+  createCard("deathcard-bone", "Deathcard Of Bone", "portrait_stoat_bloated", 0, 6, 4, 3, ["airborne"], { rare: true, text: "A third deathcard with too much reach." }),
+  createCard("moon", "The Moon", "moon_portrait", 0, 0, 1, 40, [], { rare: true, text: "The last thing Leshy places on the board.", portraitPath: "game assets/Portraits/moon_portrait.png", emissionPath: "" }),
 ];
 
-const OFFERING_CARD = card("offering-token", "Offering", 0, 0, 0, 1, [], "rite", false, "OF", "A spare body for blood costs.");
-const PLAYER_CARD_LOOKUP = Object.fromEntries(PLAYER_CARDS.map((entry) => [entry.id, entry]));
-const ENEMY_CARD_LOOKUP = Object.fromEntries(ENEMY_CARDS.map((entry) => [entry.id, entry]));
-const CARD_LOOKUP = { ...PLAYER_CARD_LOOKUP, ...ENEMY_CARD_LOOKUP, [OFFERING_CARD.id]: OFFERING_CARD };
+const CARD_DEFS = Object.freeze(Object.fromEntries(CARD_LIST.map((card) => [card.id, card])));
+
+const STARTER_DECKS = [
+  { id: "vanilla", name: "Vanilla", summary: "Stoat, Bullfrog, Wolf, and two Rabbit Pelts.", cards: ["stoat", "bullfrog", "wolf", "rabbit-pelt", "rabbit-pelt"], preview: ["stoat", "bullfrog", "wolf", "rabbit-pelt", "rabbit-pelt"] },
+  { id: "high-cost", name: "High Cost", summary: "Black Goat, Moose Buck, Mole, and two Rabbit Pelts.", cards: ["black-goat", "moose-buck", "mole", "rabbit-pelt", "rabbit-pelt"], preview: ["black-goat", "mole", "moose-buck", "rabbit-pelt", "rabbit-pelt"] },
+  { id: "ants", name: "Ants", summary: "Ant Queen, Flying Ant, Skunk, and two Rabbit Pelts.", cards: ["ant-queen", "flying-ant", "skunk", "rabbit-pelt", "rabbit-pelt"], preview: ["ant-queen", "flying-ant", "worker-ant", "rabbit-pelt", "rabbit-pelt"] },
+  { id: "one-true-god", name: "One True God", summary: "Mantis God, two Ring Worms, and two Rabbit Pelts.", cards: ["mantis-god", "ring-worm", "ring-worm", "rabbit-pelt", "rabbit-pelt"], preview: ["mantis-god", "ring-worm", "ring-worm", "rabbit-pelt", "rabbit-pelt"] },
+  { id: "no-cost", name: "No Cost", summary: "Rabbit, Tadpole, Geck, and two Rabbit Pelts.", cards: ["rabbit", "tadpole", "geck", "rabbit-pelt", "rabbit-pelt"], preview: ["rabbit", "tadpole", "geck", "rabbit-pelt", "rabbit-pelt"] },
+  { id: "bones", name: "Bones", summary: "Opossum, Rat King, Coyote, and two Rabbit Pelts.", cards: ["opossum", "rat-king", "coyote", "rabbit-pelt", "rabbit-pelt"], preview: ["opossum", "rat-king", "coyote", "rabbit-pelt", "rabbit-pelt"] },
+];
+
+const DECK_BY_ID = Object.freeze(Object.fromEntries(STARTER_DECKS.map((deck) => [deck.id, deck])));
+
+const CHALLENGES = [
+  { id: "tipped-scales", name: "Tipped Scales", description: "Each battle starts one point against you." },
+  { id: "single-candle", name: "Single Candle", description: "The run begins with one candle instead of two." },
+  { id: "stronger-foes", name: "Stronger Foes", description: "Enemy creatures gain extra health." },
+  { id: "pricey-pelts", name: "Pricey Pelts", description: "Pelts cost one extra tooth at the Trapper." },
+  { id: "small-backpack", name: "Small Backpack", description: "Carry only two items." },
+  { id: "scarce-campfires", name: "Scarce Campfires", description: "Only one campfire works in a run." },
+  { id: "boss-buffs", name: "Boss Buffs", description: "Boss creatures gain extra stats." },
+];
+
+const CHALLENGE_BY_ID = Object.freeze(Object.fromEntries(CHALLENGES.map((challenge) => [challenge.id, challenge])));
+
+const UNLOCK_TABLE = [
+  { clearCp: 0, deck: "high-cost", challenge: "single-candle" },
+  { clearCp: 1, deck: "ants", challenge: "stronger-foes" },
+  { clearCp: 2, deck: "one-true-god", challenge: "pricey-pelts" },
+  { clearCp: 3, deck: "no-cost", challenge: "small-backpack" },
+  { clearCp: 4, deck: "bones", challenge: "scarce-campfires" },
+  { clearCp: 5, deck: null, challenge: "boss-buffs" },
+];
 
 const ITEM_DEFS = [
-  item("amber-candle", "Amber Candle", "Draw two cards from your main deck.", "none", "A bright wick for sudden momentum."),
-  item("grave-salt", "Grave Salt", "Gain 4 bones.", "none", "A handful of old debt."),
-  item("ash-knife", "Ash Knife", "Deal 1 damage to an enemy creature.", "enemy", "A mean little certainty."),
-  item("smoke-phial", "Smoke Phial", "Add two Offering tokens to your hand.", "none", "Useful when the table wants more bodies."),
-  item("ember-oil", "Ember Oil", "A friendly creature gains +1 attack and fresh ward.", "player", "The bottle sweats heat through glass."),
-  item("balance-weight", "Balance Weight", "Tip the scale 2 toward you.", "none", "Old brass still remembers how to lean."),
+  { id: "pliers", name: "Pliers", description: "Tip the scale 1 point in your favor.", target: "none" },
+  { id: "fish-hook", name: "Fish Hook", description: "Steal an enemy creature into an open lane.", target: "enemy" },
+  { id: "squirrel-bottle", name: "Squirrel Bottle", description: "Add a Squirrel to your hand.", target: "none" },
+  { id: "black-goat-bottle", name: "Black Goat Bottle", description: "Add a Black Goat to your hand.", target: "none" },
+  { id: "scissors", name: "Scissors", description: "Cut down an enemy creature.", target: "enemy" },
+  { id: "hourglass", name: "Hourglass", description: "Skip the next enemy attack step.", target: "none" },
+  { id: "skinning-knife", name: "Skinning Knife", description: "Kill an enemy creature and keep a Rabbit Pelt.", target: "enemy" },
 ];
-const ITEM_LOOKUP = Object.fromEntries(ITEM_DEFS.map((entry) => [entry.id, entry]));
 
-const EVENT_DEFS = [
-  eventDef("campfire-blades", "campfire", "Warm The Blades", "Choose a survivor to gain +1 attack.", { stat: "attack", amount: 1 }),
-  eventDef("campfire-hide", "campfire", "Stitch The Hide", "Choose a survivor to gain +1 health.", { stat: "health", amount: 1 }),
-  eventDef("trader-barter", "trader", "A Fairer Bargain", "The trader lays out three cards and waits."),
-  eventDef("trader-purge", "trader", "Leave A Burden", "The trader will remove one card from your deck."),
-  eventDef("shrine-sky", "sigil-shrine", "Sigil Of Wind", "Choose a sigil, then choose a bearer.", { pool: "sky" }),
-  eventDef("shrine-grave", "sigil-shrine", "Sigil Of Bone", "Choose a sigil, then choose a bearer.", { pool: "grave" }),
-  eventDef("cache-tools", "item-cache", "Ash Drawer", "A shallow drawer holds salvageable tools."),
-  eventDef("cache-relics", "item-cache", "Velvet Relic Box", "A rarer cache waits under dust."),
-];
-const EVENT_LOOKUP = Object.fromEntries(EVENT_DEFS.map((entry) => [entry.id, entry]));
-const STARTER_DECKS = [
-  {
-    id: "red-rite",
-    name: "Red Rite",
-    summary: "Blood aggro with explosive sacrifices and fast pressure.",
-    style: "Aggressive blood deck",
-    description: "Flood the board with cheap zealots, then cash them in for sudden violence.",
-    chips: ["Early pressure", "Blood economy", "Air reach"],
-    cards: ["ember-initiate","ember-initiate","altar-goat","altar-goat","pyre-cat","cinder-hound","cinder-hound","soot-falcon","flame-ward","red-maw"],
-    preview: ["altar-goat","pyre-cat","red-maw","wick-wolf"],
-  },
-  {
-    id: "bone-choir",
-    name: "Bone Choir",
-    summary: "Bone recursion that snowballs from every death.",
-    style: "Bone economy deck",
-    description: "Open slowly, then turn corpses into fuel until larger threats arrive for free.",
-    chips: ["Bone gain", "Late scaling", "Attrition"],
-    cards: ["marrow-scribe","marrow-scribe","choir-rib","choir-rib","grave-sapper","grave-sapper","bone-usher","dirge-bat","femur-mason","crypt-mother"],
-    preview: ["marrow-scribe","grave-sapper","crypt-mother","catacomb-giant"],
-  },
-  {
-    id: "moss-covenant",
-    name: "Moss Covenant",
-    summary: "Midrange board control with wards, guardians, and growth.",
-    style: "Value and board control",
-    description: "Protect the lanes, outlast the first swings, then let rooted threats take over.",
-    chips: ["Durability", "Lane control", "Sprouts"],
-    cards: ["moss-scout","moss-scout","bark-guard","bark-guard","sapling-host","sapling-host","reed-stalker","hollow-tender","vine-cutter","briar-elk"],
-    preview: ["bark-guard","sapling-host","briar-elk","thicket-matron"],
-  },
-];
-const STARTER_LOOKUP = Object.fromEntries(STARTER_DECKS.map((entry) => [entry.id, entry]));
+const ITEM_BY_ID = Object.freeze(Object.fromEntries(ITEM_DEFS.map((item) => [item.id, item])));
 
-const ENCOUNTERS = [
-  { id: "rise-watchers", region: 0, tier: "battle", name: "Watchers In The Ash", subtitle: "Two hungry shapes wait.", rewardType: "card", waves: [[spawn(0,"hollow-scab"),spawn(3,"hollow-scab")],[spawn(1,"cinder-mite"),spawn(2,"ember-crow")],[spawn(0,"grave-maggot"),spawn(2,"straw-bailiff")],[spawn(1,"bone-raider")]] },
-  { id: "rise-embers", region: 0, tier: "battle", name: "The Ember Gutter", subtitle: "The seams glow and crawl.", rewardType: "card", waves: [[spawn(1,"cinder-mite"),spawn(2,"cinder-mite")],[spawn(0,"ember-crow"),spawn(3,"grave-maggot")],[spawn(1,"ash-usher"),spawn(2,"bone-raider")],[spawn(0,"ember-crow"),spawn(3,"bone-raider")]] },
-  { id: "rise-crossing", region: 0, tier: "battle", name: "Straw Crossing", subtitle: "The first tax collectors arrive.", rewardType: "card", waves: [[spawn(0,"straw-bailiff")],[spawn(2,"hollow-scab"),spawn(3,"ember-crow")],[spawn(1,"bone-raider"),spawn(2,"straw-bailiff")],[spawn(0,"grave-maggot"),spawn(3,"bone-raider")]] },
-  { id: "rise-elite-tithe", region: 0, tier: "elite", name: "The Tithe Collectors", subtitle: "Straw law with heavier hands.", rewardType: "elite", waves: [[spawn(1,"straw-bailiff"),spawn(2,"straw-bailiff")],[spawn(0,"ember-crow"),spawn(3,"ember-crow")],[spawn(1,"bone-raider"),spawn(2,"bone-raider")],[spawn(0,"ash-usher"),spawn(3,"ash-usher")]] },
-  { id: "boss-wicker-judge", region: 0, tier: "boss", name: "The Wicker Judge", subtitle: "He measures the row.", rewardType: "boss", waves: [[spawn(1,"straw-bailiff"),spawn(2,"straw-bailiff")],[spawn(1,"wicker-judge",{boss:true})],[spawn(0,"ember-crow"),spawn(3,"ember-crow")],[spawn(1,"bone-raider"),spawn(2,"straw-bailiff")]] },
-  { id: "cloister-procession", region: 1, tier: "battle", name: "Choir Procession", subtitle: "Wax hymnals file between lanes.", rewardType: "card", waves: [[spawn(0,"wax-sister"),spawn(3,"wax-sister")],[spawn(1,"mire-spitter"),spawn(2,"cinder-mite")],[spawn(0,"bone-raider"),spawn(2,"wax-sister")],[spawn(1,"ember-crow"),spawn(3,"mire-spitter")]] },
-  { id: "cloister-market", region: 1, tier: "battle", name: "Wax Market", subtitle: "The sellers kept one inventory.", rewardType: "card", waves: [[spawn(1,"mire-spitter"),spawn(2,"wax-sister")],[spawn(0,"grave-maggot"),spawn(3,"bone-raider")],[spawn(1,"wax-sister"),spawn(2,"wax-sister")],[spawn(0,"ember-crow"),spawn(3,"ember-crow")]] },
-  { id: "cloister-vigil", region: 1, tier: "battle", name: "Candle Vigil", subtitle: "Every flame watches back.", rewardType: "card", waves: [[spawn(1,"wax-sister"),spawn(2,"mire-spitter")],[spawn(0,"ash-usher"),spawn(3,"wax-sister")],[spawn(1,"bone-raider"),spawn(3,"ember-crow")],[spawn(0,"bone-raider"),spawn(2,"mire-spitter")]] },
-  { id: "cloister-elite-vespers", region: 1, tier: "elite", name: "Vespers Of Melted Wax", subtitle: "The hymn reaches every lane.", rewardType: "elite", waves: [[spawn(0,"wax-sister"),spawn(3,"wax-sister")],[spawn(1,"mire-spitter"),spawn(2,"mire-spitter")],[spawn(0,"bone-raider"),spawn(2,"wax-sister"),spawn(3,"ember-crow")],[spawn(1,"bone-raider"),spawn(2,"bone-raider")]] },
-  { id: "boss-candle-matron", region: 1, tier: "boss", name: "The Candle Matron", subtitle: "She counts extinguished wicks.", rewardType: "boss", waves: [[spawn(0,"wax-sister"),spawn(3,"wax-sister")],[spawn(1,"candle-matron",{boss:true})],[spawn(0,"mire-spitter"),spawn(3,"mire-spitter")],[spawn(1,"ember-crow"),spawn(2,"bone-raider")]] },
-  { id: "barrow-roots", region: 2, tier: "battle", name: "Rootbound Dead", subtitle: "The barrow exhales.", rewardType: "card", waves: [[spawn(1,"briar-wretch"),spawn(2,"grave-maggot")],[spawn(0,"tomb-warden"),spawn(3,"rot-hound")],[spawn(1,"bone-raider"),spawn(2,"briar-wretch")],[spawn(0,"ember-crow"),spawn(3,"tomb-warden")]] },
-  { id: "barrow-court", region: 2, tier: "battle", name: "Burial Court", subtitle: "Petty nobles want a front row.", rewardType: "card", waves: [[spawn(0,"tomb-warden"),spawn(3,"tomb-warden")],[spawn(1,"briar-wretch"),spawn(2,"bone-raider")],[spawn(0,"rot-hound"),spawn(2,"mire-spitter")],[spawn(1,"ember-crow"),spawn(3,"bone-raider")]] },
-  { id: "barrow-pit", region: 2, tier: "battle", name: "The Open Pit", subtitle: "Everything wants the lane.", rewardType: "card", waves: [[spawn(1,"rot-hound"),spawn(2,"rot-hound")],[spawn(0,"briar-wretch"),spawn(3,"grave-maggot")],[spawn(1,"tomb-warden"),spawn(2,"briar-wretch")],[spawn(0,"bone-raider"),spawn(3,"mire-spitter")]] },
-  { id: "barrow-elite-sentinels", region: 2, tier: "elite", name: "Sentinels Of The Crown", subtitle: "The lesser vows still bite.", rewardType: "elite", waves: [[spawn(0,"tomb-warden"),spawn(3,"tomb-warden")],[spawn(1,"briar-wretch"),spawn(2,"briar-wretch")],[spawn(0,"rot-hound"),spawn(1,"bone-raider"),spawn(3,"rot-hound")],[spawn(2,"bone-raider"),spawn(3,"mire-spitter")]] },
-  { id: "boss-buried-king", region: 2, tier: "boss", name: "The Buried King", subtitle: "He demands tribute from graves.", rewardType: "boss", waves: [[spawn(0,"tomb-warden"),spawn(3,"tomb-warden")],[spawn(1,"buried-king",{boss:true})],[spawn(0,"rot-hound"),spawn(3,"rot-hound")],[spawn(1,"briar-wretch"),spawn(2,"bone-raider")]] },
-];
-const ENCOUNTER_LOOKUP = Object.fromEntries(ENCOUNTERS.map((entry) => [entry.id, entry]));
+const BONUS_SIGIL_POOL = ["airborne", "mighty-leap", "guardian", "sprinter", "sharp-quills", "stinky", "fledgling", "rabbit-hole", "bees-within", "bifurcated"];
 
-function loadPersistedRun() {
-  try { const raw = localStorage.getItem(STORAGE_KEYS.run); return raw ? hydrateRun(JSON.parse(raw)) : null; }
-  catch (error) { console.warn("Failed to load run", error); return null; }
+const TRIAL_DEFS = [
+  { id: "blood", name: "Trial Of Blood", asset: ASSETS.trials.blood, description: "Reveal three cards with at least 4 blood total." },
+  { id: "bones", name: "Trial Of Bones", asset: ASSETS.trials.bones, description: "Reveal three cards with at least 5 bones total." },
+  { id: "power", name: "Trial Of Power", asset: ASSETS.trials.power, description: "Reveal three cards with at least 4 power total." },
+  { id: "health", name: "Trial Of Health", asset: ASSETS.trials.health, description: "Reveal three cards with at least 6 health total." },
+  { id: "wisdom", name: "Trial Of Wisdom", asset: ASSETS.trials.wisdom, description: "Reveal three cards with at least 3 sigils total." },
+  { id: "kin", name: "Trial Of Kin", asset: ASSETS.trials.kin, description: "Reveal two matching tribes or identical cards." },
+];
+
+const TRIAL_BY_ID = Object.freeze(Object.fromEntries(TRIAL_DEFS.map((trial) => [trial.id, trial])));
+
+const REWARD_POOLS = {
+  map1: ["stoat", "bullfrog", "cat", "black-goat", "wolf-cub", "sparrow", "porcupine", "beaver", "skunk", "opossum", "coyote", "ring-worm", "worker-ant", "mantis", "warren", "beehive"],
+  map2: ["wolf", "raven-egg", "raven", "mole", "bloodhound", "kingfisher", "skink", "adder", "pronghorn", "flying-ant", "ant-queen", "rattler", "rat-king", "corpse-maggots", "cockroach", "field-mice", "pack-rat"],
+  map3: ["mole-man", "moose-buck", "turkey-vulture", "grizzly", "mantis-god", "geck", "urayuli", "amalgam", "ouroboros", "river-otter"],
+  rare: ["grizzly", "mantis-god", "geck", "urayuli", "amalgam", "ouroboros", "mole-man"],
+};
+
+const STANDARD_ENCOUNTERS = [
+  [
+    { id: "forest-watch", title: "Woodland Watch", copy: "The first telegraphs stir at the edge of the board.", waves: [[null, "stoat", null, "sparrow"], [null, "bullfrog", "wolf-cub", null], ["coyote", null, null, null]] },
+    { id: "frog-crossing", title: "Frog Crossing", copy: "Frogs and birds wait behind the queue.", waves: [["bullfrog", null, null, null], [null, "sparrow", null, "sparrow"], [null, null, "wolf", null]] },
+    { id: "low-ant-trail", title: "Ant Trail", copy: "The line crawls with insects.", waves: [[null, "worker-ant", null, null], ["stoat", null, null, "worker-ant"], [null, "ant-queen", null, null]] },
+  ],
+  [
+    { id: "marsh-eggs", title: "Marsh Eggs", copy: "Birdsong and shells crack in the reeds.", waves: [[null, "raven-egg", null, "kingfisher"], [null, "skink", "raven-egg", null], ["bloodhound", null, null, null]] },
+    { id: "otter-water", title: "Otter Water", copy: "Everything here ducks below the surface.", waves: [[null, "river-otter", null, "kingfisher"], ["skink", null, null, "adder"], [null, "rattler", null, null]] },
+    { id: "bone-choir", title: "Bone Choir", copy: "The bones pile up in the queue.", waves: [["opossum", null, null, "coyote"], [null, "rat-king", null, null], [null, null, "corpse-maggots", null]] },
+  ],
+  [
+    { id: "snow-breach", title: "Snow Breach", copy: "The last stretch is heavier and meaner.", waves: [[null, "cockroach", null, "adder"], [null, "moose-buck", null, null], ["turkey-vulture", null, null, null]] },
+    { id: "grave-surge", title: "Grave Surge", copy: "The dead arrive faster than the cards do.", waves: [["corpse-maggots", null, null, "cockroach"], [null, "grizzly", null, null], [null, null, "turkey-vulture", null]] },
+    { id: "moonless-run", title: "Moonless Run", copy: "Even the common fights are oversized now.", waves: [["skink", null, "pronghorn", null], [null, "mantis", null, "adder"], ["grizzly", null, null, null]] },
+  ],
+];
+
+const BOSS_ENCOUNTERS = {
+  prospector: {
+    id: "prospector",
+    title: "The Prospector",
+    copy: "He grins and reaches for the pan.",
+    phases: [
+      { name: "The Prospector", copy: "A Pack Mule waits somewhere in the queue.", waves: [[null, "wolf-cub", "pack-mule", null], ["coyote", null, null, "sparrow"], [null, "wolf", null, null]] },
+      { name: "Strike Gold", copy: "Your board turns to gold as the second phase begins.", waves: [["gold-nugget", null, null, null], [null, "bloodhound", null, "porcupine"], [null, "grizzly", null, null]] },
+    ],
+  },
+  angler: {
+    id: "angler",
+    title: "The Angler",
+    copy: "He hooks what you love most.",
+    phases: [
+      { name: "The Angler", copy: "The river telegraphs through bait and eggs.", waves: [["kingfisher", null, null, "raven-egg"], [null, "adder", null, null], [null, "raven", null, null]] },
+      { name: "Go Fish", copy: "Buckets line the board, and sharks lurk beneath them.", waves: [["bait-bucket", null, "bait-bucket", null], [null, "bait-bucket", null, "bait-bucket"], [null, "great-white", null, null]] },
+    ],
+  },
+  "trapper-trader": {
+    id: "trapper-trader",
+    title: "The Trapper / Trader",
+    copy: "Traps first. Pelts later.",
+    phases: [
+      { name: "The Trapper", copy: "Steel traps guard the first phase.", waves: [["leaping-trap", null, "strange-frog", null], [null, "leaping-trap", null, "wolf"], ["bloodhound", null, null, null]] },
+      { name: "The Trader", copy: "Pelts clog the lanes before the final reveal.", waves: [["wolf-pelt", "wolf-pelt", "wolf-pelt", "wolf-pelt"], [null, "grizzly", null, null], [null, null, "mole-man", null]] },
+    ],
+  },
+  leshy: {
+    id: "leshy",
+    title: "Leshy",
+    copy: "No boons. No mercy. Only the moon after the masks.",
+    phases: [
+      { name: "Leshy", copy: "The rare cards arrive first.", waves: [["mole-man", null, "pack-rat", null], [null, "grizzly", null, "urayuli"], [null, "amalgam", null, null]] },
+      { name: "Deathcards", copy: "He carves fresh dead into the next hand.", waves: [["deathcard-woods", null, "deathcard-moon", null], [null, "deathcard-bone", null, "deathcard-woods"], [null, "grizzly", null, null]] },
+      { name: "The Moon", copy: "The last phase rises all at once.", waves: [[null, "moon", null, null]] },
+    ],
+  },
+};
+
+const app = {
+  profile: null,
+  run: null,
+  setupDeckId: "vanilla",
+  setupChallenges: new Set(),
+  selectedMapNodeId: null,
+  selection: null,
+  inspect: null,
+  menuSelection: "new-game",
+  codexTab: "current",
+  codexReturn: "title-screen",
+  endingState: null,
+  toastTimer: null,
+  resetArmed: false,
+  concedeArmed: false,
+  atmosphere: {
+    motes: [],
+    frameId: 0,
+    width: 0,
+    height: 0,
+  },
+};
+
+function defaultProfile() {
+  return {
+    version: 2,
+    ascensionLevel: 0,
+    highestClearedCP: -1,
+    unlockedDeckIds: ["vanilla"],
+    unlockedChallengeIds: ["tipped-scales"],
+    winsByDeck: {},
+    discoveredCardIds: ["stoat", "bullfrog", "wolf", "rabbit-pelt", "squirrel"],
+    options: {
+      reducedMotion: false,
+      pixelScaling: true,
+      confirmConcede: true,
+    },
+    stats: {
+      runsStarted: 0,
+      victories: 0,
+      bossesDefeated: 0,
+    },
+  };
 }
-function savePersistedRun(run) { if (!run) return; try { localStorage.setItem(STORAGE_KEYS.run, JSON.stringify(run)); } catch (error) { console.warn("Failed to save run", error); } }
-function clearPersistedRun() { localStorage.removeItem(STORAGE_KEYS.run); }
-function hasPersistedRun() { return Boolean(loadPersistedRun()); }
-function loadBestStats() {
+
+function loadProfile() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.best);
-    return raw ? JSON.parse(raw) : { runsStarted: 0, victories: 0, bossesDefeated: 0, deepestRegion: 0, longestDeck: 0 };
+    const raw = localStorage.getItem(STORAGE_KEYS.profile);
+    if (!raw) return defaultProfile();
+    const parsed = JSON.parse(raw);
+    return {
+      ...defaultProfile(),
+      ...parsed,
+      options: { ...defaultProfile().options, ...(parsed.options || {}) },
+      stats: { ...defaultProfile().stats, ...(parsed.stats || {}) },
+      unlockedDeckIds: unique([...(parsed.unlockedDeckIds || ["vanilla"])]),
+      unlockedChallengeIds: unique([...(parsed.unlockedChallengeIds || ["tipped-scales"])]),
+      discoveredCardIds: unique([...(parsed.discoveredCardIds || [])]),
+      winsByDeck: { ...(parsed.winsByDeck || {}) },
+    };
   } catch (error) {
-    console.warn("Failed to load best stats", error);
-    return { runsStarted: 0, victories: 0, bossesDefeated: 0, deepestRegion: 0, longestDeck: 0 };
+    console.warn("Failed to load profile", error);
+    return defaultProfile();
   }
-}
-function saveBestStats(stats) { localStorage.setItem(STORAGE_KEYS.best, JSON.stringify(stats)); }
-function loadDiscoveredCards() { try { const raw = localStorage.getItem(STORAGE_KEYS.discovered); return raw ? JSON.parse(raw) : []; } catch (error) { console.warn("Failed to load discovered cards", error); return []; } }
-function saveDiscoveredCards(cardIds) { localStorage.setItem(STORAGE_KEYS.discovered, JSON.stringify(unique(cardIds).sort())); }
-function markDiscovered(cardIds) {
-  let changed = false;
-  for (const cardId of cardIds) {
-    if (cardId && CARD_LOOKUP[cardId] && !app.discovered.has(cardId)) { app.discovered.add(cardId); changed = true; }
-  }
-  if (changed) saveDiscoveredCards([...app.discovered]);
 }
 
-function createDeckCard(run, cardId, overrides = {}) { return { uid: uid(run, "deck"), cardId, attackBuff: 0, healthBuff: 0, addedSigils: [], generated: false, ...overrides }; }
-function getCardDefinition(cardId) { return CARD_LOOKUP[cardId] || OFFERING_CARD; }
-function getDeckCardModel(deckCard) {
-  const def = getCardDefinition(deckCard.cardId);
-  return { ...def, uid: deckCard.uid, attack: def.attack + (deckCard.attackBuff || 0), health: Math.max(1, def.health + (deckCard.healthBuff || 0)), sigils: unique([...(def.sigils || []), ...(deckCard.addedSigils || [])]) };
-}
-function getUnitModel(unit) { return { id: unit.cardId, name: unit.name, costBlood: unit.costBlood || 0, costBones: unit.costBones || 0, attack: unit.attack, health: unit.maxHealth, currentHealth: unit.health, sigils: [...unit.sigils], tribe: unit.tribe, rare: unit.rare, artGlyph: unit.artGlyph, description: unit.description, owner: unit.owner }; }
-function createUnitFromDeckCard(run, deckCard, side, lane) {
-  const model = getDeckCardModel(deckCard);
-  return { uid: uid(run, "unit"), owner: side, lane, side, deckCardUid: deckCard.uid, cardId: model.id, name: model.name, attack: model.attack, health: model.health, maxHealth: model.health, sigils: [...model.sigils], tribe: model.tribe, rare: model.rare, artGlyph: model.artGlyph, description: model.description, costBlood: model.costBlood, costBones: model.costBones, flags: { wardUsed: false, skitterDir: lane < 2 ? 1 : -1, sprouted: false }, turnsInPlay: 0 };
-}
-function createEnemyUnit(run, cardId, lane, extra = {}) {
-  const def = getCardDefinition(cardId);
-  return { uid: uid(run, "enemy"), owner: "enemy", lane, side: "enemy", deckCardUid: null, cardId: def.id, name: def.name, attack: def.attack + (extra.attackBuff || 0), health: def.health + (extra.healthBuff || 0), maxHealth: def.health + (extra.healthBuff || 0), sigils: [...def.sigils], tribe: def.tribe, rare: def.rare, artGlyph: def.artGlyph, description: def.description, costBlood: 0, costBones: 0, flags: { wardUsed: false, skitterDir: lane < 2 ? 1 : -1, sprouted: false }, turnsInPlay: 0, boss: Boolean(def.boss || extra.boss) };
-}
-function getEncounter(encounterId) { return ENCOUNTER_LOOKUP[encounterId]; }
-function getEvent(eventId) { return EVENT_LOOKUP[eventId]; }
-function getNode(run, nodeId) { return run.map.find((node) => node.id === nodeId) || null; }
-function getNodeLabel(nodeType) { return NODE_LABELS[nodeType] || NODE_LABELS.battle; }
-function getRegionStartNodeIds(map, regionIndex) { return map.filter((node) => node.region === regionIndex && node.depth === 0).map((node) => node.id); }
-function pickPlayerCard(run, filterFn = null) { const candidates = PLAYER_CARDS.filter((entry) => (filterFn ? filterFn(entry) : true)); return weightedPick(run, candidates.map((entry) => ({ value: entry.id, weight: entry.group === run.starterDeckId ? 3 : 1 }))); }
-function pickRewardCards(run, count) { const picks = []; while (picks.length < count) picks.push(pickPlayerCard(run, (entry) => !picks.includes(entry.id))); markDiscovered(picks); return picks; }
-function pickItemChoices(run, count) { return shuffleWithState(run, ITEM_DEFS.map((entry) => entry.id)).slice(0, count); }
-function pickEncounterId(run, regionIndex, nodeType) {
-  if (nodeType === "boss") return ENCOUNTERS.find((entry) => entry.region === regionIndex && entry.tier === "boss").id;
-  const tier = nodeType === "elite" ? "elite" : "battle";
-  const pool = ENCOUNTERS.filter((entry) => entry.region === regionIndex && entry.tier === tier);
-  return pool[randomInt(run, 0, pool.length)].id;
-}
-function pickEventId(run, nodeType) { const pool = EVENT_DEFS.filter((entry) => entry.nodeType === nodeType); return pool[randomInt(run, 0, pool.length)].id; }
-function connectNodes(previousNodes, currentNodes, run) {
-  for (const previous of previousNodes) {
-    const sorted = [...currentNodes].sort((left, right) => Math.abs(left.y - previous.y) - Math.abs(right.y - previous.y));
-    const desired = currentNodes.length > 2 && nextRandom(run) < 0.32 ? 2 : 1;
-    previous.branchesTo = unique(sorted.slice(0, desired).map((node) => node.id));
-  }
-  for (const current of currentNodes) {
-    if (!previousNodes.some((previous) => previous.branchesTo.includes(current.id)) && previousNodes.length) {
-      const nearest = [...previousNodes].sort((left, right) => Math.abs(left.y - current.y) - Math.abs(right.y - current.y))[0];
-      nearest.branchesTo = unique([...nearest.branchesTo, current.id]);
-    }
+function saveProfile() {
+  try {
+    localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(app.profile));
+  } catch (error) {
+    console.warn("Failed to save profile", error);
   }
 }
-function buildMap(run) {
-  const map = [];
-  const tracks = [16, 33, 50, 67, 84];
-  for (let regionIndex = 0; regionIndex < REGION_LAYOUTS.length; regionIndex += 1) {
-    let previousNodes = [];
-    for (let depth = 0; depth < REGION_LAYOUTS[regionIndex].length; depth += 1) {
-      const types = REGION_LAYOUTS[regionIndex][depth];
-      const x = 11 + depth * 16;
-      const yChoices = shuffleWithState(run, tracks).slice(0, types.length).sort((left, right) => left - right);
-      const currentNodes = types.map((type, index) => {
-        const node = { id: `region-${regionIndex}-depth-${depth}-slot-${index}`, type, region: regionIndex, depth, x, y: yChoices[index], branchesTo: [], encounterId: ["battle","elite","boss"].includes(type) ? pickEncounterId(run, regionIndex, type) : null, eventId: ["campfire","trader","sigil-shrine","item-cache"].includes(type) ? pickEventId(run, type) : null, completed: false };
-        map.push(node);
-        return node;
-      });
-      if (previousNodes.length) connectNodes(previousNodes, currentNodes, run);
-      previousNodes = currentNodes;
-    }
-  }
-  return map;
-}
-function syncBattleMirror(run = app.run) {
-  if (!run) return;
-  if (run.battle) {
-    run.hand = clone(run.battle.hand); run.discard = clone(run.battle.discard); run.board = clone(run.battle.board); run.queuedEnemyPlays = clone(run.battle.queuedEnemyPlays); run.bones = run.battle.bones; run.scale = run.battle.scale; run.log = clone(run.battle.log);
-  } else {
-    run.hand = []; run.discard = []; run.board = { player: [null, null, null, null], enemy: [null, null, null, null] }; run.queuedEnemyPlays = []; run.bones = 0; run.scale = 0; run.log = [];
+
+function loadRun() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.run);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed.version !== 2) return null;
+    return parsed;
+  } catch (error) {
+    console.warn("Failed to load run", error);
+    return null;
   }
 }
-function createRun(starterId) {
-  const starter = STARTER_LOOKUP[starterId];
-  const seed = makeSeed();
-  const run = { version: 1, seed, rngState: seed, uidCounter: 0, screen: "map-screen", starterDeckId: starterId, regionIndex: 0, nodeIndex: 0, map: [], availableNodeIds: [], selectedMapNodeId: null, deck: [], offeringDeck: Array.from({ length: 10 }, () => OFFERING_CARD.id), hand: [], discard: [], board: { player: [null, null, null, null], enemy: [null, null, null, null] }, queuedEnemyPlays: [], bones: 0, scale: 0, items: [], lives: 2, bossesDefeated: 0, bossFlags: {}, log: [], battle: null, flow: null, stats: { turns: 0, battlesWon: 0, nodesCleared: 0, cardsPlayed: 0, itemsUsed: 0, cardsAdded: 0 } };
-  run.deck = starter.cards.map((cardId) => createDeckCard(run, cardId));
-  run.map = buildMap(run);
-  run.availableNodeIds = getRegionStartNodeIds(run.map, 0);
-  run.selectedMapNodeId = run.availableNodeIds[0] || null;
-  markDiscovered([...starter.cards, OFFERING_CARD.id]);
-  const best = loadBestStats(); best.runsStarted += 1; best.longestDeck = Math.max(best.longestDeck, run.deck.length); saveBestStats(best);
-  syncBattleMirror(run);
-  return run;
-}
-function hydrateRun(run) {
-  if (!run || run.version !== 1 || !Array.isArray(run.deck) || !Array.isArray(run.map)) return null;
-  run.uidCounter = run.uidCounter || 0; run.items = Array.isArray(run.items) ? run.items : []; run.availableNodeIds = Array.isArray(run.availableNodeIds) && run.availableNodeIds.length ? run.availableNodeIds : getRegionStartNodeIds(run.map, run.regionIndex || 0); run.board = run.board || { player: [null, null, null, null], enemy: [null, null, null, null] }; run.log = Array.isArray(run.log) ? run.log : []; run.hand = Array.isArray(run.hand) ? run.hand : []; run.discard = Array.isArray(run.discard) ? run.discard : []; run.stats = run.stats || { turns: 0, battlesWon: 0, nodesCleared: 0, cardsPlayed: 0, itemsUsed: 0, cardsAdded: 0 };
-  if (run.battle) {
-    run.battle.board = run.battle.board || { player: [null, null, null, null], enemy: [null, null, null, null] };
-    run.battle.log = Array.isArray(run.battle.log) ? run.battle.log : [];
-    run.battle.hand = Array.isArray(run.battle.hand) ? run.battle.hand : [];
-    run.battle.discard = Array.isArray(run.battle.discard) ? run.battle.discard : [];
-    run.battle.drawPile = Array.isArray(run.battle.drawPile) ? run.battle.drawPile : [];
-    run.battle.offeringPile = Array.isArray(run.battle.offeringPile) ? run.battle.offeringPile : [];
-    run.battle.queuedEnemyPlays = Array.isArray(run.battle.queuedEnemyPlays) ? run.battle.queuedEnemyPlays : [];
+
+function saveRun() {
+  if (!app.run) return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.run, JSON.stringify(app.run));
+  } catch (error) {
+    console.warn("Failed to save run", error);
   }
-  if (run.screen === "battle-screen" && !run.battle) run.screen = "map-screen";
-  if (run.screen === "flow-screen" && !run.flow) run.screen = "map-screen";
-  syncBattleMirror(run);
+}
+
+function clearRun() {
+  app.run = null;
+  localStorage.removeItem(STORAGE_KEYS.run);
+}
+
+function nextUid(run, prefix) {
+  run.uidCounter = (run.uidCounter || 0) + 1;
+  return `${prefix}-${run.uidCounter}`;
+}
+
+function randomSeed() {
+  return ((Date.now() >>> 0) ^ (Math.random() * 0xffffffff >>> 0)) >>> 0;
+}
+
+function rand(run) {
+  run.rngState = ((run.rngState * 1664525) + 1013904223) >>> 0;
+  return run.rngState / 0x100000000;
+}
+
+function randInt(run, min, maxExclusive) {
+  return Math.floor(rand(run) * (maxExclusive - min)) + min;
+}
+
+function shuffle(run, values) {
+  const copy = [...values];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = randInt(run, 0, i + 1);
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function sample(run, values) {
+  return values[randInt(run, 0, values.length)];
+}
+
+function takeRandomDistinct(run, values, count) {
+  return shuffle(run, values).slice(0, Math.min(count, values.length));
+}
+
+function hasChallenge(run, challengeId) {
+  return Boolean(run.challengeIds?.includes(challengeId));
+}
+
+function isDeckUnlocked(deckId) {
+  return app.profile.unlockedDeckIds.includes(deckId);
+}
+
+function isChallengeUnlocked(challengeId) {
+  return app.profile.unlockedChallengeIds.includes(challengeId);
+}
+
+function getRequiredCp() {
+  return clamp((app.profile.highestClearedCP ?? -1) + 1, 0, 6);
+}
+
+function markDiscovered(cardIds) {
+  const merged = unique([...(app.profile.discoveredCardIds || []), ...cardIds.filter(Boolean)]);
+  app.profile.discoveredCardIds = merged.filter((cardId) => CARD_DEFS[cardId]);
+  saveProfile();
+}
+
+function createDeckEntry(run, cardId, extra = {}) {
+  const uid = nextUid(run, "deck");
+  return {
+    uid,
+    sourceUid: uid,
+    cardId,
+    attackBuff: 0,
+    healthBuff: 0,
+    addedSigils: [],
+    removedSigils: [],
+    temporary: false,
+    ...extra,
+  };
+}
+
+function createRuntimeEntry(run, cardId, extra = {}) {
+  return {
+    uid: nextUid(run, "hand"),
+    sourceUid: extra.sourceUid || null,
+    cardId,
+    attackBuff: extra.attackBuff || 0,
+    healthBuff: extra.healthBuff || 0,
+    addedSigils: [...(extra.addedSigils || [])],
+    removedSigils: [...(extra.removedSigils || [])],
+    temporary: true,
+  };
+}
+
+function cloneEntryForBattle(entry) {
+  return {
+    uid: entry.uid,
+    sourceUid: entry.sourceUid,
+    cardId: entry.cardId,
+    attackBuff: entry.attackBuff || 0,
+    healthBuff: entry.healthBuff || 0,
+    addedSigils: [...(entry.addedSigils || [])],
+    removedSigils: [...(entry.removedSigils || [])],
+    temporary: Boolean(entry.temporary),
+  };
+}
+
+function getCardDef(cardId) {
+  return CARD_DEFS[cardId];
+}
+
+function getEntryModel(entry) {
+  const base = getCardDef(entry.cardId);
+  const sigils = unique([...(base.sigils || []), ...(entry.addedSigils || [])]).filter((sigil) => !(entry.removedSigils || []).includes(sigil));
+  return {
+    ...base,
+    attack: base.attack + (entry.attackBuff || 0),
+    health: base.health + (entry.healthBuff || 0),
+    sigils,
+    addedSigils: [...(entry.addedSigils || [])],
+  };
+}
+
+function getPersistentEntry(sourceUid) {
+  return app.run?.deck.find((entry) => entry.sourceUid === sourceUid) || null;
+}
+
+function createUnitFromEntry(run, entry, side, lane, modifiers = {}) {
+  const model = getEntryModel(entry);
+  return {
+    uid: nextUid(run, "unit"),
+    sourceUid: entry.sourceUid || null,
+    cardId: model.id,
+    name: model.name,
+    side,
+    lane,
+    baseAttack: model.attack + (modifiers.attackBonus || 0),
+    health: model.health + (modifiers.healthBonus || 0),
+    maxHealth: model.health + (modifiers.healthBonus || 0),
+    sigils: [...model.sigils],
+    addedSigils: [...(entry.addedSigils || [])],
+    removedSigils: [...(entry.removedSigils || [])],
+    rare: model.rare,
+    frame: model.frame,
+    text: model.text,
+    tribe: model.tribe,
+    special: model.special,
+    flags: {
+      direction: modifiers.direction || (lane >= MAX_LANES - 1 ? -1 : 1),
+      tailUsed: false,
+      evolved: false,
+    },
+    turnsInPlay: 0,
+  };
+}
+
+function createEnemyUnit(run, battle, cardId, lane) {
+  const def = getCardDef(cardId);
+  let attackBonus = battle.mapIndex >= 2 ? 1 : 0;
+  let healthBonus = battle.mapIndex >= 1 ? 1 : 0;
+  if (hasChallenge(run, "stronger-foes")) healthBonus += 1;
+  if (battle.bossId && hasChallenge(run, "boss-buffs")) {
+    attackBonus += 1;
+    healthBonus += 1;
+  }
+  if (def.tags.includes("terrain") || def.id === "moon") attackBonus = 0;
+  const entry = createRuntimeEntry(run, cardId);
+  return createUnitFromEntry(run, entry, "enemy", lane, { attackBonus, healthBonus });
+}
+
+function getItemCapacity(run) {
+  return hasChallenge(run, "small-backpack") ? 2 : 3;
+}
+
+function createNewRun(deckId, challengeIds) {
+  const run = {
+    version: 2,
+    seed: randomSeed(),
+    rngState: randomSeed(),
+    uidCounter: 0,
+    scene: "map",
+    starterDeckId: deckId,
+    challengeIds: [...challengeIds],
+    cp: challengeIds.length,
+    mapIndex: 0,
+    teeth: 0,
+    candles: challengeIds.includes("single-candle") ? 1 : 2,
+    items: [],
+    deck: [],
+    bossOrder: [],
+    maps: [],
+    battle: null,
+    event: null,
+    lastBattleNodeId: null,
+    currentNodeId: null,
+    flags: {
+      freeTrapperPelt: false,
+      campfiresUsed: 0,
+    },
+    stats: {
+      bossesDefeated: 0,
+      battlesWon: 0,
+      cardsAdded: 0,
+    },
+  };
+  run.rngState = run.seed;
+  run.items = takeRandomDistinct(run, ITEM_DEFS.map((item) => item.id), Math.min(2, getItemCapacity(run)));
+  for (const cardId of DECK_BY_ID[deckId].cards) {
+    run.deck.push(createDeckEntry(run, cardId));
+  }
+  run.bossOrder = [...shuffle(run, ["prospector", "angler", "trapper-trader"]), "leshy"];
+  run.maps = generateMaps(run);
+  unlockAvailableNodes(run.maps[0], []);
   markDiscovered(run.deck.map((entry) => entry.cardId));
   return run;
 }
+
+function generateMaps(run) {
+  return MAP_BLUEPRINTS.map((columns, mapIndex) => {
+    const map = [];
+    let previousColumn = [];
+    columns.forEach((columnTypes, depth) => {
+      const column = columnTypes.map((type, laneIndex) => {
+        const verticalStep = 100 / (columnTypes.length + 1);
+        const node = {
+          id: `map-${mapIndex}-node-${depth}-${laneIndex}`,
+          mapIndex,
+          depth,
+          laneIndex,
+          type,
+          x: 12 + (depth * (76 / Math.max(1, columns.length - 1))),
+          y: (laneIndex + 1) * verticalStep + (columnTypes.length === 1 ? 0 : (rand(run) - 0.5) * 8),
+          parentIds: [],
+          childIds: [],
+          state: "future",
+          bossId: type === "boss" ? run.bossOrder[mapIndex] : null,
+        };
+        map.push(node);
+        return node;
+      });
+      if (previousColumn.length) {
+        previousColumn.forEach((prevNode, prevIndex) => {
+          const targetIndex = Math.round((prevIndex / Math.max(1, previousColumn.length - 1)) * Math.max(0, column.length - 1));
+          const candidates = unique([targetIndex, clamp(targetIndex + (prevIndex % 2 === 0 ? 1 : -1), 0, column.length - 1)]);
+          candidates.forEach((candidateIndex) => {
+            const nextNode = column[candidateIndex];
+            if (!nextNode) return;
+            if (!nextNode.parentIds.includes(prevNode.id)) nextNode.parentIds.push(prevNode.id);
+            if (!prevNode.childIds.includes(nextNode.id)) prevNode.childIds.push(nextNode.id);
+          });
+        });
+      }
+      previousColumn = column;
+    });
+    return map;
+  });
+}
+
+function unlockAvailableNodes(map, clearedNodeIds) {
+  map.forEach((node) => {
+    if (node.state === "cleared") return;
+    if (!node.parentIds.length) {
+      node.state = "available";
+      return;
+    }
+    node.state = node.parentIds.some((parentId) => clearedNodeIds.includes(parentId)) ? "available" : "future";
+  });
+}
+
+function getCurrentMap() {
+  return app.run?.maps[app.run.mapIndex] || [];
+}
+
+function getNodeById(nodeId) {
+  return getCurrentMap().find((node) => node.id === nodeId) || null;
+}
+
+function getNodeMeta(node) {
+  return NODE_TYPE_META[node.type] || NODE_TYPE_META.battle;
+}
+
+function applyOptions() {
+  document.body.classList.toggle("reduced-motion", Boolean(app.profile.options.reducedMotion));
+  document.body.classList.toggle("pixel-soft", !app.profile.options.pixelScaling);
+}
+
 function showToast(message) {
   const toast = el("toast");
   toast.textContent = message;
   toast.classList.add("is-visible");
-  if (app.toastTimer) clearTimeout(app.toastTimer);
-  app.toastTimer = window.setTimeout(() => toast.classList.remove("is-visible"), 1800);
+  clearTimeout(app.toastTimer);
+  app.toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 2400);
 }
-function updateBestProgress() {
-  if (!app.run) return;
-  const best = loadBestStats();
-  best.deepestRegion = Math.max(best.deepestRegion, (app.run.regionIndex || 0) + 1);
-  best.bossesDefeated = Math.max(best.bossesDefeated, app.run.bossesDefeated || 0);
-  best.longestDeck = Math.max(best.longestDeck, app.run.deck.length);
-  saveBestStats(best);
-}
-function activeBattle() { return app.run ? app.run.battle : null; }
-function hasSigil(unit, sigilId) { return Boolean(unit && unit.sigils && unit.sigils.includes(sigilId)); }
-function battleBoard(side) { const battle = activeBattle(); return battle ? battle.board[side] : []; }
-function findHandIndex(handUid) { const battle = activeBattle(); return battle ? battle.hand.findIndex((entry) => entry.uid === handUid) : -1; }
-function countPlayerSigil(sigilId) { return battleBoard("player").filter((unit) => hasSigil(unit, sigilId)).length; }
-function getAttackTargets(unit, lane) {
-  if (hasSigil(unit, "cleave")) return unique([lane - 1, lane, lane + 1].filter((value) => value >= 0 && value < 4));
-  if (hasSigil(unit, "bifurcated")) { const targets = [lane - 1, lane + 1].filter((value) => value >= 0 && value < 4); return targets.length ? targets : [lane]; }
-  return [lane];
-}
-function sacrificeValue(unit) { return hasSigil(unit, "worthy") ? 3 : 1; }
-function totalAvailableBlood() { return battleBoard("player").reduce((sum, unit) => sum + (unit ? sacrificeValue(unit) : 0), 0); }
-function canPlayDeckCard(deckCard) { const battle = activeBattle(); if (!battle) return false; const model = getDeckCardModel(deckCard); return model.costBones <= battle.bones && model.costBlood <= totalAvailableBlood() && battle.board.player.some((slot) => !slot); }
-function currentAttack(unit) { return Math.max(0, unit.attack); }
-function addBattleLog(message) { const battle = activeBattle(); if (!battle) return; battle.log.push(message); battle.log = battle.log.slice(-18); syncBattleMirror(); }
-function adjustScale(delta, sourceLabel = "") { const battle = activeBattle(); if (!battle) return; battle.scale = clamp(battle.scale + delta, -5, 5); if (delta !== 0 && sourceLabel) addBattleLog(`${sourceLabel} shifts the scale ${delta > 0 ? "+" : ""}${delta}.`); syncBattleMirror(); }
-function killUnit(side, lane) {
-  const battle = activeBattle(); if (!battle) return;
-  const unit = battle.board[side][lane]; if (!unit) return;
-  battle.board[side][lane] = null;
-  battle.bones += 1 + countPlayerSigil("scavenger") + (hasSigil(unit, "bone-king") ? 3 : 0);
-  if (side === "enemy") battle.enemyDeaths = (battle.enemyDeaths || 0) + 1; else battle.playerDeaths = (battle.playerDeaths || 0) + 1;
-  addBattleLog(`${unit.name} is claimed by the table.`);
-  syncBattleMirror();
-}
-function dealDamage(side, lane, amount) {
-  const battle = activeBattle(); if (!battle) return false;
-  const unit = battle.board[side][lane]; if (!unit || amount <= 0) return false;
-  if (hasSigil(unit, "warded") && !unit.flags.wardUsed) { unit.flags.wardUsed = true; addBattleLog(`${unit.name} shrugs off the first blow.`); syncBattleMirror(); return false; }
-  unit.health -= amount; if (unit.health <= 0) { killUnit(side, lane); return true; }
-  syncBattleMirror(); return false;
-}
-function applyGuardianMovement(side, targetLane) {
-  const battle = activeBattle(); if (!battle) return;
-  const board = battle.board[side]; if (board[targetLane]) return;
-  const candidates = board.map((unit, lane) => ({ unit, lane })).filter(({ unit, lane }) => unit && lane !== targetLane && hasSigil(unit, "guardian"));
-  if (!candidates.length) return;
-  candidates.sort((left, right) => Math.abs(left.lane - targetLane) - Math.abs(right.lane - targetLane));
-  const chosen = candidates[0]; board[targetLane] = chosen.unit; board[chosen.lane] = null; chosen.unit.lane = targetLane; addBattleLog(`${chosen.unit.name} lunges to guard lane ${targetLane + 1}.`); syncBattleMirror();
-}
-function applyOnPlayEffects(unit) {
-  if (!hasSigil(unit, "sentry")) return;
-  const opposingSide = unit.owner === "player" ? "enemy" : "player";
-  if (battleBoard(opposingSide)[unit.lane]) { addBattleLog(`${unit.name} peppers the opposite lane.`); dealDamage(opposingSide, unit.lane, 1); }
-  else addBattleLog(`${unit.name} rattles, but finds no mark.`);
-}
-function resolvePlayCard(selection) {
-  const battle = activeBattle(); if (!battle) return;
-  const handIndex = findHandIndex(selection.handUid); if (handIndex < 0) return cancelSelections();
-  const deckCard = battle.hand[handIndex]; const model = getDeckCardModel(deckCard);
-  if (model.costBones > battle.bones) return showToast("Not enough bones.");
-  if (battle.board.player[selection.targetLane]) return showToast("That lane is occupied.");
-  battle.bones -= model.costBones;
-  for (const lane of selection.lanes) {
-    const unit = battle.board.player[lane]; if (!unit) continue;
-    if (hasSigil(unit, "many-lives")) addBattleLog(`${unit.name} survives the sacrifice.`); else killUnit("player", lane);
-  }
-  battle.hand.splice(handIndex, 1);
-  const unit = createUnitFromDeckCard(app.run, deckCard, "player", selection.targetLane);
-  applyGuardianMovement("enemy", selection.targetLane);
-  battle.board.player[selection.targetLane] = unit;
-  applyOnPlayEffects(unit);
-  app.run.stats.cardsPlayed += 1;
-  battle.pendingHandUid = null; battle.selection = null; app.inspect = { type: "unit", side: "player", lane: selection.targetLane };
-  addBattleLog(`You play ${unit.name} into lane ${selection.targetLane + 1}.`);
-  syncBattleMirror(); renderApp();
-}
-function beginPlayCard(handUid, targetLane) {
-  const battle = activeBattle(); if (!battle) return;
-  const handIndex = findHandIndex(handUid); if (handIndex < 0) return;
-  const model = getDeckCardModel(battle.hand[handIndex]);
-  if (battle.board.player[targetLane]) return showToast("Choose an empty lane.");
-  if (model.costBones > battle.bones) return showToast("Not enough bones.");
-  if (model.costBlood > totalAvailableBlood()) return showToast("You need more blood on the board.");
-  if (model.costBlood > 0) { battle.selection = { type: "sacrifice", handUid, targetLane, needed: model.costBlood, lanes: [] }; battle.pendingHandUid = handUid; return renderApp(); }
-  resolvePlayCard({ type: "sacrifice", handUid, targetLane, needed: 0, lanes: [] });
-}
-function cancelSelections() { const battle = activeBattle(); if (!battle) return; battle.selection = null; battle.pendingHandUid = null; battle.itemTargeting = null; renderApp(); }
-function toggleSacrificeLane(lane) {
-  const battle = activeBattle(); if (!battle || !battle.selection || battle.selection.type !== "sacrifice") return;
-  battle.selection.lanes = battle.selection.lanes.includes(lane) ? battle.selection.lanes.filter((value) => value !== lane) : [...battle.selection.lanes, lane];
-  const total = battle.selection.lanes.reduce((sum, selectedLane) => { const unit = battle.board.player[selectedLane]; return sum + (unit ? sacrificeValue(unit) : 0); }, 0);
-  renderApp();
-  if (total >= battle.selection.needed) resolvePlayCard({ type: "sacrifice", handUid: battle.selection.handUid, targetLane: battle.selection.targetLane, needed: battle.selection.needed, lanes: [...battle.selection.lanes] });
-}
-function resetRoundFlags() { const battle = activeBattle(); if (!battle) return; for (const side of ["player", "enemy"]) for (const unit of battle.board[side]) if (unit) unit.turnsInPlay += 1; }
-function resolveStrike(side, lane, targetLane) {
-  const battle = activeBattle(); if (!battle) return;
-  const attacker = battle.board[side][lane]; if (!attacker) return;
-  const power = currentAttack(attacker); if (power <= 0) return;
-  const defendingSide = side === "player" ? "enemy" : "player";
-  const target = battle.board[defendingSide][targetLane];
-  if (target && !hasSigil(attacker, "airborne")) {
-    addBattleLog(`${attacker.name} strikes ${target.name}.`);
-    const died = dealDamage(defendingSide, targetLane, power);
-    if (!died && target && hasSigil(target, "thorn") && battle.board[side][lane]) { addBattleLog(`${target.name} throws pain back through the lane.`); dealDamage(side, lane, 1); }
-  } else adjustScale(side === "player" ? power : -power, attacker.name);
-  if (hasSigil(attacker, "brittle") && battle.board[side][lane]) killUnit(side, lane);
-}
-function runAttackSide(side) {
-  const battle = activeBattle(); if (!battle) return false;
-  for (let lane = 0; lane < 4; lane += 1) {
-    const unit = battle.board[side][lane]; if (!unit) continue;
-    for (const targetLane of getAttackTargets(unit, lane)) {
-      if (!battle.board[side][lane]) break;
-      resolveStrike(side, lane, targetLane);
-      if (Math.abs(battle.scale) >= 5) return true;
-    }
-  }
-  return false;
-}
-function transformSprouts() {
-  const battle = activeBattle(); if (!battle) return;
-  for (const side of ["player", "enemy"]) {
-    for (let lane = 0; lane < 4; lane += 1) {
-      const unit = battle.board[side][lane];
-      if (!unit || !hasSigil(unit, "sprout") || unit.flags.sprouted || unit.turnsInPlay < 1) continue;
-      const nextCardId = getCardDefinition(unit.cardId).sproutsTo; if (!nextCardId) continue;
-      unit.flags.sprouted = true;
-      const replacement = side === "player" ? createUnitFromDeckCard(app.run, createDeckCard(app.run, nextCardId), side, lane) : createEnemyUnit(app.run, nextCardId, lane);
-      replacement.turnsInPlay = unit.turnsInPlay; battle.board[side][lane] = replacement; addBattleLog(`${unit.name} unfurls into ${replacement.name}.`); markDiscovered([replacement.cardId]);
-    }
-  }
-  syncBattleMirror();
-}
-function moveSkitterUnits() {
-  const battle = activeBattle(); if (!battle) return;
-  for (const side of ["player", "enemy"]) {
-    const board = battle.board[side];
-    const movers = board.map((unit, lane) => ({ unit, lane })).filter(({ unit }) => unit && hasSigil(unit, "skitter"));
-    for (const mover of movers) {
-      const unit = board[mover.lane]; if (!unit) continue;
-      const direction = unit.flags.skitterDir || 1; let targetLane = mover.lane + direction;
-      if (targetLane < 0 || targetLane > 3 || board[targetLane]) { unit.flags.skitterDir = direction * -1; targetLane = mover.lane + unit.flags.skitterDir; }
-      if (targetLane >= 0 && targetLane < 4 && !board[targetLane]) { board[targetLane] = unit; board[mover.lane] = null; unit.lane = targetLane; addBattleLog(`${unit.name} skitters into lane ${targetLane + 1}.`); }
-    }
-  }
-  syncBattleMirror();
-}
-function maybeTriggerBossPhase() {
-  const battle = activeBattle(); if (!battle || battle.encounterTier !== "boss" || battle.bossPhase > 1) return;
-  const occupiedPlayerLanes = battle.board.player.filter(Boolean).length;
-  if (battle.encounterId === "boss-wicker-judge" && occupiedPlayerLanes >= 3) { battle.bossPhase = 2; addBattleLog("The Wicker Judge demands a fuller tithe."); for (let lane = 0; lane < 4; lane += 1) if (!battle.board.enemy[lane]) battle.board.enemy[lane] = createEnemyUnit(app.run, "straw-bailiff", lane); return syncBattleMirror(); }
-  if (battle.encounterId === "boss-candle-matron" && (battle.enemyDeaths || 0) >= 3) { battle.bossPhase = 2; addBattleLog("The Candle Matron draws strength from extinguished wax."); for (let lane = 0; lane < 4; lane += 1) if (!battle.board.enemy[lane]) battle.board.enemy[lane] = createEnemyUnit(app.run, "wax-sister", lane); return syncBattleMirror(); }
-  if (battle.encounterId === "boss-buried-king" && (battle.scale >= 2 || occupiedPlayerLanes >= 3)) { battle.bossPhase = 2; addBattleLog("The Buried King commands the graves to open."); for (let lane = 0; lane < 4; lane += 1) if (!battle.board.enemy[lane]) battle.board.enemy[lane] = createEnemyUnit(app.run, "tomb-warden", lane); syncBattleMirror(); }
-}
-function deployEnemyWave() {
-  const battle = activeBattle(); if (!battle) return;
-  const wave = battle.waves[battle.queueIndex]; if (!wave) { battle.queuedEnemyPlays = []; return syncBattleMirror(); }
-  addBattleLog("The table reveals the next enemy movement.");
-  for (const placement of wave) {
-    let lane = placement.lane;
-    if (battle.board.enemy[lane]) { const openLane = [0,1,2,3].find((candidate) => !battle.board.enemy[candidate]); if (openLane == null) continue; lane = openLane; }
-    applyGuardianMovement("player", lane);
-    const unit = createEnemyUnit(app.run, placement.cardId, lane, placement); battle.board.enemy[lane] = unit; applyOnPlayEffects(unit); markDiscovered([placement.cardId]);
-  }
-  battle.queueIndex += 1; battle.queuedEnemyPlays = clone(battle.waves[battle.queueIndex] || []); markDiscovered(battle.queuedEnemyPlays.map((placement) => placement.cardId)); syncBattleMirror();
-}
-function noEnemyPressureLeft() { const battle = activeBattle(); return Boolean(battle) && battle.board.enemy.every((slot) => !slot) && battle.queueIndex >= battle.waves.length; }
-function noPlayerOptionsLeft() { const battle = activeBattle(); return Boolean(battle) && battle.board.player.every((slot) => !slot) && battle.hand.length === 0 && battle.drawPile.length === 0 && battle.offeringPile.length === 0 && app.run.items.length === 0; }
-function drawCards(source, count, ignoreTurnLimit = false) {
-  const battle = activeBattle(); if (!battle) return;
-  if (!ignoreTurnLimit && battle.drawnThisTurn) return showToast("You may only draw once each turn.");
-  let drawsMade = 0;
-  for (let index = 0; index < count; index += 1) {
-    const pile = source === "main" ? battle.drawPile : battle.offeringPile; if (!pile.length) continue;
-    const drawn = pile.shift(); battle.hand.push(drawn); drawsMade += 1; markDiscovered([drawn.cardId]);
-  }
-  if (!ignoreTurnLimit && drawsMade > 0) battle.drawnThisTurn = true;
-  syncBattleMirror(); renderApp();
-}
-function buildBattleState(node, encounter) {
-  return {
-    nodeId: node.id, encounterId: encounter.id, encounterName: encounter.name, encounterSubtitle: encounter.subtitle, encounterTier: encounter.tier,
-    turn: 1, queueIndex: 0, waves: clone(encounter.waves), queuedEnemyPlays: clone(encounter.waves[0] || []), board: { player: [null,null,null,null], enemy: [null,null,null,null] },
-    hand: [], drawPile: shuffleWithState(app.run, clone(app.run.deck)), offeringPile: shuffleWithState(app.run, Array.from({ length: 10 }, () => createDeckCard(app.run, OFFERING_CARD.id, { generated: true }))), discard: [], bones: 0, scale: 0,
-    log: [`${encounter.name} begins.`], drawnThisTurn: false, pendingHandUid: null, selection: null, itemTargeting: null, bossPhase: 1, enemyDeaths: 0, playerDeaths: 0,
-  };
-}
-function buildCardRewardFlow(node, options) { return { mode: "card-reward", nodeId: node.id, kicker: options.kicker, title: options.title, description: options.description, cards: pickRewardCards(app.run, 3), next: options.next }; }
-function handleBattleOutcome(result) {
-  const battle = activeBattle(); if (!battle) return;
-  const node = getNode(app.run, battle.nodeId); app.run.battle = null; syncBattleMirror();
-  if (result === "win") {
-    app.run.stats.battlesWon += 1;
-    if (node.type === "boss") { app.run.bossesDefeated += 1; app.run.bossFlags[node.encounterId] = { defeated: true }; return completeNode(node.id); }
-    if (node.type === "elite") { app.run.flow = buildCardRewardFlow(node, { kicker: "Elite Reward", title: "Claim A Stronger Survivor", description: "Choose a card, then take an item.", next: { type: "item-reward", nodeId: node.id } }); showScreen("flow-screen"); return renderApp(); }
-    app.run.flow = buildCardRewardFlow(node, { kicker: "Battle Reward", title: "Choose A Card", description: "One survivor joins your ledger.", next: { type: "complete-node", nodeId: node.id } }); showScreen("flow-screen"); return renderApp();
-  }
-  app.run.lives -= 1;
-  if (app.run.lives <= 0) return triggerGameOver(`The ${battle.encounterName.toLowerCase()} ends with the last candle dark.`);
-  showToast("A candle gutters out. The encounter begins again.");
-  startEncounter(node, true);
-}
-function endTurn() {
-  const battle = activeBattle(); if (!battle) return;
-  if (battle.selection || battle.itemTargeting) return showToast("Finish or cancel the current choice first.");
-  app.run.stats.turns += 1; addBattleLog(`Turn ${battle.turn} resolves.`);
-  if (runAttackSide("player") || battle.scale >= 5) return handleBattleOutcome("win");
-  if (runAttackSide("enemy") || battle.scale <= -5) return handleBattleOutcome("loss");
-  resetRoundFlags(); transformSprouts(); moveSkitterUnits(); maybeTriggerBossPhase(); deployEnemyWave();
-  if (noEnemyPressureLeft()) { addBattleLog("No further pressure remains on the enemy side."); return handleBattleOutcome("win"); }
-  if (noPlayerOptionsLeft() && battle.board.enemy.some(Boolean)) addBattleLog("Your side of the table is spent.");
-  battle.pendingHandUid = null; battle.selection = null; battle.itemTargeting = null; battle.turn += 1; battle.drawnThisTurn = false; syncBattleMirror(); renderApp();
-}
-function startEncounter(node, retry = false) {
-  const encounter = getEncounter(node.encounterId); if (!encounter) return;
-  app.pauseVisible = false; app.inspect = { type: "encounter" }; app.run.battle = buildBattleState(node, encounter); drawCards("main", 3, true); drawCards("offering", 1, true); app.run.screen = "battle-screen"; markDiscovered((encounter.waves[0] || []).map((placement) => placement.cardId)); if (retry) addBattleLog(`The ${encounter.name.toLowerCase()} re-forms before you.`); showScreen("battle-screen"); renderApp();
-}
-function openItemRewardFlow(nodeId, title = "Choose An Item", description = "Take one tool and move on.") { app.run.flow = { mode: "item-reward", nodeId, kicker: "Spoils", title, description, items: pickItemChoices(app.run, 3), next: { type: "complete-node", nodeId } }; showScreen("flow-screen"); renderApp(); }
-function addCardToDeck(cardId) { app.run.deck.push(createDeckCard(app.run, cardId)); app.run.stats.cardsAdded += 1; markDiscovered([cardId]); updateBestProgress(); }
-function addItemToRun(itemId) { if (app.run.items.length >= 3) app.run.items.shift(); app.run.items.push(itemId); }
-function removeDeckCardByUid(deckUid) { app.run.deck = app.run.deck.filter((entry) => entry.uid !== deckUid); }
-function modifyDeckCard(deckUid, change) { const deckCard = app.run.deck.find((entry) => entry.uid === deckUid); if (!deckCard) return; if (change.attack) deckCard.attackBuff += change.attack; if (change.health) deckCard.healthBuff += change.health; if (change.sigil && !deckCard.addedSigils.includes(change.sigil)) deckCard.addedSigils.push(change.sigil); }
-function completeNode(nodeId) {
-  const node = getNode(app.run, nodeId); if (!node) return;
-  node.completed = true; app.run.nodeIndex = node.depth; app.run.stats.nodesCleared += 1; app.run.flow = null; app.run.selectedMapNodeId = null; app.selectedMapNodeId = null;
-  if (node.type === "boss") {
-    if (app.run.regionIndex >= REGION_INFO.length - 1) return triggerVictory("The third seal breaks and the table finally falls quiet.");
-    app.run.regionIndex += 1; app.run.availableNodeIds = getRegionStartNodeIds(app.run.map, app.run.regionIndex); showToast(`${REGION_INFO[app.run.regionIndex].name} opens ahead.`);
-  } else app.run.availableNodeIds = [...node.branchesTo];
-  updateBestProgress(); showScreen("map-screen"); renderApp();
-}
-function finalizeFlowAction(action) { if (!action) return; if (action.type === "complete-node") return completeNode(action.nodeId); if (action.type === "item-reward") openItemRewardFlow(action.nodeId); }
-function resolveFlowAction(action) {
-  if (!action || !app.run || !app.run.flow) return;
-  switch (action.type) {
-    case "take-reward-card": addCardToDeck(action.cardId); return finalizeFlowAction(app.run.flow.next);
-    case "take-item": addItemToRun(action.itemId); return finalizeFlowAction(app.run.flow.next);
-    case "campfire-buff": modifyDeckCard(action.deckUid, { [action.stat]: action.amount }); return completeNode(action.nodeId);
-    case "purge-card": removeDeckCardByUid(action.deckUid); return completeNode(action.nodeId);
-    case "shrine-select-sigil": app.run.flow = { mode: "shrine-apply", nodeId: action.nodeId, kicker: "Sigil Shrine", title: `Bearer Of ${SIGIL_LOOKUP[action.sigilId].name}`, description: "Choose a creature to carry the mark.", chosenSigil: action.sigilId, deckTargets: app.run.deck.filter((entry) => getDeckCardModel(entry).cardId !== OFFERING_CARD.id) }; showScreen("flow-screen"); return renderApp();
-    case "shrine-apply": modifyDeckCard(action.deckUid, { sigil: action.sigilId }); return completeNode(action.nodeId);
-    case "leave": return completeNode(action.nodeId);
-    default: return;
-  }
-}
-function openEventFlow(node) {
-  const ev = getEvent(node.eventId); if (!ev) return completeNode(node.id);
-  if (ev.id === "campfire-blades" || ev.id === "campfire-hide") app.run.flow = { mode: "campfire", nodeId: node.id, kicker: "Campfire", title: ev.title, description: ev.description, deckTargets: app.run.deck.filter((entry) => getDeckCardModel(entry).cardId !== OFFERING_CARD.id).slice(0, 8), stat: ev.stat, amount: ev.amount, buttons: [{ label: "Leave", action: { type: "leave", nodeId: node.id } }] };
-  else if (ev.id === "trader-barter") app.run.flow = { mode: "card-reward", nodeId: node.id, kicker: "Trader", title: ev.title, description: ev.description, cards: pickRewardCards(app.run, 3), next: { type: "complete-node", nodeId: node.id } };
-  else if (ev.id === "trader-purge") app.run.flow = { mode: "purge", nodeId: node.id, kicker: "Trader", title: ev.title, description: ev.description, deckTargets: app.run.deck.filter((entry) => getDeckCardModel(entry).cardId !== OFFERING_CARD.id), buttons: [{ label: "Keep Everything", action: { type: "leave", nodeId: node.id } }] };
-  else if (ev.id === "shrine-sky" || ev.id === "shrine-grave") app.run.flow = { mode: "shrine-select", nodeId: node.id, kicker: "Sigil Shrine", title: ev.title, description: ev.description, sigils: shuffleWithState(app.run, SIGIL_POOLS[ev.pool]).slice(0, 3), buttons: [{ label: "Leave", action: { type: "leave", nodeId: node.id } }] };
-  else if (ev.id === "cache-tools" || ev.id === "cache-relics") app.run.flow = { mode: "item-reward", nodeId: node.id, kicker: "Item Cache", title: ev.title, description: ev.description, items: pickItemChoices(app.run, 3), next: { type: "complete-node", nodeId: node.id } };
-  showScreen("flow-screen"); renderApp();
-}
-function travelToNode(nodeId) { const node = getNode(app.run, nodeId); if (!node || !app.run.availableNodeIds.includes(nodeId)) return; app.selectedMapNodeId = nodeId; if (["battle","elite","boss"].includes(node.type)) return startEncounter(node); openEventFlow(node); }
-function consumeItem(index) { app.run.items.splice(index, 1); }
-function resolveItemEffect(itemId, target) {
-  const battle = activeBattle(); if (!battle) return false;
-  if (itemId === "amber-candle") { drawCards("main", 2, true); addBattleLog("The amber candle spills two extra draws."); return true; }
-  if (itemId === "grave-salt") { battle.bones += 4; addBattleLog("Grave salt cracks across the table."); syncBattleMirror(); return true; }
-  if (itemId === "ash-knife") { if (!target || target.side !== "enemy" || !battle.board.enemy[target.lane]) return showToast("Choose a living enemy."), false; addBattleLog("The ash knife finds a weak seam."); dealDamage("enemy", target.lane, 1); return true; }
-  if (itemId === "smoke-phial") { battle.hand.push(createDeckCard(app.run, OFFERING_CARD.id, { generated: true })); battle.hand.push(createDeckCard(app.run, OFFERING_CARD.id, { generated: true })); addBattleLog("Smoke thickens into two more offerings."); syncBattleMirror(); return true; }
-  if (itemId === "ember-oil") { if (!target || target.side !== "player" || !battle.board.player[target.lane]) return showToast("Choose one of your creatures."), false; const unit = battle.board.player[target.lane]; unit.attack += 1; if (!unit.sigils.includes("warded")) unit.sigils.push("warded"); unit.flags.wardUsed = false; addBattleLog(`${unit.name} drinks ember oil and glows hotter.`); syncBattleMirror(); return true; }
-  if (itemId === "balance-weight") { adjustScale(2, "The brass weight"); return true; }
-  return false;
-}
-function useItem(index) {
-  const battle = activeBattle(); if (!battle) return;
-  const itemId = app.run.items[index]; const itemDef = ITEM_LOOKUP[itemId]; if (!itemDef) return;
-  if (itemDef.target === "none") { const used = resolveItemEffect(itemId, null); if (used) { consumeItem(index); app.run.stats.itemsUsed += 1; renderApp(); } return; }
-  battle.itemTargeting = { index, target: itemDef.target, itemId }; renderApp();
-}
-function triggerGameOver(copy) {
-  const run = app.run; const best = loadBestStats(); best.bossesDefeated = Math.max(best.bossesDefeated, run ? run.bossesDefeated : 0); best.longestDeck = Math.max(best.longestDeck, run ? run.deck.length : 0); saveBestStats(best);
-  app.ending = { result: "gameover", copy, stats: { bossesDefeated: run ? run.bossesDefeated : 0, cardsInDeck: run ? run.deck.length : 0, battlesWon: run ? run.stats.battlesWon : 0, turns: run ? run.stats.turns : 0 } };
-  app.run = null; clearPersistedRun(); showScreen("gameover-screen"); renderApp();
-}
-function triggerVictory(copy) {
-  const run = app.run; const best = loadBestStats(); best.victories += 1; best.bossesDefeated = Math.max(best.bossesDefeated, run ? run.bossesDefeated : 0); best.deepestRegion = 3; best.longestDeck = Math.max(best.longestDeck, run ? run.deck.length : 0); saveBestStats(best);
-  app.ending = { result: "victory", copy, stats: { bossesDefeated: run ? run.bossesDefeated : 0, cardsInDeck: run ? run.deck.length : 0, battlesWon: run ? run.stats.battlesWon : 0, turns: run ? run.stats.turns : 0 } };
-  app.run = null; clearPersistedRun(); showScreen("victory-screen"); renderApp();
-}
-function showScreen(screenId) { app.visibleScreen = screenId; if (app.run && PERSISTED_SCREENS.has(screenId)) app.run.screen = screenId; if (screenId === "title-screen") app.pauseVisible = false; }
-function openDeckbook(returnScreen, tab = "current") { app.deckbookReturnScreen = returnScreen; app.deckbookTab = tab; showScreen("deckbook-screen"); renderApp(); }
-function closeDeckbook() { showScreen(app.deckbookReturnScreen || "title-screen"); renderApp(); }
-function saveAndQuitToTitle() { if (app.run) savePersistedRun(app.run); app.pauseVisible = false; app.run = null; app.inspect = null; app.selectedMapNodeId = null; showScreen("title-screen"); renderApp(); }
-function cardBonusText(model) {
-  const tags = [];
-  if (model.rare) tags.push("Rare");
-  if (model.currentHealth != null && model.currentHealth !== model.health) tags.push(`${model.currentHealth}/${model.health}`);
-  if (model.count) tags.push(`x${model.count}`);
-  return tags.join("  ");
-}
-function createCardElement(model, options = {}) {
-  const element = document.createElement(options.tagName || "div");
-  element.className = ["ash-card", options.enemy ? "enemy-card" : "", options.compact ? "compact" : "", options.queue ? "queue-card" : "", options.hand ? "hand-card" : "", options.cantPlay ? "cant-play" : "", options.extraClass || ""].filter(Boolean).join(" ");
-  if (options.tagName === "button") element.type = "button";
-  if (options.selected) element.classList.add("is-selected");
-  const sigilText = (model.sigils || []).slice(0, options.compact ? 2 : 4).map((sigilId) => `<span class="sigil-pill">${SIGIL_LOOKUP[sigilId] ? SIGIL_LOOKUP[sigilId].name : titleCase(sigilId)}</span>`).join("");
-  const costBadges = [];
-  if (model.costBlood) costBadges.push(`<span class="cost-badge blood">${model.costBlood} Blood</span>`);
-  if (model.costBones) costBadges.push(`<span class="cost-badge bones">${model.costBones} Bones</span>`);
-  element.innerHTML = `
-    <div class="card-top">
-      <div>
-        <div class="card-name">${model.name}</div>
-        <div class="card-costs">${costBadges.join("")}</div>
-      </div>
-      <div class="card-glyph">${model.artGlyph || "?"}</div>
-    </div>
-    <div class="card-text">${model.description || ""}</div>
-    <div class="card-sigils">${sigilText || '<span class="sigil-pill">Plain</span>'}</div>
-    <div class="card-bottom">
-      <div class="card-stats">
-        <span class="stat-badge">ATK ${model.attack}</span>
-        <span class="stat-badge">HP ${model.currentHealth != null ? model.currentHealth : model.health}</span>
-      </div>
-      <div class="bonus-badge">${cardBonusText(model)}</div>
-    </div>
-  `;
-  if (options.onClick) element.addEventListener("click", options.onClick);
-  if (options.onPointerDown) element.addEventListener("pointerdown", options.onPointerDown);
-  if (options.inspectData) element.addEventListener("mouseenter", () => { app.inspect = options.inspectData; if (app.visibleScreen === "battle-screen") renderInspectPanel(); });
+
+function button(text, className, onClick) {
+  const element = document.createElement("button");
+  element.type = "button";
+  element.className = className;
+  element.textContent = text;
+  element.addEventListener("click", onClick);
   return element;
 }
-function createInfoChoice(title, description, onClick) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "item-btn flow-choice";
-  button.innerHTML = `<div class="item-name">${title}</div><div class="item-copy">${description}</div>`;
-  button.addEventListener("click", onClick);
-  return button;
+
+function clearElement(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
 }
+
+function preloadAssets() {
+  const urls = [
+    ...Object.values(ASSETS.menu),
+    ...Object.values(ASSETS.frames),
+    ...Object.values(ASSETS.backs),
+    ...Object.values(ASSETS.slots),
+    ...Object.values(ASSETS.costs),
+    ...Object.values(ASSETS.sigils),
+    ...Object.values(ASSETS.trials),
+    ...Object.values(ASSETS.misc),
+    ...CARD_LIST.flatMap((card) => [card.portrait, card.emission].filter(Boolean)),
+  ];
+  urls.forEach((url) => {
+    const image = new Image();
+    image.src = url;
+  });
+}
+
+function showScreen(screenId) {
+  document.querySelectorAll(".screen").forEach((screen) => {
+    screen.classList.toggle("active", screen.id === screenId);
+  });
+}
+
+function getSourceModel(source, battle) {
+  if (!source) return null;
+  if (source.side) {
+    const def = getCardDef(source.cardId);
+    return {
+      ...def,
+      attack: getUnitBaseAttack(battle, source),
+      health: source.health,
+      sigils: [...source.sigils],
+      addedSigils: [...(source.addedSigils || [])],
+    };
+  }
+  if (source.cardId) return getEntryModel(source);
+  return source;
+}
+
+function createCardElement(source, options = {}) {
+  const model = source.cardId || source.side ? getSourceModel(source, options.battle || null) : source;
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = `card pixel-image${options.compact ? " compact" : ""}${options.tiny ? " tiny" : ""}${options.selected ? " is-selected" : ""}${options.disabled ? " is-disabled" : ""}`;
+  card.disabled = Boolean(options.disabled);
+  const face = document.createElement("div");
+  face.className = "card-face";
+  const frame = document.createElement("div");
+  frame.className = `card-frame ${model.frame || (model.rare ? "rare" : "normal")}`;
+  const name = document.createElement("div");
+  name.className = "card-name";
+  name.textContent = model.name;
+  const portrait = document.createElement("div");
+  portrait.className = "card-portrait";
+  portrait.style.backgroundImage = `url("${model.portrait}")`;
+  face.append(frame, name, portrait);
+
+  if (model.emission) {
+    const emission = document.createElement("div");
+    emission.className = "card-emission";
+    emission.style.backgroundImage = `url("${model.emission}")`;
+    face.appendChild(emission);
+  }
+
+  const costAsset = model.costBlood > 0
+    ? ASSETS.costs[`blood-${model.costBlood}`]
+    : model.costBones > 0
+      ? ASSETS.costs[`bone-${model.costBones}`]
+      : "";
+  if (costAsset) {
+    const cost = document.createElement("div");
+    cost.className = "card-cost";
+    cost.style.backgroundImage = `url("${costAsset}")`;
+    face.appendChild(cost);
+  }
+
+  const attack = document.createElement("div");
+  attack.className = "card-stat attack";
+  attack.textContent = String(model.attack);
+  const health = document.createElement("div");
+  health.className = "card-stat health";
+  health.textContent = String(model.health);
+  face.append(attack, health);
+
+  if (model.sigils.length) {
+    const sigils = document.createElement("div");
+    sigils.className = "card-sigils";
+    model.sigils.slice(0, 3).forEach((sigilId) => {
+      const sigil = document.createElement("div");
+      sigil.className = "card-sigil";
+      sigil.style.backgroundImage = `url("${ASSETS.sigils[sigilId] || ASSETS.sigils.airborne}")`;
+      if ((model.addedSigils || []).includes(sigilId)) {
+        const added = document.createElement("div");
+        added.className = "card-added-sigil";
+        sigil.appendChild(added);
+      }
+      sigils.appendChild(sigil);
+    });
+    face.appendChild(sigils);
+  }
+
+  const text = document.createElement("div");
+  text.className = "card-text";
+  text.textContent = model.text;
+  face.appendChild(text);
+  card.appendChild(face);
+  return card;
+}
+
 function renderTitle() {
-  const best = loadBestStats();
-  el("title-best-stats").innerHTML = `Victories: ${best.victories}<br>Deepest Region: ${best.deepestRegion}<br>Bosses Broken: ${best.bossesDefeated}`;
-  el("title-discovery-stats").innerHTML = `${app.discovered.size} / ${Object.keys(CARD_LOOKUP).length} pages found<br>Longest Deck: ${best.longestDeck}<br>Runs Started: ${best.runsStarted}`;
-  el("continue-run-btn").disabled = !hasPersistedRun();
+  showScreen("title-screen");
+  const titleMenu = el("title-menu-cards");
+  clearElement(titleMenu);
+  MENU_CARDS.forEach((menuCard) => {
+    const buttonEl = document.createElement("button");
+    buttonEl.type = "button";
+    buttonEl.className = `menu-card-button${app.menuSelection === menuCard.id ? " is-selected" : ""}`;
+    if (menuCard.id === "continue" && !app.run) buttonEl.disabled = true;
+    buttonEl.addEventListener("mouseenter", () => {
+      app.menuSelection = menuCard.id;
+      renderTitle();
+    });
+    buttonEl.addEventListener("click", () => handleTitleAction(menuCard.id));
+    const art = document.createElement("div");
+    art.className = "menu-card-art pixel-image";
+    art.style.backgroundImage = `url("${menuCard.asset}")`;
+    const label = document.createElement("div");
+    label.className = "menu-card-label";
+    const strong = document.createElement("strong");
+    strong.textContent = menuCard.title;
+    const span = document.createElement("span");
+    span.textContent = menuCard.id === "continue" && !app.run ? "No saved run exists yet." : menuCard.copy;
+    label.append(strong, span);
+    buttonEl.append(art, label);
+    titleMenu.appendChild(buttonEl);
+  });
+
+  const summary = el("profile-summary");
+  clearElement(summary);
+  [
+    ["Ascension", String(app.profile.ascensionLevel)],
+    ["Highest CP", app.profile.highestClearedCP >= 0 ? String(app.profile.highestClearedCP) : "None"],
+    ["Victories", String(app.profile.stats.victories)],
+    ["Bosses", String(app.profile.stats.bossesDefeated)],
+  ].forEach(([label, value]) => {
+    const row = document.createElement("div");
+    row.className = "stat-row";
+    row.innerHTML = `<strong>${label}</strong><span>${value}</span>`;
+    summary.appendChild(row);
+  });
+
+  const unlock = el("unlock-summary");
+  clearElement(unlock);
+  [
+    ["Required CP", String(getRequiredCp())],
+    ["Decks", `${app.profile.unlockedDeckIds.length}/${STARTER_DECKS.length}`],
+    ["Challenges", `${app.profile.unlockedChallengeIds.length}/${CHALLENGES.length}`],
+    ["Collection", `${app.profile.discoveredCardIds.length} cards`],
+  ].forEach(([label, value]) => {
+    const row = document.createElement("div");
+    row.className = "stat-row";
+    row.innerHTML = `<strong>${label}</strong><span>${value}</span>`;
+    unlock.appendChild(row);
+  });
 }
-function renderStarterScreen() {
-  const starterDecks = el("starter-decks"); starterDecks.replaceChildren();
-  for (const starter of STARTER_DECKS) {
-    const article = document.createElement("article");
-    article.className = `panel starter-card${starter.id === app.selectedStarterId ? " is-selected" : ""}`;
-    article.innerHTML = `<div class="section-label">${starter.style}</div><h3>${starter.name}</h3><p class="detail-copy">${starter.summary}</p><div class="detail-list">${starter.chips.map((chip) => `<span class="detail-chip">${chip}</span>`).join("")}</div>`;
-    article.addEventListener("click", () => { app.selectedStarterId = starter.id; renderStarterScreen(); });
-    starterDecks.append(article);
-  }
-  const starter = STARTER_LOOKUP[app.selectedStarterId];
-  const detail = el("starter-detail");
-  detail.innerHTML = `<div class="section-label">${starter.style}</div><h3>${starter.name}</h3><p class="detail-copy">${starter.description}</p><div class="detail-list">${starter.chips.map((chip) => `<span class="detail-chip">${chip}</span>`).join("")}</div>`;
-  const previewWrap = document.createElement("div"); previewWrap.className = "detail-preview"; starter.preview.forEach((cardId) => previewWrap.append(createCardElement(getCardDefinition(cardId), { compact: true }))); detail.append(previewWrap);
+
+function renderSetup() {
+  showScreen("setup-screen");
+  const deckList = el("setup-deck-list");
+  clearElement(deckList);
+  STARTER_DECKS.forEach((deck) => {
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = `selection-option${app.setupDeckId === deck.id ? " is-selected" : ""}${isDeckUnlocked(deck.id) ? "" : " is-locked"}`;
+    option.disabled = !isDeckUnlocked(deck.id);
+    option.addEventListener("click", () => {
+      app.setupDeckId = deck.id;
+      renderSetup();
+    });
+    option.innerHTML = `<strong>${deck.name}</strong><small>${deck.summary}</small>`;
+    deckList.appendChild(option);
+  });
+
+  const selectedDeck = DECK_BY_ID[app.setupDeckId];
+  const detail = el("setup-deck-detail");
+  clearElement(detail);
+  detail.innerHTML = `
+    <div class="panel-kicker text-dark">Deck Detail</div>
+    <h3 class="text-dark" style="margin:6px 0 0;">${selectedDeck.name}</h3>
+    <p class="detail-copy text-dark">${selectedDeck.summary}</p>
+    <p class="detail-copy text-dark">Wins with deck: ${app.profile.winsByDeck[selectedDeck.id] || 0}</p>
+  `;
+  const preview = el("setup-deck-preview");
+  clearElement(preview);
+  selectedDeck.preview.forEach((cardId) => preview.appendChild(createCardElement(getCardDef(cardId), { compact: true, disabled: true })));
+
+  const challengeList = el("setup-challenge-list");
+  clearElement(challengeList);
+  CHALLENGES.forEach((challenge) => {
+    const unlocked = isChallengeUnlocked(challenge.id);
+    const selected = app.setupChallenges.has(challenge.id);
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = `challenge-option${selected ? " is-selected" : ""}${unlocked ? "" : " is-locked"}`;
+    option.disabled = !unlocked;
+    option.addEventListener("click", () => {
+      if (app.setupChallenges.has(challenge.id)) app.setupChallenges.delete(challenge.id);
+      else app.setupChallenges.add(challenge.id);
+      renderSetup();
+    });
+    option.innerHTML = `<strong>${challenge.name}</strong><small>${challenge.description}</small>`;
+    challengeList.appendChild(option);
+  });
+
+  el("setup-requirements").innerHTML = `
+    <div class="panel-kicker">Run Requirement</div>
+    <p class="detail-copy">Required challenge points: <strong>${getRequiredCp()}</strong></p>
+    <p class="detail-copy">Selected challenge points: <strong>${app.setupChallenges.size}</strong></p>
+  `;
+  const canStart = isDeckUnlocked(app.setupDeckId) && app.setupChallenges.size >= getRequiredCp();
+  el("setup-start-btn").disabled = !canStart;
+  el("setup-start-btn").textContent = canStart ? "Begin Run" : "Need More Challenge Points";
 }
-function renderMapDetail() {
-  const panel = el("map-detail");
-  if (!app.run) { panel.innerHTML = ""; return; }
-  const selectedId = app.selectedMapNodeId || app.run.selectedMapNodeId || app.run.availableNodeIds[0];
-  const node = getNode(app.run, selectedId);
-  if (!node) { panel.innerHTML = `<div class="section-label">Route Detail</div><h3>Pick A Node</h3><p class="detail-copy">Study the branches, then commit to a path.</p>`; return; }
-  const label = getNodeLabel(node.type);
-  panel.innerHTML = `<div class="section-label">${REGION_INFO[node.region].kicker}</div><h3>${label.name}</h3><p class="detail-copy">${label.copy}</p><div class="detail-list"><span class="detail-chip">Depth ${node.depth + 1}</span><span class="detail-chip">${node.completed ? "Cleared" : app.run.availableNodeIds.includes(node.id) ? "Reachable" : "Locked"}</span></div>`;
-  if (app.run.availableNodeIds.includes(node.id)) {
-    const button = document.createElement("button"); button.type = "button"; button.className = "ash-btn ash-btn-primary"; button.textContent = "Travel"; button.addEventListener("click", () => travelToNode(node.id)); panel.append(button);
-  }
-}
-function renderMapScreen() {
-  if (!app.run) return;
-  const region = REGION_INFO[app.run.regionIndex];
-  el("map-region-kicker").textContent = region.kicker; el("map-region-title").textContent = region.name; el("map-lives").textContent = String(app.run.lives); el("map-deck-count").textContent = String(app.run.deck.length); el("map-item-count").textContent = String(app.run.items.length); el("map-boss-count").textContent = String(app.run.bossesDefeated);
-  const stage = el("map-stage"); stage.replaceChildren();
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.setAttribute("viewBox", "0 0 100 100"); svg.classList.add("map-lines");
-  const currentRegionNodes = app.run.map.filter((node) => node.region === app.run.regionIndex);
-  for (const node of currentRegionNodes) {
-    for (const branchId of node.branchesTo) {
-      const target = getNode(app.run, branchId); if (!target || target.region !== app.run.regionIndex) continue;
+
+function renderMap() {
+  showScreen("map-screen");
+  const run = app.run;
+  const currentMap = getCurrentMap();
+  const region = REGION_INFO[run.mapIndex];
+  el("map-region-kicker").textContent = region.kicker;
+  el("map-region-title").textContent = region.title;
+  el("map-region-copy").textContent = region.copy;
+
+  const summary = el("map-run-summary");
+  clearElement(summary);
+  [
+    ["Deck", `${run.deck.length} cards`],
+    ["Teeth", `${run.teeth}`],
+    ["Candles", `${run.candles}`],
+    ["Items", `${run.items.length}/${getItemCapacity(run)}`],
+    ["CP", `${run.cp}`],
+  ].forEach(([label, value]) => {
+    const row = document.createElement("div");
+    row.className = "stat-row";
+    row.innerHTML = `<strong>${label}</strong><span>${value}</span>`;
+    summary.appendChild(row);
+  });
+
+  const bossOrder = el("map-boss-order");
+  clearElement(bossOrder);
+  run.bossOrder.forEach((bossId, index) => {
+    const chip = document.createElement("div");
+    chip.className = `boss-chip${index === run.mapIndex ? " is-next" : ""}`;
+    chip.textContent = titleCase(bossId);
+    bossOrder.appendChild(chip);
+  });
+
+  const nodeLayer = el("map-node-layer");
+  clearElement(nodeLayer);
+  const selectedNode = getNodeById(app.selectedMapNodeId) || currentMap.find((node) => node.state === "available") || currentMap[0] || null;
+  app.selectedMapNodeId = selectedNode?.id || null;
+  currentMap.forEach((node) => {
+    const buttonEl = document.createElement("button");
+    buttonEl.type = "button";
+    buttonEl.className = `map-node${node.state === "available" ? " is-available" : ""}${node.id === app.selectedMapNodeId ? " is-selected" : ""}${node.state === "cleared" ? " is-cleared" : ""}`;
+    buttonEl.style.left = `${node.x}%`;
+    buttonEl.style.top = `${node.y}%`;
+    buttonEl.disabled = node.state !== "available";
+    buttonEl.addEventListener("click", () => {
+      app.selectedMapNodeId = node.id;
+      renderMap();
+    });
+    const meta = getNodeMeta(node);
+    const strong = document.createElement("strong");
+    strong.textContent = meta.label;
+    const span = document.createElement("span");
+    span.textContent = node.type === "boss" ? titleCase(node.bossId) : meta.copy;
+    buttonEl.append(strong, span);
+    nodeLayer.appendChild(buttonEl);
+  });
+
+  const lineSvg = el("map-lines");
+  clearElement(lineSvg);
+  currentMap.forEach((node) => {
+    node.childIds.forEach((childId) => {
+      const child = currentMap.find((candidate) => candidate.id === childId);
+      if (!child) return;
       const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("x1", String(node.x)); line.setAttribute("y1", String(node.y)); line.setAttribute("x2", String(target.x)); line.setAttribute("y2", String(target.y)); line.setAttribute("stroke", node.completed ? "rgba(190, 219, 155, 0.48)" : "rgba(223, 191, 134, 0.22)"); line.setAttribute("stroke-width", "0.7"); svg.append(line);
+      line.setAttribute("x1", String(node.x));
+      line.setAttribute("y1", String(node.y));
+      line.setAttribute("x2", String(child.x));
+      line.setAttribute("y2", String(child.y));
+      lineSvg.appendChild(line);
+    });
+  });
+  renderMapDetail(selectedNode);
+}
+
+function renderMapDetail(node) {
+  const detail = el("map-detail");
+  clearElement(detail);
+  if (!node) {
+    detail.innerHTML = "<div class='panel-kicker'>Trail Note</div><p class='detail-copy'>Choose an available node to continue.</p>";
+    return;
+  }
+  const meta = getNodeMeta(node);
+  detail.innerHTML = `
+    <div class="panel-kicker">${node.type === "boss" ? "Boss Node" : "Trail Node"}</div>
+    <h3>${node.type === "boss" ? titleCase(node.bossId) : meta.label}</h3>
+    <p class="detail-copy">${node.type === "boss" ? `Face ${titleCase(node.bossId)} and claim a rare reward if you survive.` : meta.copy}</p>
+    <div class="map-detail-meta">
+      <span>Status: ${titleCase(node.state)}</span>
+      <span>Depth: ${node.depth + 1}</span>
+    </div>
+  `;
+  const actions = document.createElement("div");
+  actions.className = "map-detail-actions";
+  const travel = button(node.state === "available" ? "Travel" : "Blocked", "inscry-btn", () => enterNode(node.id));
+  travel.disabled = node.state !== "available";
+  actions.appendChild(travel);
+  detail.appendChild(actions);
+}
+
+function startNewGameFromSetup() {
+  const chosenDeck = DECK_BY_ID[app.setupDeckId];
+  if (!chosenDeck) return;
+  if (!isDeckUnlocked(chosenDeck.id)) {
+    showToast("That starter deck has not been unlocked yet.");
+    return;
+  }
+  const selectedChallenges = [...app.setupChallenges];
+  if (selectedChallenges.length < getRequiredCp()) {
+    showToast(`You need at least ${getRequiredCp()} challenge points for this run.`);
+    return;
+  }
+  app.profile.stats.runsStarted += 1;
+  saveProfile();
+  app.run = createNewRun(chosenDeck.id, selectedChallenges);
+  app.selectedMapNodeId = getCurrentMap().find((node) => node.state === "available")?.id || null;
+  app.selection = null;
+  app.inspect = null;
+  app.endingState = null;
+  saveRun();
+  renderMap();
+}
+
+function enterNode(nodeId) {
+  const node = getNodeById(nodeId);
+  if (!node || node.state !== "available") return;
+  app.run.currentNodeId = node.id;
+  if (node.type === "battle" || node.type === "boss") {
+    startBattle(node);
+    return;
+  }
+  startEventForNode(node);
+}
+
+function getRewardPoolForMap(mapIndex) {
+  if (mapIndex <= 0) return REWARD_POOLS.map1;
+  if (mapIndex === 1) return [...REWARD_POOLS.map1, ...REWARD_POOLS.map2];
+  return [...REWARD_POOLS.map1, ...REWARD_POOLS.map2, ...REWARD_POOLS.map3];
+}
+
+function pickRewardCards(run, pool, count, extra = {}) {
+  const candidates = pool.filter((cardId) => CARD_DEFS[cardId]);
+  return takeRandomDistinct(run, candidates, count).map((cardId) => ({
+    cardId,
+    attackBuff: extra.attackBuff || 0,
+    healthBuff: extra.healthBuff || 0,
+    addedSigils: [...(extra.addedSigils || [])],
+  }));
+}
+
+function buildStandardEncounter() {
+  const run = app.run;
+  const template = clone(sample(run, STANDARD_ENCOUNTERS[Math.min(app.run.mapIndex, STANDARD_ENCOUNTERS.length - 1)]));
+  return {
+    id: template.id,
+    title: template.title,
+    copy: template.copy,
+    bossId: null,
+    rewardKind: "reward",
+    phases: [{ name: template.title, copy: template.copy, waves: template.waves }],
+  };
+}
+
+function buildBossEncounter(node) {
+  const bossId = node.bossId || app.run.bossOrder[app.run.mapIndex];
+  const template = clone(BOSS_ENCOUNTERS[bossId]);
+  return {
+    id: template.id,
+    title: template.title,
+    copy: template.copy,
+    bossId,
+    rewardKind: bossId === "leshy" ? "victory" : "rare-reward",
+    phases: template.phases,
+  };
+}
+
+function createBattleState(node, encounter) {
+  const run = app.run;
+  const battle = {
+    nodeId: node.id,
+    encounterId: encounter.id,
+    title: encounter.title,
+    copy: encounter.copy,
+    rewardKind: encounter.rewardKind,
+    bossId: encounter.bossId,
+    mapIndex: run.mapIndex,
+    phaseIndex: 0,
+    phases: encounter.phases,
+    queue: Array(MAX_LANES).fill(null),
+    upcomingWaves: [],
+    playerBoard: Array(MAX_LANES).fill(null),
+    enemyBoard: Array(MAX_LANES).fill(null),
+    hand: [],
+    mainDeck: shuffle(run, run.deck.map((entry) => cloneEntryForBattle(entry))),
+    sideDeck: Array.from({ length: 10 }, () => createRuntimeEntry(run, "squirrel")),
+    playerBones: 0,
+    scale: hasChallenge(run, "tipped-scales") ? -1 : 0,
+    turn: 1,
+    mustDraw: true,
+    skipEnemyAttack: 0,
+    logs: [],
+    lastPlayedLane: null,
+    starvations: 0,
+  };
+  beginBattlePhase(battle, 0);
+  drawFromSideDeck(battle, true);
+  drawFromMainDeck(battle, true);
+  drawFromMainDeck(battle, true);
+  logBattle(battle, `${battle.title} waits behind facedown telegraphs.`);
+  return battle;
+}
+
+function beginBattlePhase(battle, phaseIndex) {
+  battle.phaseIndex = phaseIndex;
+  battle.queue = [...(battle.phases[phaseIndex].waves[0] || Array(MAX_LANES).fill(null))];
+  battle.upcomingWaves = (battle.phases[phaseIndex].waves.slice(1) || []).map((wave) => [...wave]);
+  clearBoardSide(battle, "enemy");
+  logBattle(battle, battle.phases[phaseIndex].copy);
+}
+
+function clearBoardSide(battle, side) {
+  if (side === "player") battle.playerBoard = Array(MAX_LANES).fill(null);
+  else battle.enemyBoard = Array(MAX_LANES).fill(null);
+}
+
+function startBattle(node) {
+  const encounter = node.type === "boss" ? buildBossEncounter(node) : buildStandardEncounter(node);
+  app.run.battle = createBattleState(node, encounter);
+  app.run.scene = "battle";
+  app.run.lastBattleNodeId = node.id;
+  app.selection = null;
+  app.inspect = null;
+  saveRun();
+  renderBattle();
+}
+
+function logBattle(battle, message) {
+  battle.logs.unshift(message);
+  battle.logs = battle.logs.slice(0, 14);
+}
+
+function getBoard(battle, side) {
+  return side === "player" ? battle.playerBoard : battle.enemyBoard;
+}
+
+function renderBattle() {
+  showScreen("battle-screen");
+  const battle = app.run.battle;
+  el("battle-candles").textContent = String(app.run.candles);
+  el("battle-teeth").textContent = String(app.run.teeth);
+  el("battle-bones").textContent = String(battle.playerBones);
+  el("battle-main-count").textContent = String(battle.mainDeck.length);
+  el("battle-side-count").textContent = String(battle.sideDeck.length);
+  el("battle-encounter-kicker").textContent = battle.bossId ? "Boss Battle" : "Encounter";
+  el("battle-encounter-title").textContent = battle.bossId ? `${battle.title} - ${battle.phases[battle.phaseIndex].name}` : battle.title;
+  el("draw-main-btn").disabled = !battle.mustDraw;
+  el("draw-side-btn").disabled = !battle.mustDraw;
+  el("ring-bell-btn").disabled = battle.mustDraw || Boolean(app.selection);
+  renderItemBar();
+  renderQueue();
+  renderLaneRow("enemy-row", "enemy");
+  renderScale();
+  renderLaneRow("player-row", "player");
+  renderHand();
+  renderSelectionBanner();
+  renderInspectPanel();
+  renderBattleLog();
+}
+
+function renderItemBar() {
+  const itemBar = el("item-bar");
+  clearElement(itemBar);
+  const items = app.run.items.slice(0, getItemCapacity(app.run));
+  for (let index = 0; index < getItemCapacity(app.run); index += 1) {
+    const itemId = items[index];
+    const slot = document.createElement("button");
+    slot.type = "button";
+    slot.className = `item-slot${itemId ? "" : " is-empty"}`;
+    slot.disabled = !itemId || Boolean(app.selection);
+    if (itemId) {
+      const item = ITEM_BY_ID[itemId];
+      slot.innerHTML = `<strong>${item.name}</strong><span>${item.description}</span>`;
+      slot.addEventListener("click", () => handleItemUse(itemId));
+    } else {
+      slot.innerHTML = "<strong>Empty Slot</strong><span>No item is stored here.</span>";
+    }
+    itemBar.appendChild(slot);
+  }
+}
+
+function renderQueue() {
+  const queue = el("enemy-queue");
+  clearElement(queue);
+  app.run.battle.queue.forEach((cardId) => {
+    const slot = document.createElement("div");
+    slot.className = `queue-slot${app.run.battle.bossId ? " is-boss" : ""}`;
+    if (cardId) {
+      const back = document.createElement("div");
+      back.className = "queue-cardback pixel-image";
+      slot.appendChild(back);
+    }
+    queue.appendChild(slot);
+  });
+}
+
+function renderLaneRow(containerId, side) {
+  const battle = app.run.battle;
+  const row = el(containerId);
+  clearElement(row);
+  const board = getBoard(battle, side);
+  board.forEach((unit, lane) => {
+    const slot = document.createElement("button");
+    slot.type = "button";
+    slot.className = "lane-slot";
+    if (side === "player" && app.selection?.type === "play-card" && !unit) slot.classList.add("can-host");
+    if (side === "player" && app.selection?.type === "sacrifice" && unit && canSacrificeUnit(unit)) slot.classList.add("sacrifice-target");
+    if (side === "enemy" && app.selection?.type === "item-target-enemy" && unit) slot.classList.add("attack-target");
+    if (side === "enemy" && app.selection?.type === "hook-target" && unit) slot.classList.add("hook-target");
+    slot.addEventListener("click", () => handleLaneClick(side, lane));
+    if (unit) slot.appendChild(createCardElement(unit, { compact: true, battle, selected: app.inspect?.uid === unit.uid }));
+    row.appendChild(slot);
+  });
+}
+
+function renderScale() {
+  const track = el("scale-track");
+  clearElement(track);
+  for (let value = -5; value <= 5; value += 1) {
+    const notch = document.createElement("div");
+    notch.className = "scale-notch";
+    if (value === 0) notch.classList.add("is-center");
+    if (value > 0 && value <= app.run.battle.scale) notch.classList.add("is-player");
+    if (value < 0 && value >= app.run.battle.scale) notch.classList.add("is-enemy");
+    track.appendChild(notch);
+  }
+}
+
+function renderHand() {
+  const hand = el("hand-row");
+  clearElement(hand);
+  app.run.battle.hand.forEach((entry) => {
+    const card = createCardElement(entry, {
+      compact: true,
+      selected: app.selection?.handUid === entry.uid,
+      disabled: app.run.battle.mustDraw,
+    });
+    card.addEventListener("click", () => handleHandCardClick(entry.uid));
+    hand.appendChild(card);
+  });
+}
+
+function renderSelectionBanner() {
+  const battle = app.run.battle;
+  const banner = el("selection-banner");
+  const text = el("selection-text");
+  if (battle.mustDraw) {
+    banner.classList.remove("hidden");
+    text.textContent = "Draw from your main deck or your squirrel deck before doing anything else.";
+    return;
+  }
+  if (!app.selection) {
+    banner.classList.add("hidden");
+    return;
+  }
+  banner.classList.remove("hidden");
+  if (app.selection.type === "sacrifice") {
+    text.textContent = `Choose sacrifices (${app.selection.currentBlood}/${app.selection.requiredBlood} blood).`;
+  } else if (app.selection.type === "play-card") {
+    text.textContent = "Choose an open lane for the selected card.";
+  } else if (app.selection.type === "item-target-enemy") {
+    text.textContent = "Choose an enemy creature for the selected item.";
+  } else if (app.selection.type === "hook-target") {
+    text.textContent = "Choose an enemy creature to pull across the board.";
+  }
+}
+
+function renderInspectPanel() {
+  const panel = el("inspect-panel");
+  clearElement(panel);
+  const title = document.createElement("div");
+  title.className = "panel-kicker";
+  title.textContent = "Inspect";
+  panel.appendChild(title);
+  if (!app.inspect) {
+    const copy = document.createElement("p");
+    copy.className = "detail-copy";
+    copy.textContent = "Click a card on the board or in your hand to inspect it here.";
+    panel.appendChild(copy);
+    return;
+  }
+  const model = getSourceModel(app.inspect, app.run.battle);
+  panel.appendChild(createCardElement(app.inspect.side ? app.inspect : model, { compact: true, disabled: true, battle: app.run.battle }));
+  const meta = document.createElement("div");
+  meta.className = "inspect-meta";
+  meta.innerHTML = `<strong>${model.name}</strong><span>${model.attack}/${app.inspect.side ? app.inspect.health : model.health}</span>`;
+  panel.appendChild(meta);
+  const copy = document.createElement("p");
+  copy.className = "detail-copy";
+  copy.textContent = model.text;
+  panel.appendChild(copy);
+}
+
+function renderBattleLog() {
+  const logEl = el("battle-log");
+  clearElement(logEl);
+  app.run.battle.logs.forEach((entry) => {
+    const div = document.createElement("div");
+    div.className = "battle-log-entry";
+    div.textContent = entry;
+    logEl.appendChild(div);
+  });
+}
+
+function countAvailableBlood(battle) {
+  return battle.playerBoard.reduce((sum, unit) => {
+    if (!unit || !canSacrificeUnit(unit)) return sum;
+    return sum + sacrificeValue(unit);
+  }, 0);
+}
+
+function canSacrificeUnit(unit) {
+  const def = getCardDef(unit.cardId);
+  return def.canSacrifice !== false && !def.tags.includes("pelt") && !def.tags.includes("terrain");
+}
+
+function sacrificeValue(unit) {
+  return unit.sigils.includes("worthy-sacrifice") ? 3 : 1;
+}
+
+function handleHandCardClick(handUid) {
+  const battle = app.run.battle;
+  if (battle.mustDraw) {
+    showToast("Draw first.");
+    return;
+  }
+  const entry = battle.hand.find((card) => card.uid === handUid);
+  if (!entry) return;
+  app.inspect = entry;
+  const model = getEntryModel(entry);
+  if (model.costBones > battle.playerBones) {
+    showToast("Not enough bones.");
+    renderBattle();
+    return;
+  }
+  if (model.costBlood > countAvailableBlood(battle)) {
+    showToast("Not enough blood on the board.");
+    renderBattle();
+    return;
+  }
+  if (model.costBlood > 0) {
+    app.selection = {
+      type: "sacrifice",
+      handUid,
+      requiredBlood: model.costBlood,
+      currentBlood: 0,
+      chosenLanes: [],
+    };
+  } else {
+    app.selection = { type: "play-card", handUid, chosenLanes: [] };
+  }
+  renderBattle();
+}
+
+function handleLaneClick(side, lane) {
+  const battle = app.run.battle;
+  const board = getBoard(battle, side);
+  const unit = board[lane];
+  if (unit) app.inspect = unit;
+  if (side === "player" && app.selection?.type === "sacrifice") {
+    if (!unit || !canSacrificeUnit(unit)) {
+      renderBattle();
+      return;
+    }
+    const selectedIndex = app.selection.chosenLanes.indexOf(lane);
+    if (selectedIndex >= 0) app.selection.chosenLanes.splice(selectedIndex, 1);
+    else app.selection.chosenLanes.push(lane);
+    app.selection.currentBlood = app.selection.chosenLanes.reduce((sum, selectedLane) => sum + sacrificeValue(battle.playerBoard[selectedLane]), 0);
+    if (app.selection.currentBlood >= app.selection.requiredBlood) {
+      app.selection = { type: "play-card", handUid: app.selection.handUid, chosenLanes: [...app.selection.chosenLanes] };
+      showToast("Enough blood. Choose an open lane.");
+    }
+    renderBattle();
+    return;
+  }
+  if (side === "player" && app.selection?.type === "play-card") {
+    if (unit) return;
+    playSelectedCardToLane(lane);
+    return;
+  }
+  if (side === "enemy" && app.selection?.type === "item-target-enemy") {
+    if (!unit) return;
+    useTargetedItem(unit, lane);
+    return;
+  }
+  if (side === "enemy" && app.selection?.type === "hook-target") {
+    if (!unit) return;
+    useFishHook(unit, lane);
+    return;
+  }
+  renderBattle();
+}
+
+function cancelSelection() {
+  app.selection = null;
+  renderBattle();
+}
+
+function reactGuardian(side, targetLane) {
+  const battle = app.run.battle;
+  const board = getBoard(battle, side);
+  if (board[targetLane]) return;
+  const sourceLane = board.findIndex((unit, index) => unit && index !== targetLane && unit.sigils.includes("guardian"));
+  if (sourceLane < 0) return;
+  const unit = board[sourceLane];
+  board[sourceLane] = null;
+  unit.lane = targetLane;
+  board[targetLane] = unit;
+  logBattle(battle, `${unit.name} leaps to guard lane ${targetLane + 1}.`);
+}
+
+function resolveSacrifices(lanes) {
+  const battle = app.run.battle;
+  lanes.forEach((lane) => {
+    const unit = battle.playerBoard[lane];
+    if (!unit) return;
+    if (unit.sigils.includes("many-lives")) {
+      logBattle(battle, `${unit.name} endures the sacrifice.`);
+      return;
+    }
+    killUnit("player", lane, { reason: "sacrifice" });
+  });
+}
+
+function playSelectedCardToLane(lane) {
+  const battle = app.run.battle;
+  const selection = app.selection;
+  if (!selection || selection.type !== "play-card") return;
+  const handIndex = battle.hand.findIndex((entry) => entry.uid === selection.handUid);
+  if (handIndex < 0) {
+    cancelSelection();
+    return;
+  }
+  const entry = battle.hand.splice(handIndex, 1)[0];
+  const model = getEntryModel(entry);
+  if (model.costBlood > 0) resolveSacrifices(selection.chosenLanes || []);
+  battle.playerBones = Math.max(0, battle.playerBones - model.costBones);
+  const unit = createUnitFromEntry(app.run, entry, "player", lane);
+  battle.playerBoard[lane] = unit;
+  battle.lastPlayedLane = lane;
+  reactGuardian("enemy", lane);
+  handleOnPlayEffects(unit, entry, lane);
+  logBattle(battle, `${model.name} enters lane ${lane + 1}.`);
+  app.selection = null;
+  app.inspect = unit;
+  saveRun();
+  renderBattle();
+}
+
+function handleOnPlayEffects(unit, entry, lane) {
+  const battle = app.run.battle;
+  if (unit.sigils.includes("rabbit-hole")) battle.hand.push(createRuntimeEntry(app.run, "rabbit"));
+  if (unit.sigils.includes("fecundity")) {
+    const copy = cloneEntryForBattle(entry);
+    copy.uid = nextUid(app.run, "hand");
+    copy.removedSigils = unique([...(copy.removedSigils || []), "fecundity"]);
+    battle.hand.push(copy);
+  }
+  if (unit.sigils.includes("dam-builder")) {
+    [lane - 1, lane + 1].forEach((targetLane) => {
+      if (targetLane < 0 || targetLane >= MAX_LANES || battle.playerBoard[targetLane]) return;
+      battle.playerBoard[targetLane] = createUnitFromEntry(app.run, createRuntimeEntry(app.run, "dam"), "player", targetLane);
+    });
+  }
+  if (unit.sigils.includes("hoarder") && battle.mainDeck.length) battle.hand.push(battle.mainDeck.shift());
+  if (unit.sigils.includes("ant-spawner")) battle.hand.push(createRuntimeEntry(app.run, "worker-ant"));
+  if (unit.sigils.includes("sentry")) damageUnit("enemy", lane, 1, { reason: "sentry", attacker: unit });
+}
+
+function consumeItem(itemId) {
+  const index = app.run.items.indexOf(itemId);
+  if (index >= 0) app.run.items.splice(index, 1);
+}
+
+function handleItemUse(itemId) {
+  const item = ITEM_BY_ID[itemId];
+  if (!item) return;
+  if (item.target === "none") {
+    useImmediateItem(itemId);
+    return;
+  }
+  app.selection = { type: itemId === "fish-hook" ? "hook-target" : "item-target-enemy", itemId };
+  renderBattle();
+}
+
+function useImmediateItem(itemId) {
+  const battle = app.run.battle;
+  switch (itemId) {
+    case "pliers":
+      battle.scale += 1;
+      logBattle(battle, "The pliers tip the scale in your favor.");
+      break;
+    case "squirrel-bottle":
+      battle.hand.push(createRuntimeEntry(app.run, "squirrel"));
+      logBattle(battle, "A bottled squirrel joins your hand.");
+      break;
+    case "black-goat-bottle":
+      battle.hand.push(createRuntimeEntry(app.run, "black-goat"));
+      logBattle(battle, "A bottled Black Goat joins your hand.");
+      break;
+    case "hourglass":
+      battle.skipEnemyAttack += 1;
+      logBattle(battle, "The hourglass stalls the next enemy attack.");
+      break;
+    default:
+      return;
+  }
+  consumeItem(itemId);
+  app.selection = null;
+  saveRun();
+  if (checkBattleOutcome()) return;
+  renderBattle();
+}
+
+function useTargetedItem(unit, lane) {
+  const itemId = app.selection?.itemId;
+  if (!itemId) return;
+  if (itemId === "scissors") {
+    logBattle(app.run.battle, `The scissors cut down ${unit.name}.`);
+    killUnit("enemy", lane, { reason: "item" });
+  } else if (itemId === "skinning-knife") {
+    logBattle(app.run.battle, `The skinning knife claims ${unit.name} and a fresh pelt.`);
+    killUnit("enemy", lane, { reason: "item" });
+    app.run.battle.hand.push(createRuntimeEntry(app.run, "rabbit-pelt"));
+  }
+  consumeItem(itemId);
+  app.selection = null;
+  saveRun();
+  if (checkBattleOutcome()) return;
+  renderBattle();
+}
+
+function useFishHook(unit, lane) {
+  const battle = app.run.battle;
+  const openLane = battle.playerBoard.findIndex((entry) => !entry);
+  if (openLane < 0) {
+    showToast("No open lane can receive the hooked creature.");
+    return;
+  }
+  battle.enemyBoard[lane] = null;
+  unit.side = "player";
+  unit.lane = openLane;
+  battle.playerBoard[openLane] = unit;
+  consumeItem("fish-hook");
+  app.selection = null;
+  logBattle(battle, `${unit.name} is hooked into your board.`);
+  saveRun();
+  renderBattle();
+}
+
+function drawFromMainDeck(battle, silent = false) {
+  if (!battle.mainDeck.length) {
+    if (!silent) showToast("The main deck is empty. Starvation approaches.");
+    battle.starvations += 1;
+    const lane = randInt(app.run, 0, MAX_LANES);
+    if (!battle.queue[lane]) battle.queue[lane] = "starvation";
+    battle.mustDraw = false;
+    return;
+  }
+  battle.hand.push(battle.mainDeck.shift());
+  battle.mustDraw = false;
+}
+
+function drawFromSideDeck(battle, silent = false) {
+  if (!battle.sideDeck.length) {
+    if (!silent) showToast("The squirrel deck is empty.");
+    return;
+  }
+  battle.hand.push(battle.sideDeck.shift());
+  battle.mustDraw = false;
+}
+
+function handleDrawMain() {
+  drawFromMainDeck(app.run.battle);
+  saveRun();
+  renderBattle();
+}
+
+function handleDrawSide() {
+  drawFromSideDeck(app.run.battle);
+  saveRun();
+  renderBattle();
+}
+
+function getUnitBaseAttack(battle, unit) {
+  let attack = unit.baseAttack;
+  if (unit.sigils.includes("ant-power")) {
+    attack = getBoard(battle, unit.side).filter((candidate) => candidate && ["worker-ant", "flying-ant", "ant-queen"].includes(candidate.cardId)).length;
+  }
+  const board = getBoard(battle, unit.side);
+  [unit.lane - 1, unit.lane + 1].forEach((lane) => {
+    const ally = board[lane];
+    if (ally && ally.sigils.includes("leader")) attack += 1;
+  });
+  return Math.max(0, attack);
+}
+
+function getAttackAgainstTarget(battle, attacker, target) {
+  let attack = getUnitBaseAttack(battle, attacker);
+  if (target && target.sigils.includes("stinky")) attack -= 1;
+  return Math.max(0, attack);
+}
+
+function prepareDefender(attacker, targetLane) {
+  const battle = app.run.battle;
+  const defenderSide = attacker.side === "player" ? "enemy" : "player";
+  const board = getBoard(battle, defenderSide);
+  if (!board[targetLane]) {
+    const burrowerLane = board.findIndex((unit, lane) => {
+      if (!unit || lane === targetLane || !unit.sigils.includes("burrower")) return false;
+      if (attacker.sigils.includes("airborne") && !unit.sigils.includes("mighty-leap")) return false;
+      return true;
+    });
+    if (burrowerLane >= 0) {
+      const unit = board[burrowerLane];
+      board[burrowerLane] = null;
+      unit.lane = targetLane;
+      board[targetLane] = unit;
+      logBattle(battle, `${unit.name} burrows into lane ${targetLane + 1}.`);
     }
   }
-  stage.append(svg);
-  currentRegionNodes.forEach((node) => {
-    const label = getNodeLabel(node.type); const button = document.createElement("button"); button.type = "button";
-    button.className = ["map-node", node.completed ? "complete" : "", app.run.availableNodeIds.includes(node.id) ? "available" : "", !node.completed && !app.run.availableNodeIds.includes(node.id) ? "locked" : "", node.type === "boss" ? "boss" : "", app.selectedMapNodeId === node.id ? "is-selected" : ""].filter(Boolean).join(" ");
-    button.style.left = `${node.x}%`; button.style.top = `${node.y}%`; button.innerHTML = `<div class="map-node-icon">${label.icon}</div><div class="map-node-name">${label.name}</div>`;
-    button.addEventListener("click", () => { app.selectedMapNodeId = node.id; app.run.selectedMapNodeId = node.id; renderMapScreen(); });
-    stage.append(button);
-  });
-  renderMapDetail();
+  let defender = board[targetLane];
+  if (defender && defender.sigils.includes("waterborne")) defender = null;
+  return defender;
 }
-function renderScaleTrack() {
-  const track = el("scale-track"); track.replaceChildren(); const battle = activeBattle(); if (!battle) return;
-  for (let index = -5; index <= 5; index += 1) { const step = document.createElement("div"); step.className = "scale-step"; if (index < 0) step.classList.add("enemy-side"); if (index > 0) step.classList.add("player-side"); if (index === 0) step.classList.add("is-center"); if (index === battle.scale) step.classList.add("is-active"); track.append(step); }
+
+function strikeLanes(unit) {
+  if (unit.sigils.includes("trifurcated")) return [unit.lane - 1, unit.lane, unit.lane + 1];
+  if (unit.sigils.includes("bifurcated")) return [unit.lane - 1, unit.lane + 1];
+  return [unit.lane];
 }
-function createLaneSlot(side, lane, unit) {
-  const slot = document.createElement("div"); slot.className = "battle-slot"; slot.dataset.side = side; slot.dataset.lane = String(lane); slot.innerHTML = `<div class="battle-slot-label">Lane ${lane + 1}</div>`;
-  const battle = activeBattle();
-  const selectableForSacrifice = Boolean(side === "player" && battle && battle.selection && battle.selection.type === "sacrifice" && unit);
-  const isItemTarget = Boolean(battle && battle.itemTargeting && ((battle.itemTargeting.target === "enemy" && side === "enemy" && unit) || (battle.itemTargeting.target === "player" && side === "player" && unit)));
-  if (selectableForSacrifice || isItemTarget || (!unit && side === "player" && battle && battle.pendingHandUid)) slot.classList.add("selectable");
-  if (battle && battle.selection && battle.selection.lanes && battle.selection.lanes.includes(lane) && side === "player") slot.classList.add("is-targeted");
-  slot.addEventListener("click", () => handleLaneClick(side, lane));
-  if (unit) slot.append(createCardElement(getUnitModel(unit), { enemy: side === "enemy", inspectData: { type: "unit", side, lane } }));
-  return slot;
-}
-function renderBattleRows() {
-  const battle = activeBattle(); if (!battle) return;
-  const enemyRow = el("enemy-row"); const playerRow = el("player-row"); enemyRow.replaceChildren(); playerRow.replaceChildren();
-  for (let lane = 0; lane < 4; lane += 1) { enemyRow.append(createLaneSlot("enemy", lane, battle.board.enemy[lane])); playerRow.append(createLaneSlot("player", lane, battle.board.player[lane])); }
-  const queueRow = el("enemy-queue"); queueRow.replaceChildren();
-  if (!battle.queuedEnemyPlays.length) { const empty = document.createElement("div"); empty.className = "empty-state"; empty.textContent = "No further telegraphs."; queueRow.append(empty); }
-  else battle.queuedEnemyPlays.forEach((placement) => queueRow.append(createCardElement(getCardDefinition(placement.cardId), { enemy: true, compact: true, queue: true, inspectData: { type: "queue", cardId: placement.cardId } })));
-}
-function handleHandTap(handUid) { const battle = activeBattle(); if (!battle) return; battle.pendingHandUid = battle.pendingHandUid === handUid ? null : handUid; renderApp(); }
-function beginCardDrag(event, handUid) {
-  if (event.button !== 0) return; const battle = activeBattle(); if (!battle) return;
-  const handIndex = findHandIndex(handUid); if (handIndex < 0) return;
-  const deckCard = battle.hand[handIndex]; const dragGhost = el("drag-card"); dragGhost.replaceChildren(createCardElement(getDeckCardModel(deckCard), { hand: true, tagName: "div" })); dragGhost.classList.remove("hidden"); app.drag = { handUid, startX: event.clientX, startY: event.clientY, moved: false }; moveDragCard(event);
-}
-function moveDragCard(event) {
-  if (!app.drag) return;
-  const dragGhost = el("drag-card"); app.drag.moved = app.drag.moved || Math.abs(event.clientX - app.drag.startX) > 5 || Math.abs(event.clientY - app.drag.startY) > 5; dragGhost.style.transform = `translate(${event.clientX - 70}px, ${event.clientY - 80}px)`;
-}
-function finishCardDrag(event) {
-  if (!app.drag) return;
-  const current = app.drag; el("drag-card").classList.add("hidden"); el("drag-card").style.transform = "translate(-9999px, -9999px)";
-  const hovered = document.elementFromPoint(event.clientX, event.clientY); const slot = hovered ? hovered.closest(".battle-slot") : null;
-  if (slot) { const side = slot.dataset.side; const lane = Number(slot.dataset.lane); if (side === "player") beginPlayCard(current.handUid, lane); }
-  app.drag = null;
-}
-function renderHand() {
-  const handRow = el("hand-row"); handRow.replaceChildren(); const battle = activeBattle(); if (!battle) return;
-  battle.hand.forEach((deckCard) => handRow.append(createCardElement(getDeckCardModel(deckCard), { hand: true, tagName: "button", cantPlay: !canPlayDeckCard(deckCard), selected: battle.pendingHandUid === deckCard.uid, onClick: () => handleHandTap(deckCard.uid), onPointerDown: (event) => beginCardDrag(event, deckCard.uid) })));
-  if (!battle.hand.length) { const empty = document.createElement("div"); empty.className = "empty-state"; empty.textContent = "Your hand is empty."; handRow.append(empty); }
-}
-function renderItems() {
-  const itemBar = el("item-bar"); itemBar.replaceChildren();
-  if (!app.run || !app.run.items.length) { const empty = document.createElement("div"); empty.className = "empty-state"; empty.textContent = "No items carried."; itemBar.append(empty); return; }
-  const battle = activeBattle();
-  app.run.items.forEach((itemId, index) => {
-    const current = ITEM_LOOKUP[itemId]; const button = document.createElement("button"); button.type = "button"; button.className = `item-btn${battle && battle.itemTargeting && battle.itemTargeting.index === index ? " is-targeting" : ""}`;
-    button.innerHTML = `<div class="item-name">${current.name}</div><div class="item-copy">${current.description}</div>`;
-    button.addEventListener("click", () => useItem(index)); button.addEventListener("mouseenter", () => { app.inspect = { type: "item", itemId }; renderInspectPanel(); }); itemBar.append(button);
-  });
-}
-function renderInspectPanel() {
-  const panel = el("inspect-panel"); const battle = activeBattle();
-  if (!battle) { panel.innerHTML = `<div class="section-label">Inspection</div><h3>No Active Battle</h3><p class="muted-copy">Cards, items, and telegraphs will describe themselves here.</p>`; return; }
-  if (!app.inspect) { panel.innerHTML = `<div class="section-label">${battle.encounterName}</div><h3>Read The Table</h3><p class="muted-copy">${battle.encounterSubtitle}</p><p class="muted-copy">Hover cards, items, or telegraphs to inspect them.</p>`; return; }
-  if (app.inspect.type === "item") { const current = ITEM_LOOKUP[app.inspect.itemId]; panel.innerHTML = `<div class="section-label">Item</div><h3>${current.name}</h3><p class="muted-copy">${current.description}</p><p class="muted-copy">${current.detail}</p>`; return; }
-  if (app.inspect.type === "encounter") { panel.innerHTML = `<div class="section-label">${battle.encounterTier === "boss" ? "Boss" : titleCase(battle.encounterTier)}</div><h3>${battle.encounterName}</h3><p class="muted-copy">${battle.encounterSubtitle}</p><p class="muted-copy">Enemy telegraphs appear above the board before they deploy.</p>`; return; }
-  const model = app.inspect.type === "unit" ? getUnitModel(battle.board[app.inspect.side][app.inspect.lane]) : getCardDefinition(app.inspect.cardId);
-  if (!model) return;
-  panel.innerHTML = `<div class="section-label">${model.tribe || "Card"}</div><h3>${model.name}</h3><p class="muted-copy">${model.description}</p><div class="detail-list"><span class="detail-chip">ATK ${model.attack}</span><span class="detail-chip">HP ${model.currentHealth != null ? model.currentHealth : model.health}</span>${model.sigils.map((sigilId) => `<span class="detail-chip">${SIGIL_LOOKUP[sigilId] ? SIGIL_LOOKUP[sigilId].name : titleCase(sigilId)}</span>`).join("")}</div>`;
-}
-function renderBattleLog() {
-  const log = el("battle-log"); log.replaceChildren(); const battle = activeBattle();
-  if (!battle || !battle.log.length) { const empty = document.createElement("div"); empty.className = "empty-state"; empty.textContent = "The ritual log is quiet."; log.append(empty); return; }
-  battle.log.slice(-10).forEach((line) => { const row = document.createElement("div"); row.className = "log-line"; row.textContent = line; log.append(row); });
-}
-function renderSelectionBanner() {
-  const banner = el("selection-banner"); const text = el("selection-text"); const battle = activeBattle();
-  if (!battle) return banner.classList.add("hidden");
-  if (battle.itemTargeting) { const current = ITEM_LOOKUP[battle.itemTargeting.itemId]; banner.classList.remove("hidden"); text.textContent = `Choose a ${battle.itemTargeting.target === "enemy" ? "foe" : "friendly creature"} for ${current.name}.`; return; }
-  if (battle.selection && battle.selection.type === "sacrifice") {
-    const total = battle.selection.lanes.reduce((sum, lane) => { const unit = battle.board.player[lane]; return sum + (unit ? sacrificeValue(unit) : 0); }, 0);
-    const pendingIndex = findHandIndex(battle.selection.handUid); const pendingCard = pendingIndex >= 0 ? getDeckCardModel(battle.hand[pendingIndex]).name : "the chosen card";
-    banner.classList.remove("hidden"); text.textContent = `Choose sacrifices for ${pendingCard}: ${total}/${battle.selection.needed} blood.`; return;
+
+function resolveStrike(attacker, targetLane) {
+  const battle = app.run.battle;
+  if (targetLane < 0 || targetLane >= MAX_LANES) return;
+  const defender = prepareDefender(attacker, targetLane);
+  const attack = getAttackAgainstTarget(battle, attacker, defender);
+  if (attack <= 0) return;
+  if (!defender || (attacker.sigils.includes("airborne") && !defender.sigils.includes("mighty-leap"))) {
+    battle.scale += attacker.side === "player" ? attack : -attack;
+    logBattle(battle, `${attacker.name} strikes the scale for ${attack}.`);
+    return;
   }
-  if (battle.pendingHandUid) { const handIndex = findHandIndex(battle.pendingHandUid); if (handIndex >= 0) { banner.classList.remove("hidden"); text.textContent = `${getDeckCardModel(battle.hand[handIndex]).name} is ready. Choose an empty lane or drag the card onto one.`; return; } }
-  banner.classList.add("hidden");
+  damageUnit(defender.side, defender.lane, attack, { reason: "combat", attacker, lethalTouch: attacker.sigils.includes("touch-of-death") });
 }
-function renderBattleScreen() {
-  const battle = activeBattle(); if (!battle) return;
-  el("scale-readout").textContent = `${battle.scale >= 0 ? "+" : ""}${battle.scale} / 5`; el("bones-readout").textContent = String(battle.bones); el("battle-lives").textContent = String(app.run.lives); el("deck-readout").textContent = String(battle.drawPile.length); el("offering-readout").textContent = String(battle.offeringPile.length); el("draw-main-btn").disabled = battle.drawnThisTurn || battle.drawPile.length === 0; el("draw-offering-btn").disabled = battle.drawnThisTurn || battle.offeringPile.length === 0;
-  renderScaleTrack(); renderBattleRows(); renderHand(); renderItems(); renderInspectPanel(); renderBattleLog(); renderSelectionBanner();
+
+function tryLooseTail(side, lane) {
+  const battle = app.run.battle;
+  const board = getBoard(battle, side);
+  const unit = board[lane];
+  if (!unit || !unit.sigils.includes("loose-tail") || unit.flags.tailUsed) return;
+  const preferred = unit.flags.direction >= 0 ? [lane + 1, lane - 1] : [lane - 1, lane + 1];
+  const escapeLane = preferred.find((targetLane) => targetLane >= 0 && targetLane < MAX_LANES && !board[targetLane]);
+  if (escapeLane == null) return;
+  board[lane] = createUnitFromEntry(app.run, createRuntimeEntry(app.run, "skink-tail"), side, lane);
+  unit.flags.tailUsed = true;
+  unit.lane = escapeLane;
+  board[escapeLane] = unit;
+  logBattle(battle, `${unit.name} slips away and leaves a tail behind.`);
 }
-function renderFlowScreen() {
-  const flow = app.run ? app.run.flow : null; if (!flow) return;
-  el("flow-kicker").textContent = flow.kicker || "Flow"; el("flow-title").textContent = flow.title || "A Choice Awaits"; el("flow-description").textContent = flow.description || "";
-  const cardGrid = el("flow-card-grid"); const deckGrid = el("flow-deck-grid"); const buttonRow = el("flow-button-row"); cardGrid.replaceChildren(); deckGrid.replaceChildren(); buttonRow.replaceChildren();
-  if (flow.mode === "card-reward") flow.cards.forEach((cardId) => cardGrid.append(createCardElement(getCardDefinition(cardId), { tagName: "button", onClick: () => resolveFlowAction({ type: "take-reward-card", cardId }), extraClass: "flow-choice" })));
-  if (flow.mode === "item-reward") flow.items.forEach((itemId) => { const current = ITEM_LOOKUP[itemId]; cardGrid.append(createInfoChoice(current.name, current.description, () => resolveFlowAction({ type: "take-item", itemId }))); });
-  if (flow.mode === "campfire") flow.deckTargets.forEach((deckCard) => deckGrid.append(createCardElement(getDeckCardModel(deckCard), { tagName: "button", onClick: () => resolveFlowAction({ type: "campfire-buff", deckUid: deckCard.uid, stat: flow.stat, amount: flow.amount, nodeId: flow.nodeId }), extraClass: "flow-choice" })));
-  if (flow.mode === "purge") flow.deckTargets.forEach((deckCard) => deckGrid.append(createCardElement(getDeckCardModel(deckCard), { tagName: "button", onClick: () => resolveFlowAction({ type: "purge-card", deckUid: deckCard.uid, nodeId: flow.nodeId }), extraClass: "flow-choice" })));
-  if (flow.mode === "shrine-select") flow.sigils.forEach((sigilId) => { const current = SIGIL_LOOKUP[sigilId]; cardGrid.append(createInfoChoice(current.name, current.description, () => resolveFlowAction({ type: "shrine-select-sigil", sigilId, nodeId: flow.nodeId }))); });
-  if (flow.mode === "shrine-apply") flow.deckTargets.forEach((deckCard) => deckGrid.append(createCardElement(getDeckCardModel(deckCard), { tagName: "button", onClick: () => resolveFlowAction({ type: "shrine-apply", sigilId: flow.chosenSigil, deckUid: deckCard.uid, nodeId: flow.nodeId }), extraClass: "flow-choice" })));
-  (flow.buttons || []).forEach((buttonDef) => { const button = document.createElement("button"); button.type = "button"; button.className = "ash-btn ash-btn-secondary"; button.textContent = buttonDef.label; button.addEventListener("click", () => resolveFlowAction(buttonDef.action)); buttonRow.append(button); });
-  el("flow-close-btn").classList.add("hidden");
-}
-function groupedCurrentDeck() {
-  if (!app.run) return [];
-  const grouped = new Map();
-  app.run.deck.forEach((deckCard) => { if (!grouped.has(deckCard.cardId)) grouped.set(deckCard.cardId, { deckCard, count: 0 }); grouped.get(deckCard.cardId).count += 1; });
-  return [...grouped.values()].map(({ deckCard, count }) => ({ ...getDeckCardModel(deckCard), count })).sort((left, right) => left.name.localeCompare(right.name));
-}
-function renderDeckbook() {
-  const summary = el("deckbook-summary"); const grid = el("deckbook-grid"); grid.replaceChildren(); el("deckbook-current-tab").classList.toggle("is-active", app.deckbookTab === "current"); el("deckbook-discovered-tab").classList.toggle("is-active", app.deckbookTab === "discovered");
-  if (app.deckbookTab === "current") {
-    if (!app.run) { summary.textContent = "No current run loaded."; const empty = document.createElement("div"); empty.className = "empty-state"; empty.textContent = "Start or continue a run to inspect the live deck."; grid.append(empty); return; }
-    summary.textContent = `${app.run.deck.length} cards, ${app.run.items.length} items, ${app.run.lives} candles.`; groupedCurrentDeck().forEach((model) => grid.append(createCardElement(model, {}))); return;
+
+function damageUnit(side, lane, amount, context = {}) {
+  const battle = app.run.battle;
+  if (amount <= 0) return;
+  tryLooseTail(side, lane);
+  const board = getBoard(battle, side);
+  const unit = board[lane];
+  if (!unit) return;
+  if (unit.sigils.includes("bees-within") && side === "player") battle.hand.push(createRuntimeEntry(app.run, "bee"));
+  if (context.lethalTouch) unit.health = 0;
+  else unit.health -= amount;
+  if (unit.health <= 0) {
+    killUnit(side, lane, context);
+    return;
   }
-  const discoveredModels = [...app.discovered].map((cardId) => getCardDefinition(cardId)).sort((left, right) => left.name.localeCompare(right.name));
-  summary.textContent = `${discoveredModels.length} recovered pages.`; discoveredModels.forEach((model) => grid.append(createCardElement(model, { enemy: ENEMY_CARD_LOOKUP[model.id] != null })));
+  if (unit.sigils.includes("sharp-quills") && context.attacker) damageUnit(context.attacker.side, context.attacker.lane, 1, { reason: "sharp-quills" });
 }
-function renderEndScreens() {
-  if (!app.ending) return;
-  const target = app.ending.result === "victory" ? "victory" : "gameover"; el(`${target}-copy`).textContent = app.ending.copy; const stats = el(`${target}-stats`); stats.replaceChildren(); Object.entries(app.ending.stats).forEach(([label, value]) => { const cell = document.createElement("div"); cell.className = "end-stat"; cell.innerHTML = `${titleCase(label.replace(/([A-Z])/g, " $1"))}<strong>${value}</strong>`; stats.append(cell); });
-}
-function renderPauseOverlay() { el("pause-overlay").classList.toggle("hidden", !app.pauseVisible); }
-function renderApp() {
-  renderTitle(); renderStarterScreen(); if (app.run) { renderMapScreen(); if (app.run.battle) renderBattleScreen(); if (app.run.flow) renderFlowScreen(); } renderDeckbook(); renderEndScreens(); renderPauseOverlay(); document.querySelectorAll(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === app.visibleScreen)); if (app.run) savePersistedRun(app.run);
-}
-function handleLaneClick(side, lane) {
-  const battle = activeBattle(); if (!battle) return;
-  if (battle.itemTargeting) { const used = resolveItemEffect(battle.itemTargeting.itemId, { side, lane }); if (used) { consumeItem(battle.itemTargeting.index); battle.itemTargeting = null; app.run.stats.itemsUsed += 1; renderApp(); } return; }
-  if (battle.selection && battle.selection.type === "sacrifice") { if (side !== "player" || !battle.board.player[lane]) return showToast("Choose your own creatures for sacrifice."); return toggleSacrificeLane(lane); }
-  if (side === "player") { if (battle.board.player[lane]) { app.inspect = { type: "unit", side, lane }; return renderInspectPanel(); } if (battle.pendingHandUid) return beginPlayCard(battle.pendingHandUid, lane); }
-  if (side === "enemy" && battle.board.enemy[lane]) { app.inspect = { type: "unit", side, lane }; renderInspectPanel(); }
-}
-function togglePause() { if (!app.run || !["map-screen","battle-screen","flow-screen"].includes(app.visibleScreen)) return; app.pauseVisible = !app.pauseVisible; renderPauseOverlay(); }
-function renderAtmosphere(timestamp) {
-  const canvas = el("atmosphere-canvas"); if (!canvas) return;
-  const rect = canvas.getBoundingClientRect(); if (canvas.width !== Math.floor(rect.width) || canvas.height !== Math.floor(rect.height)) { canvas.width = Math.floor(rect.width); canvas.height = Math.floor(rect.height); }
-  const ctx = canvas.getContext("2d"); const delta = app.lastFrameTime ? Math.min(0.05, (timestamp - app.lastFrameTime) / 1000) : 0.016; app.lastFrameTime = timestamp;
-  if (!app.motes.length) for (let index = 0; index < 40; index += 1) app.motes.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2.8 + 0.8, speed: Math.random() * 20 + 8, alpha: Math.random() * 0.28 + 0.08 });
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const flicker = 0.5 + Math.sin(timestamp / 240) * 0.06 + Math.sin(timestamp / 130) * 0.03;
-  const leftGlow = ctx.createRadialGradient(90, canvas.height - 120, 0, 90, canvas.height - 120, 180); leftGlow.addColorStop(0, `rgba(255, 214, 142, ${0.16 * flicker})`); leftGlow.addColorStop(1, "rgba(255, 214, 142, 0)"); ctx.fillStyle = leftGlow; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const rightGlow = ctx.createRadialGradient(canvas.width - 90, canvas.height - 120, 0, canvas.width - 90, canvas.height - 120, 180); rightGlow.addColorStop(0, `rgba(255, 214, 142, ${0.16 * flicker})`); rightGlow.addColorStop(1, "rgba(255, 214, 142, 0)"); ctx.fillStyle = rightGlow; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  for (const mote of app.motes) {
-    mote.y -= mote.speed * delta; mote.x += Math.sin((timestamp / 1000) + mote.y * 0.01) * 3 * delta; if (mote.y < -10) { mote.y = canvas.height + 12; mote.x = Math.random() * canvas.width; }
-    ctx.fillStyle = `rgba(255, 218, 166, ${mote.alpha})`; ctx.beginPath(); ctx.arc(mote.x, mote.y, mote.size, 0, Math.PI * 2); ctx.fill();
+
+function handleDeathFollowups(deadUnit, context) {
+  const battle = app.run.battle;
+  if (deadUnit.side === "player") {
+    battle.playerBones += 1;
+    if (deadUnit.sigils.includes("bone-king")) battle.playerBones += 3;
+  } else {
+    const scavengers = battle.playerBoard.filter((unit) => unit && unit.sigils.includes("scavenger")).length;
+    if (scavengers) battle.playerBones += scavengers;
   }
-  requestAnimationFrame(renderAtmosphere);
+  if (deadUnit.cardId === "ouroboros" && deadUnit.sourceUid) {
+    const persistent = getPersistentEntry(deadUnit.sourceUid);
+    if (persistent) {
+      persistent.attackBuff += 1;
+      persistent.healthBuff += 1;
+    }
+  }
+  if (deadUnit.sigils.includes("unkillable")) {
+    if (deadUnit.sourceUid) {
+      const persistent = getPersistentEntry(deadUnit.sourceUid);
+      if (persistent) battle.hand.push(cloneEntryForBattle(persistent));
+    } else {
+      battle.hand.push(createRuntimeEntry(app.run, deadUnit.cardId));
+    }
+  }
+  if (deadUnit.special === "pack-mule") {
+    const room = getItemCapacity(app.run) - app.run.items.length;
+    const gained = takeRandomDistinct(app.run, ITEM_DEFS.map((item) => item.id), Math.max(0, room));
+    app.run.items.push(...gained);
+    logBattle(battle, `The Pack Mule spills ${gained.length ? gained.join(", ") : "nothing useful"}.`);
+  }
+  if (deadUnit.special === "bait-bucket") {
+    const board = getBoard(battle, deadUnit.side);
+    if (!board[deadUnit.lane]) board[deadUnit.lane] = createEnemyUnit(app.run, battle, "great-white", deadUnit.lane);
+  }
+  if (deadUnit.special === "strange-frog") {
+    const board = getBoard(battle, deadUnit.side);
+    if (!board[deadUnit.lane]) board[deadUnit.lane] = createUnitFromEntry(app.run, createRuntimeEntry(app.run, "leaping-trap"), deadUnit.side, deadUnit.lane);
+  }
+  if (deadUnit.sigils.includes("steel-trap") && context.attacker) {
+    killUnit(context.attacker.side, context.attacker.lane, { reason: "trap" });
+    if (context.attacker.side === "player") battle.hand.push(createRuntimeEntry(app.run, "wolf-pelt"));
+  }
 }
-function bindUI() {
-  el("new-run-btn").addEventListener("click", () => { app.ending = null; app.selectedStarterId = STARTER_DECKS[0].id; showScreen("starter-screen"); renderApp(); });
-  el("continue-run-btn").addEventListener("click", () => { const loaded = loadPersistedRun(); if (!loaded) return showToast("No saved run was found."), renderTitle(); app.run = loaded; app.pauseVisible = false; app.ending = null; app.selectedMapNodeId = app.run.selectedMapNodeId || app.run.availableNodeIds[0] || null; showScreen(app.run.screen || "map-screen"); renderApp(); });
-  el("open-codex-btn").addEventListener("click", () => openDeckbook("title-screen", "discovered"));
-  el("starter-back-btn").addEventListener("click", () => { showScreen("title-screen"); renderApp(); });
-  el("starter-begin-btn").addEventListener("click", () => { app.ending = null; app.run = createRun(app.selectedStarterId); app.selectedMapNodeId = app.run.availableNodeIds[0] || null; showScreen("map-screen"); renderApp(); });
-  el("map-codex-btn").addEventListener("click", () => openDeckbook("map-screen", "current"));
-  el("map-save-btn").addEventListener("click", saveAndQuitToTitle);
-  el("draw-main-btn").addEventListener("click", () => drawCards("main", 1));
-  el("draw-offering-btn").addEventListener("click", () => drawCards("offering", 1));
-  el("end-turn-btn").addEventListener("click", endTurn);
-  el("battle-codex-btn").addEventListener("click", () => openDeckbook("battle-screen", "current"));
-  el("pause-btn").addEventListener("click", togglePause);
-  el("selection-cancel-btn").addEventListener("click", cancelSelections);
-  el("flow-close-btn").addEventListener("click", () => { showScreen("map-screen"); renderApp(); });
-  el("deckbook-close-btn").addEventListener("click", closeDeckbook);
-  el("deckbook-current-tab").addEventListener("click", () => { app.deckbookTab = "current"; renderDeckbook(); });
-  el("deckbook-discovered-tab").addEventListener("click", () => { app.deckbookTab = "discovered"; renderDeckbook(); });
-  el("gameover-restart-btn").addEventListener("click", () => { app.ending = null; showScreen("starter-screen"); renderApp(); });
-  el("gameover-codex-btn").addEventListener("click", () => openDeckbook("gameover-screen", "discovered"));
-  el("victory-new-run-btn").addEventListener("click", () => { app.ending = null; showScreen("starter-screen"); renderApp(); });
-  el("victory-codex-btn").addEventListener("click", () => openDeckbook("victory-screen", "discovered"));
-  el("resume-btn").addEventListener("click", () => { app.pauseVisible = false; renderPauseOverlay(); });
-  el("pause-codex-btn").addEventListener("click", () => { app.pauseVisible = false; openDeckbook(app.visibleScreen, "current"); });
-  el("save-quit-btn").addEventListener("click", saveAndQuitToTitle);
-  document.addEventListener("pointermove", moveDragCard);
-  document.addEventListener("pointerup", finishCardDrag);
-  document.addEventListener("keydown", (event) => {
-    if (event.code === "Space" && app.visibleScreen === "battle-screen" && !app.pauseVisible) { event.preventDefault(); endTurn(); return; }
-    if (event.code === "Tab") { event.preventDefault(); if (app.visibleScreen === "deckbook-screen") closeDeckbook(); else if (app.run) openDeckbook(app.visibleScreen, "current"); else openDeckbook("title-screen", "discovered"); return; }
-    if (event.code === "Escape") { event.preventDefault(); if (app.visibleScreen === "deckbook-screen") closeDeckbook(); else togglePause(); }
+
+function killUnit(side, lane, context = {}) {
+  const battle = app.run.battle;
+  const board = getBoard(battle, side);
+  const unit = board[lane];
+  if (!unit) return;
+  board[lane] = null;
+  logBattle(battle, `${unit.name} is removed from lane ${lane + 1}.`);
+  handleDeathFollowups(unit, context);
+}
+
+function pushChain(board, lane, direction) {
+  if (lane < 0 || lane >= MAX_LANES) return false;
+  if (!board[lane]) return true;
+  if (!pushChain(board, lane + direction, direction)) return false;
+  const unit = board[lane];
+  board[lane + direction] = unit;
+  unit.lane = lane + direction;
+  board[lane] = null;
+  return true;
+}
+
+function handleMovementForSide(side) {
+  const battle = app.run.battle;
+  const board = getBoard(battle, side);
+  board.forEach((unit, lane) => {
+    if (!unit || unit.lane !== lane) return;
+    if (!unit.sigils.includes("sprinter") && !unit.sigils.includes("hefty")) return;
+    let direction = unit.flags.direction || 1;
+    let targetLane = lane + direction;
+    const wantsPush = unit.sigils.includes("hefty");
+    let canMove = wantsPush ? pushChain(board, targetLane, direction) : targetLane >= 0 && targetLane < MAX_LANES && !board[targetLane];
+    if (!canMove) {
+      direction *= -1;
+      unit.flags.direction = direction;
+      targetLane = lane + direction;
+      canMove = wantsPush ? pushChain(board, targetLane, direction) : targetLane >= 0 && targetLane < MAX_LANES && !board[targetLane];
+    }
+    if (targetLane < 0 || targetLane >= MAX_LANES || !canMove) return;
+    board[lane] = null;
+    unit.lane = targetLane;
+    unit.flags.direction = direction;
+    board[targetLane] = unit;
   });
 }
-function init() { app.discovered = new Set(loadDiscoveredCards()); bindUI(); renderApp(); requestAnimationFrame(renderAtmosphere); }
-init();
+
+function deployQueue() {
+  const battle = app.run.battle;
+  battle.queue.forEach((cardId, lane) => {
+    if (!cardId || battle.enemyBoard[lane]) return;
+    battle.enemyBoard[lane] = createEnemyUnit(app.run, battle, cardId, lane);
+    battle.queue[lane] = null;
+    reactGuardian("player", lane);
+  });
+}
+
+function queueNextWaveIfNeeded() {
+  const battle = app.run.battle;
+  if (battle.queue.some(Boolean)) return;
+  if (!battle.upcomingWaves.length) return;
+  battle.queue = battle.upcomingWaves.shift();
+}
+
+function evolveUnits() {
+  const battle = app.run.battle;
+  ["player", "enemy"].forEach((side) => {
+    getBoard(battle, side).forEach((unit, lane) => {
+      if (!unit) return;
+      unit.turnsInPlay += 1;
+      if (side === "player" && unit.sigils.includes("ant-spawner")) battle.hand.push(createRuntimeEntry(app.run, "worker-ant"));
+      if (!unit.sigils.includes("fledgling") || unit.flags.evolved || unit.turnsInPlay < 1) return;
+      const targetId = getCardDef(unit.cardId).evolvesTo;
+      if (!targetId) return;
+      const replacement = createUnitFromEntry(app.run, createRuntimeEntry(app.run, targetId), side, lane);
+      replacement.turnsInPlay = unit.turnsInPlay;
+      replacement.flags.direction = unit.flags.direction;
+      replacement.flags.evolved = true;
+      getBoard(battle, side)[lane] = replacement;
+      logBattle(battle, `${unit.name} evolves into ${replacement.name}.`);
+    });
+  });
+}
+
+function runAttackStep(side) {
+  const battle = app.run.battle;
+  for (let lane = 0; lane < MAX_LANES; lane += 1) {
+    const unit = getBoard(battle, side)[lane];
+    if (!unit || unit.lane !== lane) continue;
+    strikeLanes(unit).forEach((targetLane) => resolveStrike(unit, targetLane));
+    const stillHere = getBoard(battle, side)[lane];
+    if (stillHere && stillHere.uid === unit.uid && unit.sigils.includes("brittle")) killUnit(side, lane, { reason: "brittle" });
+    if (checkBattleOutcome()) return;
+  }
+  handleMovementForSide(side);
+}
+
+function handleBossPhaseAdvance() {
+  const battle = app.run.battle;
+  if (!battle.bossId || battle.phaseIndex >= battle.phases.length - 1) return false;
+  const nextPhase = battle.phaseIndex + 1;
+  if (battle.bossId === "prospector") {
+    battle.playerBoard = battle.playerBoard.map((unit, lane) => unit ? createUnitFromEntry(app.run, createRuntimeEntry(app.run, "gold-nugget"), "player", lane) : null);
+  }
+  if (battle.bossId === "angler") {
+    const lane = battle.lastPlayedLane;
+    if (lane != null && battle.playerBoard[lane]) {
+      const openEnemyLane = battle.enemyBoard[lane] ? battle.enemyBoard.findIndex((entry) => !entry) : lane;
+      if (openEnemyLane >= 0) {
+        const stolen = battle.playerBoard[lane];
+        battle.playerBoard[lane] = null;
+        stolen.side = "enemy";
+        stolen.lane = openEnemyLane;
+        battle.enemyBoard[openEnemyLane] = stolen;
+      }
+    }
+  }
+  battle.scale = 0;
+  beginBattlePhase(battle, nextPhase);
+  return true;
+}
+
+function loseCandle() {
+  app.run.candles -= 1;
+  if (app.run.candles <= 0) {
+    endRun(false, "The last candle has gone out.", "The Candle Fails");
+    return;
+  }
+  showToast("A candle has gone out. The battle begins again.");
+  const node = getNodeById(app.run.lastBattleNodeId);
+  if (node) startBattle(node);
+}
+
+function checkBattleOutcome() {
+  const battle = app.run.battle;
+  if (battle.scale >= SCALE_LIMIT) {
+    const overflow = Math.max(0, battle.scale - SCALE_LIMIT);
+    if (handleBossPhaseAdvance()) {
+      saveRun();
+      renderBattle();
+      return true;
+    }
+    app.run.teeth += overflow;
+    handleBattleVictory();
+    return true;
+  }
+  if (battle.scale <= -SCALE_LIMIT) {
+    loseCandle();
+    return true;
+  }
+  return false;
+}
+
+function applyRunVictoryUnlocks(run) {
+  app.profile.highestClearedCP = Math.max(app.profile.highestClearedCP, run.cp);
+  app.profile.ascensionLevel = Math.max(app.profile.ascensionLevel, run.cp + 1);
+  app.profile.winsByDeck[run.starterDeckId] = (app.profile.winsByDeck[run.starterDeckId] || 0) + 1;
+  app.profile.stats.victories += 1;
+  UNLOCK_TABLE.forEach((unlock) => {
+    if (run.cp < unlock.clearCp) return;
+    if (unlock.deck) app.profile.unlockedDeckIds = unique([...app.profile.unlockedDeckIds, unlock.deck]);
+    if (unlock.challenge) app.profile.unlockedChallengeIds = unique([...app.profile.unlockedChallengeIds, unlock.challenge]);
+  });
+}
+
+function handleBattleVictory() {
+  const battle = app.run.battle;
+  const nodeId = battle.nodeId;
+  app.run.battle = null;
+  app.run.stats.battlesWon += 1;
+  if (battle.bossId) {
+    app.run.stats.bossesDefeated += 1;
+    app.profile.stats.bossesDefeated += 1;
+    saveProfile();
+  }
+  if (battle.rewardKind === "victory") {
+    applyRunVictoryUnlocks(app.run);
+    saveProfile();
+    endRun(true, "Leshy is beaten and the run is complete.", "Victory");
+    return;
+  }
+  const rewardCards = battle.rewardKind === "rare-reward"
+    ? pickRewardCards(app.run, REWARD_POOLS.rare, 3)
+    : pickRewardCards(app.run, getRewardPoolForMap(app.run.mapIndex), 3);
+  app.run.event = {
+    kind: "reward",
+    nodeId,
+    title: battle.rewardKind === "rare-reward" ? "Boss Reward" : "Choose A Card",
+    copy: battle.rewardKind === "rare-reward" ? "Take one rare card and continue." : "Take one card and return to the trail.",
+    rewards: rewardCards,
+    rare: battle.rewardKind === "rare-reward",
+  };
+  app.run.scene = "event";
+  saveRun();
+  renderEvent();
+}
+
+function handleBell() {
+  const battle = app.run.battle;
+  if (battle.mustDraw) {
+    showToast("Draw first.");
+    return;
+  }
+  if (app.selection) {
+    showToast("Finish the current selection first.");
+    return;
+  }
+  runAttackStep("player");
+  if (checkBattleOutcome()) return;
+  deployQueue();
+  if (battle.skipEnemyAttack > 0) {
+    battle.skipEnemyAttack -= 1;
+    logBattle(battle, "The enemy attack step is skipped.");
+  } else {
+    runAttackStep("enemy");
+    if (checkBattleOutcome()) return;
+  }
+  evolveUnits();
+  queueNextWaveIfNeeded();
+  battle.mustDraw = true;
+  battle.turn += 1;
+  app.inspect = null;
+  saveRun();
+  renderBattle();
+}
+
+function startEventForNode(node) {
+  const run = app.run;
+  let event = null;
+  switch (node.type) {
+    case "campfire":
+      event = {
+        kind: "campfire",
+        nodeId: node.id,
+        title: "Campfire",
+        copy: hasChallenge(run, "scarce-campfires") && run.flags.campfiresUsed >= 1
+          ? "The survivors have already gone. Only cinders remain."
+          : "Choose one creature to gain a small permanent boost.",
+        stat: sample(run, ["attack", "health"]),
+      };
+      break;
+    case "backpack":
+      event = {
+        kind: "backpack",
+        nodeId: node.id,
+        title: "Backpack",
+        copy: "Three items wait inside the old pack.",
+        items: takeRandomDistinct(run, ITEM_DEFS.map((item) => item.id), 3),
+      };
+      break;
+    case "sacrificial-stones":
+      event = {
+        kind: "sacrificial-stones",
+        nodeId: node.id,
+        title: "Sacrificial Stones",
+        copy: "One creature gives its sigils. Another keeps them.",
+        stage: "choose-donor",
+        donorUid: null,
+      };
+      break;
+    case "trapper":
+      if (!run.flags.freeTrapperPelt) {
+        run.flags.freeTrapperPelt = true;
+        run.deck.push(createDeckEntry(run, "rabbit-pelt"));
+        markDiscovered(["rabbit-pelt"]);
+      }
+      event = { kind: "trapper", nodeId: node.id, title: "The Trapper", copy: "Pelts are always useful. The first rabbit pelt is already yours." };
+      break;
+    case "trader":
+      event = { kind: "trader", nodeId: node.id, title: "The Trader", copy: "Pelts can become something better. Choose what to trade first.", tradeType: null, offers: [] };
+      break;
+    case "deck-trial":
+      event = { kind: "deck-trial", nodeId: node.id, title: "Deck Trial", copy: "Reveal three cards to see whether the deck passes.", stage: "pick-trial", trials: takeRandomDistinct(run, TRIAL_DEFS.map((trial) => trial.id), 3) };
+      break;
+    default:
+      return;
+  }
+  run.scene = "event";
+  run.event = event;
+  saveRun();
+  renderEvent();
+}
+
+function markNodeCleared(nodeId) {
+  const map = getCurrentMap();
+  const node = map.find((entry) => entry.id === nodeId);
+  if (!node) return;
+  node.state = "cleared";
+  const clearedIds = map.filter((entry) => entry.state === "cleared").map((entry) => entry.id);
+  unlockAvailableNodes(map, clearedIds);
+}
+
+function completeNodeAndReturnToMap(nodeId) {
+  const node = getNodeById(nodeId);
+  if (!node) return;
+  markNodeCleared(nodeId);
+  if (node.type === "boss" && app.run.mapIndex < app.run.maps.length - 1) {
+    app.run.mapIndex += 1;
+    unlockAvailableNodes(getCurrentMap(), []);
+  }
+  app.run.scene = "map";
+  app.run.event = null;
+  app.selectedMapNodeId = getCurrentMap().find((entry) => entry.state === "available")?.id || null;
+  saveRun();
+  renderMap();
+}
+
+function countPeltsInDeck() {
+  return app.run.deck.reduce((counts, entry) => {
+    const def = getCardDef(entry.cardId);
+    if (!def.tags.includes("pelt")) return counts;
+    counts[entry.cardId] = (counts[entry.cardId] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function buildTraderOffers(tradeType) {
+  const isRare = tradeType === "golden-pelt";
+  const pool = isRare ? REWARD_POOLS.rare : getRewardPoolForMap(app.run.mapIndex);
+  const offerCount = tradeType === "golden-pelt" ? 4 : 8;
+  return takeRandomDistinct(app.run, pool, offerCount).map((cardId) => ({
+    cardId,
+    addedSigils: tradeType === "wolf-pelt" ? [sample(app.run, BONUS_SIGIL_POOL)] : [],
+  }));
+}
+
+function renderEvent() {
+  showScreen("event-screen");
+  const event = app.run.event;
+  const panel = el("event-panel");
+  clearElement(panel);
+  const header = document.createElement("div");
+  header.className = "event-header";
+  header.innerHTML = `<div class="panel-kicker">${event.rare ? "Rare Reward" : titleCase(event.kind)}</div><h2>${event.title}</h2><p class="detail-copy">${event.copy}</p>`;
+  const body = document.createElement("div");
+  body.className = "event-body";
+  const actions = document.createElement("div");
+  actions.className = "event-actions";
+
+  if (event.kind === "reward") {
+    const grid = document.createElement("div");
+    grid.className = "reward-grid";
+    event.rewards.forEach((reward) => {
+      const card = createCardElement({ cardId: reward.cardId, attackBuff: reward.attackBuff || 0, healthBuff: reward.healthBuff || 0, addedSigils: reward.addedSigils || [], removedSigils: [] }, {});
+      card.addEventListener("click", () => {
+        app.run.deck.push(createDeckEntry(app.run, reward.cardId, { addedSigils: reward.addedSigils || [] }));
+        app.run.stats.cardsAdded += 1;
+        markDiscovered([reward.cardId]);
+        completeNodeAndReturnToMap(event.nodeId);
+      });
+      grid.appendChild(card);
+    });
+    body.appendChild(grid);
+  } else if (event.kind === "campfire") {
+    const note = document.createElement("div");
+    note.className = "event-note";
+    note.textContent = hasChallenge(app.run, "scarce-campfires") && app.run.flags.campfiresUsed >= 1 ? "The campfire is cold. Nothing remains to claim here." : `This fire will grant ${event.stat === "attack" ? "+1 power" : "+1 health"} to one card in your deck.`;
+    body.appendChild(note);
+    if (!(hasChallenge(app.run, "scarce-campfires") && app.run.flags.campfiresUsed >= 1)) {
+      const grid = document.createElement("div");
+      grid.className = "reward-grid";
+      app.run.deck.forEach((entry) => {
+        const card = createCardElement(entry, {});
+        card.addEventListener("click", () => {
+          if (event.stat === "attack") entry.attackBuff += 1;
+          else entry.healthBuff += 1;
+          app.run.flags.campfiresUsed += 1;
+          completeNodeAndReturnToMap(event.nodeId);
+        });
+        grid.appendChild(card);
+      });
+      body.appendChild(grid);
+    }
+    actions.appendChild(button("Leave", "inscry-btn", () => completeNodeAndReturnToMap(event.nodeId)));
+  } else if (event.kind === "backpack") {
+    const grid = document.createElement("div");
+    grid.className = "event-choices";
+    event.items.forEach((itemId) => {
+      const item = ITEM_BY_ID[itemId];
+      const choice = document.createElement("button");
+      choice.type = "button";
+      choice.className = "item-choice";
+      choice.innerHTML = `<strong>${item.name}</strong><small>${item.description}</small>`;
+      choice.addEventListener("click", () => {
+        if (app.run.items.length >= getItemCapacity(app.run)) app.run.items.shift();
+        app.run.items.push(itemId);
+        completeNodeAndReturnToMap(event.nodeId);
+      });
+      grid.appendChild(choice);
+    });
+    body.appendChild(grid);
+  } else if (event.kind === "sacrificial-stones") {
+    const grid = document.createElement("div");
+    grid.className = "reward-grid";
+    if (event.stage === "choose-donor") {
+      app.run.deck.filter((entry) => getEntryModel(entry).sigils.length).forEach((entry) => {
+        const card = createCardElement(entry, {});
+        card.addEventListener("click", () => {
+          event.stage = "choose-recipient";
+          event.donorUid = entry.uid;
+          saveRun();
+          renderEvent();
+        });
+        grid.appendChild(card);
+      });
+    } else {
+      const donor = app.run.deck.find((entry) => entry.uid === event.donorUid);
+      app.run.deck.filter((entry) => entry.uid !== donor.uid).forEach((entry) => {
+        const card = createCardElement(entry, {});
+        card.addEventListener("click", () => {
+          entry.addedSigils = unique([...(entry.addedSigils || []), ...getEntryModel(donor).sigils]);
+          app.run.deck = app.run.deck.filter((cardEntry) => cardEntry.uid !== donor.uid);
+          completeNodeAndReturnToMap(event.nodeId);
+        });
+        grid.appendChild(card);
+      });
+    }
+    body.appendChild(grid);
+    actions.appendChild(button("Leave", "stone-btn", () => completeNodeAndReturnToMap(event.nodeId)));
+  } else if (event.kind === "trapper") {
+    const grid = document.createElement("div");
+    grid.className = "reward-grid";
+    [["rabbit-pelt", 2], ["wolf-pelt", 4], ["golden-pelt", 7]].forEach(([cardId, base]) => {
+      const price = base + (app.run.mapIndex === 0 ? 0 : app.run.mapIndex === 1 ? 1 : 2) + (hasChallenge(app.run, "pricey-pelts") ? 1 : 0);
+      const wrapper = document.createElement("div");
+      wrapper.className = "codex-card";
+      wrapper.appendChild(createCardElement(getCardDef(cardId), { compact: true, disabled: true }));
+      wrapper.appendChild(button(`Buy (${price} teeth)`, "inscry-btn", () => {
+        if (app.run.teeth < price) {
+          showToast("Not enough teeth.");
+          return;
+        }
+        app.run.teeth -= price;
+        app.run.deck.push(createDeckEntry(app.run, cardId));
+        markDiscovered([cardId]);
+        saveRun();
+        renderEvent();
+      }));
+      grid.appendChild(wrapper);
+    });
+    body.appendChild(grid);
+    actions.appendChild(button("Leave", "stone-btn", () => completeNodeAndReturnToMap(event.nodeId)));
+  } else if (event.kind === "trader") {
+    const pelts = countPeltsInDeck();
+    const types = ["rabbit-pelt", "wolf-pelt", "golden-pelt"].filter((cardId) => pelts[cardId] > 0);
+    if (!types.length) {
+      body.innerHTML = "<div class='event-note'>You have no pelts to trade.</div>";
+    } else {
+      const chips = document.createElement("div");
+      chips.className = "chip-row";
+      types.forEach((type) => chips.appendChild(button(titleCase(type.replace("-pelt", " pelt")), `stone-btn${event.tradeType === type ? " is-active" : ""}`, () => {
+        event.tradeType = type;
+        event.offers = buildTraderOffers(type);
+        saveRun();
+        renderEvent();
+      })));
+      body.appendChild(chips);
+      if (!event.tradeType) {
+        event.tradeType = types[0];
+        event.offers = buildTraderOffers(event.tradeType);
+      }
+      const grid = document.createElement("div");
+      grid.className = "trader-grid";
+      event.offers.forEach((offer) => {
+        const card = createCardElement({ cardId: offer.cardId, attackBuff: 0, healthBuff: 0, addedSigils: offer.addedSigils || [], removedSigils: [] }, {});
+        card.addEventListener("click", () => {
+          const peltIndex = app.run.deck.findIndex((entry) => entry.cardId === event.tradeType);
+          if (peltIndex < 0) return;
+          app.run.deck.splice(peltIndex, 1);
+          app.run.deck.push(createDeckEntry(app.run, offer.cardId, { addedSigils: offer.addedSigils || [] }));
+          markDiscovered([offer.cardId]);
+          event.offers = buildTraderOffers(event.tradeType);
+          saveRun();
+          renderEvent();
+        });
+        grid.appendChild(card);
+      });
+      body.appendChild(grid);
+    }
+    actions.appendChild(button("Leave", "inscry-btn", () => completeNodeAndReturnToMap(event.nodeId)));
+  } else if (event.kind === "deck-trial") {
+    if (event.stage === "pick-trial") {
+      const grid = document.createElement("div");
+      grid.className = "event-choices";
+      event.trials.forEach((trialId) => {
+        const trial = TRIAL_BY_ID[trialId];
+        const buttonEl = document.createElement("button");
+        buttonEl.type = "button";
+        buttonEl.className = "trial-choice";
+        buttonEl.innerHTML = `<strong>${trial.name}</strong><small>${trial.description}</small>`;
+        buttonEl.addEventListener("click", () => {
+          event.stage = "resolved";
+          event.trialId = trialId;
+          event.success = evaluateTrial(trialId);
+          if (event.success) event.rewards = pickRewardCards(app.run, getRewardPoolForMap(app.run.mapIndex), 3).map((reward) => ({ ...reward, addedSigils: takeRandomDistinct(app.run, BONUS_SIGIL_POOL, 2) }));
+          saveRun();
+          renderEvent();
+        });
+        grid.appendChild(buttonEl);
+      });
+      body.appendChild(grid);
+      actions.appendChild(button("Leave", "stone-btn", () => completeNodeAndReturnToMap(event.nodeId)));
+    } else if (!event.success) {
+      body.innerHTML = `<div class="event-note">${TRIAL_BY_ID[event.trialId].name} failed. The deck turns away in silence.</div>`;
+      actions.appendChild(button("Leave", "inscry-btn", () => completeNodeAndReturnToMap(event.nodeId)));
+    } else {
+      const grid = document.createElement("div");
+      grid.className = "reward-grid";
+      event.rewards.forEach((reward) => {
+        const card = createCardElement({ cardId: reward.cardId, attackBuff: reward.attackBuff || 0, healthBuff: reward.healthBuff || 0, addedSigils: reward.addedSigils || [], removedSigils: [] }, {});
+        card.addEventListener("click", () => {
+          app.run.deck.push(createDeckEntry(app.run, reward.cardId, { addedSigils: reward.addedSigils || [] }));
+          markDiscovered([reward.cardId]);
+          completeNodeAndReturnToMap(event.nodeId);
+        });
+        grid.appendChild(card);
+      });
+      body.appendChild(grid);
+    }
+  }
+  panel.append(header, body, actions);
+}
+
+function evaluateTrial(trialId) {
+  const sampleCards = takeRandomDistinct(app.run, app.run.deck, Math.min(3, app.run.deck.length)).map((entry) => getEntryModel(entry));
+  switch (trialId) {
+    case "blood": return sampleCards.reduce((sum, card) => sum + card.costBlood, 0) >= 4;
+    case "bones": return sampleCards.reduce((sum, card) => sum + card.costBones, 0) >= 5;
+    case "power": return sampleCards.reduce((sum, card) => sum + card.attack, 0) >= 4;
+    case "health": return sampleCards.reduce((sum, card) => sum + card.health, 0) >= 6;
+    case "wisdom": return sampleCards.reduce((sum, card) => sum + card.sigils.length, 0) >= 3;
+    case "kin": {
+      const tribes = sampleCards.map((card) => card.tribe).filter((tribe) => tribe && tribe !== "none");
+      const ids = sampleCards.map((card) => card.id);
+      return tribes.some((tribe) => tribes.filter((candidate) => candidate === tribe).length >= 2) || ids.some((id) => ids.filter((candidate) => candidate === id).length >= 2);
+    }
+    default: return false;
+  }
+}
+
+function renderCodex() {
+  showScreen("codex-screen");
+  el("codex-current-tab").classList.toggle("is-active", app.codexTab === "current");
+  el("codex-discovered-tab").classList.toggle("is-active", app.codexTab === "discovered");
+  const summary = el("codex-summary");
+  if (app.codexTab === "current" && app.run) {
+    summary.innerHTML = `<div class="panel-kicker">Current Run</div><p class="detail-copy">Deck size: ${app.run.deck.length}. Teeth: ${app.run.teeth}. Candles: ${app.run.candles}. Items: ${app.run.items.length}/${getItemCapacity(app.run)}.</p>`;
+  } else {
+    summary.innerHTML = `<div class="panel-kicker">Collection</div><p class="detail-copy">Discovered cards: ${app.profile.discoveredCardIds.length}. Unlocked decks: ${app.profile.unlockedDeckIds.length}. Unlocked challenges: ${app.profile.unlockedChallengeIds.length}.</p>`;
+  }
+  const grid = el("codex-grid");
+  clearElement(grid);
+  const cards = app.codexTab === "current" && app.run
+    ? app.run.deck
+    : app.profile.discoveredCardIds.sort().map((cardId) => getCardDef(cardId)).filter(Boolean);
+  cards.forEach((cardLike) => {
+    const model = cardLike.cardId ? getEntryModel(cardLike) : cardLike;
+    const wrapper = document.createElement("div");
+    wrapper.className = "codex-card";
+    wrapper.appendChild(createCardElement(cardLike.cardId ? cardLike : model, { compact: true, disabled: true }));
+    const title = document.createElement("h4");
+    title.textContent = model.name;
+    const description = document.createElement("p");
+    description.textContent = model.text;
+    wrapper.append(title, description);
+    grid.appendChild(wrapper);
+  });
+}
+
+function renderEnding() {
+  showScreen("ending-screen");
+  if (!app.endingState) return;
+  el("ending-kicker").textContent = app.endingState.kicker;
+  el("ending-title").textContent = app.endingState.title;
+  el("ending-copy").textContent = app.endingState.copy;
+  const stats = el("ending-stats");
+  clearElement(stats);
+  app.endingState.stats.forEach(([label, value]) => {
+    const card = document.createElement("div");
+    card.className = "ending-stat";
+    card.innerHTML = `<strong>${label}</strong><span>${value}</span>`;
+    stats.appendChild(card);
+  });
+}
+
+function endRun(victory, copy, title) {
+  const finishedRun = app.run;
+  app.endingState = {
+    kicker: victory ? "The Table Breaks" : "The Candle Fails",
+    title,
+    copy,
+    stats: [
+      ["Deck", finishedRun.deck.length],
+      ["Teeth", finishedRun.teeth],
+      ["Bosses", finishedRun.stats.bossesDefeated],
+      ["Cards Added", finishedRun.stats.cardsAdded],
+    ],
+  };
+  clearRun();
+  renderEnding();
+}
+
+function openCodex(returnScreen) {
+  app.codexReturn = returnScreen;
+  app.codexTab = "current";
+  renderCodex();
+}
+
+function closeCodex() {
+  if (app.codexReturn === "battle-screen" && app.run?.scene === "battle") renderBattle();
+  else if (app.codexReturn === "map-screen" && app.run?.scene === "map") renderMap();
+  else if (app.codexReturn === "ending-screen") renderEnding();
+  else renderTitle();
+}
+
+function renderOptions() {
+  const optionsList = el("options-list");
+  clearElement(optionsList);
+  [
+    ["Reduced Motion", "reducedMotion", "Lower ambient motion and transitions."],
+    ["Pixel Scaling", "pixelScaling", "Keep pixel-art rendering crisp."],
+    ["Confirm Concede", "confirmConcede", "Require a second click before conceding."],
+  ].forEach(([label, key, description]) => {
+    const row = document.createElement("div");
+    row.className = "option-row";
+    const meta = document.createElement("div");
+    meta.className = "option-meta";
+    meta.innerHTML = `<strong>${label}</strong><span>${description}</span>`;
+    const toggle = button(app.profile.options[key] ? "On" : "Off", "stone-btn", () => {
+      app.profile.options[key] = !app.profile.options[key];
+      saveProfile();
+      applyOptions();
+      renderOptions();
+    });
+    row.append(meta, toggle);
+    optionsList.appendChild(row);
+  });
+  el("reset-profile-btn").textContent = app.resetArmed ? "Confirm Reset" : "Reset Profile";
+}
+
+function openOptions() {
+  renderOptions();
+  el("options-overlay").classList.remove("hidden");
+}
+
+function closeOptions() {
+  app.resetArmed = false;
+  el("options-overlay").classList.add("hidden");
+  renderOptions();
+}
+
+function openPause() {
+  app.concedeArmed = false;
+  el("pause-overlay").classList.remove("hidden");
+  el("concede-btn").textContent = "Concede Run";
+}
+
+function closePause() {
+  app.concedeArmed = false;
+  el("pause-overlay").classList.add("hidden");
+}
+
+function concedeRun() {
+  if (!app.run) return;
+  if (app.profile.options.confirmConcede && !app.concedeArmed) {
+    app.concedeArmed = true;
+    el("concede-btn").textContent = "Confirm Concede";
+    return;
+  }
+  closePause();
+  endRun(false, "You abandoned the table before the candle died.", "Run Conceded");
+}
+
+function resetProfile() {
+  if (!app.resetArmed) {
+    app.resetArmed = true;
+    renderOptions();
+    return;
+  }
+  app.profile = defaultProfile();
+  clearRun();
+  saveProfile();
+  applyOptions();
+  closeOptions();
+  renderTitle();
+}
+
+function handleTitleAction(action) {
+  if (action === "new-game") renderSetup();
+  else if (action === "continue") {
+    if (!app.run) {
+      showToast("No saved run exists.");
+      return;
+    }
+    renderActiveRunScene();
+  } else if (action === "options") openOptions();
+}
+
+function renderActiveRunScene() {
+  if (!app.run) {
+    renderTitle();
+    return;
+  }
+  if (app.run.scene === "battle") renderBattle();
+  else if (app.run.scene === "event") renderEvent();
+  else renderMap();
+}
+
+function bindEvents() {
+  el("setup-back-btn").addEventListener("click", renderTitle);
+  el("setup-options-btn").addEventListener("click", openOptions);
+  el("setup-start-btn").addEventListener("click", startNewGameFromSetup);
+  el("map-codex-btn").addEventListener("click", () => openCodex("map-screen"));
+  el("map-pause-btn").addEventListener("click", openPause);
+  el("draw-main-btn").addEventListener("click", handleDrawMain);
+  el("draw-side-btn").addEventListener("click", handleDrawSide);
+  el("ring-bell-btn").addEventListener("click", handleBell);
+  el("battle-codex-btn").addEventListener("click", () => openCodex("battle-screen"));
+  el("pause-btn").addEventListener("click", openPause);
+  el("selection-cancel-btn").addEventListener("click", cancelSelection);
+  el("codex-current-tab").addEventListener("click", () => { app.codexTab = "current"; renderCodex(); });
+  el("codex-discovered-tab").addEventListener("click", () => { app.codexTab = "discovered"; renderCodex(); });
+  el("codex-close-btn").addEventListener("click", closeCodex);
+  el("ending-new-run-btn").addEventListener("click", renderTitle);
+  el("ending-codex-btn").addEventListener("click", () => openCodex("ending-screen"));
+  el("options-close-btn").addEventListener("click", closeOptions);
+  el("reset-profile-btn").addEventListener("click", resetProfile);
+  el("resume-btn").addEventListener("click", closePause);
+  el("pause-codex-btn").addEventListener("click", () => {
+    closePause();
+    openCodex(app.run?.scene === "battle" ? "battle-screen" : "map-screen");
+  });
+  el("pause-options-btn").addEventListener("click", openOptions);
+  el("concede-btn").addEventListener("click", concedeRun);
+}
+
+function initAtmosphere() {
+  const canvas = el("atmosphere-canvas");
+  const context = canvas.getContext("2d");
+  if (!context) return;
+  const state = app.atmosphere;
+
+  function resize() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    state.width = canvas.width;
+    state.height = canvas.height;
+    state.motes = Array.from({ length: 34 }, () => ({
+      x: Math.random() * state.width,
+      y: Math.random() * state.height,
+      radius: 1 + Math.random() * 3,
+      speed: 0.2 + Math.random() * 0.5,
+      drift: -0.12 + Math.random() * 0.24,
+      alpha: 0.08 + Math.random() * 0.12,
+    }));
+  }
+
+  function tick() {
+    context.clearRect(0, 0, state.width, state.height);
+    if (!app.profile.options.reducedMotion) {
+      state.motes.forEach((mote) => {
+        mote.y -= mote.speed;
+        mote.x += mote.drift;
+        if (mote.y < -10) mote.y = state.height + 10;
+        if (mote.x < -10) mote.x = state.width + 10;
+        if (mote.x > state.width + 10) mote.x = -10;
+      });
+    }
+    const gradient = context.createRadialGradient(state.width / 2, 120, 20, state.width / 2, 120, state.width * 0.5);
+    gradient.addColorStop(0, "rgba(255, 220, 160, 0.06)");
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, state.width, state.height);
+    state.motes.forEach((mote) => {
+      context.beginPath();
+      context.fillStyle = `rgba(255, 218, 168, ${mote.alpha})`;
+      context.arc(mote.x, mote.y, mote.radius, 0, Math.PI * 2);
+      context.fill();
+    });
+    state.frameId = requestAnimationFrame(tick);
+  }
+
+  resize();
+  window.addEventListener("resize", resize);
+  cancelAnimationFrame(state.frameId);
+  tick();
+}
+
+function initialize() {
+  app.profile = loadProfile();
+  app.run = loadRun();
+  if (app.run?.starterDeckId && DECK_BY_ID[app.run.starterDeckId]) app.setupDeckId = app.run.starterDeckId;
+  applyOptions();
+  preloadAssets();
+  bindEvents();
+  initAtmosphere();
+  el("menu-startscreen").style.backgroundImage = `url("${ASSETS.menu.startscreen}")`;
+  renderTitle();
+  renderOptions();
+}
+
+document.addEventListener("DOMContentLoaded", initialize);
