@@ -1402,7 +1402,7 @@ const SURGE_DROP_TABLE=[SURGE_PICKUPS.fury,SURGE_PICKUPS.blitz,SURGE_PICKUPS.vac
 function initState(){
   const ch=selectedChar,sm=ch.statMods;
   // ── NERFED BASE STATS ──────────────────────────────────────────
-  // Base damage: 14 (was 18)
+  // Base damage: 28 so wave 1 doesn't feel spongey
   // Base speed: 1.85 (was 2.2)
   const baseFireRate=ch.weaponType==='melee'?220:340;
   return {
@@ -1412,7 +1412,7 @@ function initState(){
       speed:2.2+sm.speed,
       level:1,xp:0,xpNext:10,kills:0,gold:0,
       fireRate:Math.max(100,baseFireRate+sm.fireRate),
-      bulletSpeed:6.0,damage:18+sm.damage,
+      bulletSpeed:6.0,damage:28+sm.damage,
       bulletSize:5,
       piercing:0,multishot:1,r:14,
       lastShot:0,immune:0,
