@@ -1655,3 +1655,2270 @@ body.reduced-motion *::after {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   Act 1 Fidelity Override
+   ========================================================================== */
+
+:root {
+  --rough-border: 1px solid rgba(118, 85, 47, 0.72);
+  --scene-wood:
+    linear-gradient(180deg, rgba(12, 7, 6, 0.96), rgba(5, 3, 3, 0.98)),
+    linear-gradient(90deg, rgba(68, 42, 27, 0.28), rgba(20, 11, 8, 0.18) 18%, rgba(70, 43, 28, 0.24) 36%, rgba(18, 10, 8, 0.22) 54%, rgba(63, 40, 24, 0.25) 73%, rgba(17, 9, 7, 0.28));
+  --panel-wood:
+    linear-gradient(180deg, rgba(78, 49, 31, 0.98), rgba(34, 20, 14, 0.98)),
+    linear-gradient(90deg, rgba(255, 237, 198, 0.05), transparent 14%, rgba(0, 0, 0, 0.1) 50%, transparent 84%, rgba(255, 237, 198, 0.04));
+  --panel-paper:
+    linear-gradient(180deg, rgba(207, 183, 141, 0.98), rgba(163, 136, 100, 0.99)),
+    linear-gradient(90deg, rgba(255, 245, 217, 0.24), transparent 18%, rgba(116, 79, 42, 0.08) 50%, transparent 82%, rgba(255, 245, 217, 0.16));
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% 8%, rgba(247, 208, 135, 0.08), transparent 16%),
+    radial-gradient(circle at 18% 16%, rgba(146, 58, 35, 0.1), transparent 18%),
+    radial-gradient(circle at 82% 16%, rgba(146, 58, 35, 0.1), transparent 18%),
+    linear-gradient(180deg, #090505 0%, #030202 100%);
+}
+
+body::before {
+  background:
+    radial-gradient(circle at 50% 0, rgba(255, 227, 171, 0.06), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 20%, rgba(0, 0, 0, 0.48)),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.075) 0, rgba(0, 0, 0, 0.075) 2px, transparent 2px, transparent 5px);
+}
+
+#app-shell {
+  width: min(1540px, calc(100vw - 18px));
+  height: min(960px, calc(100vh - 18px));
+  margin: 9px auto;
+  border-radius: 0;
+  border: 1px solid rgba(92, 66, 39, 0.88);
+  background:
+    radial-gradient(circle at 50% 0, rgba(242, 210, 144, 0.05), transparent 18%),
+    linear-gradient(180deg, rgba(11, 7, 6, 0.98), rgba(4, 3, 3, 1)),
+    linear-gradient(90deg, rgba(83, 52, 32, 0.22), rgba(14, 9, 7, 0.14) 14%, rgba(72, 46, 28, 0.18) 32%, rgba(10, 7, 5, 0.15) 52%, rgba(68, 43, 25, 0.17) 76%, rgba(11, 8, 6, 0.18));
+  box-shadow:
+    0 42px 90px rgba(0, 0, 0, 0.78),
+    inset 0 0 0 2px rgba(34, 21, 16, 0.95),
+    inset 0 0 0 7px rgba(91, 58, 34, 0.28),
+    inset 0 0 0 10px rgba(13, 8, 6, 0.96);
+}
+
+#app-shell::before {
+  inset: 14px;
+  border-radius: 0;
+  border: 1px solid rgba(118, 85, 47, 0.34);
+}
+
+#app-shell::after {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.18) 22%, rgba(0, 0, 0, 0.38) 100%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.055) 0, rgba(0, 0, 0, 0.055) 1px, transparent 1px, transparent 4px),
+    repeating-linear-gradient(90deg, rgba(255, 245, 217, 0.015) 0, rgba(255, 245, 217, 0.015) 1px, transparent 1px, transparent 110px);
+  opacity: 0.68;
+}
+
+.screen {
+  padding: 12px;
+}
+
+.screen-stage {
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.panel-kicker {
+  font-size: 11px;
+  letter-spacing: 2.2px;
+  color: rgba(223, 195, 145, 0.74);
+}
+
+.detail-copy {
+  font-size: 15px;
+  line-height: 1.32;
+}
+
+.ledger-panel,
+.parchment-panel,
+.stone-panel,
+.note-panel,
+.overlay-panel,
+.event-panel,
+.ending-panel,
+.wood-plaque,
+.selection-option,
+.challenge-option,
+.item-choice,
+.trial-choice,
+.item-slot,
+.event-note,
+.trial-row,
+.codex-card,
+.option-row,
+.ending-stat,
+.boss-chip,
+.chip-row span {
+  border-radius: 0 !important;
+}
+
+.ledger-panel,
+.stone-panel,
+.note-panel,
+.overlay-panel,
+.ending-panel,
+.event-panel,
+.wood-plaque,
+.item-slot,
+.option-row {
+  border: var(--rough-border);
+  background: var(--panel-wood);
+  box-shadow:
+    0 18px 28px rgba(0, 0, 0, 0.36),
+    inset 0 0 0 1px rgba(255, 234, 197, 0.06),
+    inset 0 1px 0 rgba(255, 242, 215, 0.08);
+}
+
+.parchment-panel,
+.event-note,
+.trial-row,
+.codex-card,
+.ending-stat {
+  border: 1px solid rgba(116, 82, 45, 0.62);
+  background: var(--panel-paper);
+  color: var(--ink);
+  box-shadow:
+    0 14px 22px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(255, 249, 228, 0.16);
+}
+
+.note-panel::before,
+.overlay-panel::before,
+.event-panel::before,
+.ending-panel::before,
+.ledger-panel::before,
+.parchment-panel::before,
+.stone-panel::before {
+  inset: 7px;
+  border-radius: 0;
+  border: 1px solid rgba(245, 226, 183, 0.06);
+}
+
+.stone-btn,
+.inscry-btn {
+  padding: 10px 18px;
+  border-radius: 0;
+  border: 1px solid rgba(157, 118, 67, 0.8);
+  background:
+    linear-gradient(180deg, rgba(103, 72, 44, 0.98), rgba(46, 28, 18, 0.98)),
+    linear-gradient(90deg, rgba(255, 236, 194, 0.06), transparent 18%, rgba(0, 0, 0, 0.12) 50%, transparent 82%, rgba(255, 236, 194, 0.06));
+  color: #f3e7cf;
+  text-transform: uppercase;
+  letter-spacing: 1.05px;
+  clip-path: polygon(4% 0, 96% 0, 100% 14%, 100% 86%, 96% 100%, 4% 100%, 0 86%, 0 14%);
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 235, 202, 0.08);
+}
+
+.inscry-btn {
+  background:
+    linear-gradient(180deg, rgba(125, 61, 38, 0.98), rgba(72, 31, 20, 0.98)),
+    linear-gradient(90deg, rgba(255, 226, 186, 0.07), transparent 18%, rgba(0, 0, 0, 0.14) 50%, transparent 82%, rgba(255, 226, 186, 0.06));
+}
+
+.stone-btn:hover,
+.stone-btn.is-active,
+.inscry-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(225, 191, 135, 0.92);
+  box-shadow:
+    0 14px 24px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 243, 215, 0.12),
+    0 0 0 1px rgba(255, 214, 156, 0.08);
+}
+
+.stone-btn:disabled,
+.inscry-btn:disabled,
+.menu-card-button:disabled {
+  opacity: 0.42;
+  filter: saturate(0.4);
+  cursor: default;
+}
+
+.stone-btn.warning {
+  border-color: rgba(165, 84, 63, 0.86);
+  color: #ffd2c4;
+}
+
+.toast {
+  top: 22px;
+  border-radius: 0;
+  border: 1px solid rgba(135, 95, 50, 0.8);
+  background:
+    url("../game assets/Decals/decal_smoke.png") center/60% no-repeat,
+    linear-gradient(180deg, rgba(84, 54, 34, 0.98), rgba(32, 19, 13, 0.98));
+  box-shadow:
+    0 20px 34px rgba(0, 0, 0, 0.44),
+    inset 0 0 0 1px rgba(255, 235, 198, 0.06);
+}
+
+#title-screen .screen-stage {
+  display: block;
+}
+
+.title-stage {
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 212, 137, 0.11), transparent 18%),
+    radial-gradient(circle at 17% 72%, rgba(129, 38, 29, 0.18), transparent 22%),
+    radial-gradient(circle at 84% 72%, rgba(129, 38, 29, 0.15), transparent 20%),
+    url("../game assets/Decals/decal_smoke.png") center/72% no-repeat,
+    var(--scene-wood);
+}
+
+.title-stage::before {
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 220, 160, 0.08), transparent 16%),
+    radial-gradient(circle at 72% 24%, rgba(255, 220, 160, 0.08), transparent 14%),
+    url("../game assets/Decals/decal_paint_3.png") 6% 88%/180px no-repeat,
+    url("../game assets/Decals/decal_blood_3.png") 96% 12%/220px no-repeat;
+  opacity: 0.8;
+}
+
+.title-stage::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 34px;
+  width: min(560px, 48vw);
+  height: 128px;
+  transform: translateX(-50%);
+  background: url("../game assets/Title_Pixel.png") center/contain no-repeat;
+  filter:
+    drop-shadow(0 18px 24px rgba(0, 0, 0, 0.62))
+    drop-shadow(0 0 18px rgba(255, 222, 160, 0.08));
+  pointer-events: none;
+  z-index: 4;
+}
+
+.title-main {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+}
+
+.menu-startscreen {
+  position: absolute;
+  left: 45%;
+  top: 54%;
+  width: min(520px, 42vw);
+  max-width: 560px;
+  transform: translate(-50%, -50%);
+  filter:
+    drop-shadow(0 24px 28px rgba(0, 0, 0, 0.58))
+    drop-shadow(0 0 28px rgba(255, 225, 161, 0.08));
+}
+
+.menu-card-cluster {
+  position: absolute;
+  right: 6%;
+  top: 22%;
+  bottom: 12%;
+  width: min(240px, 22vw);
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: center;
+  justify-items: end;
+  gap: 6px;
+  z-index: 2;
+}
+
+.menu-card-button {
+  display: grid;
+  grid-template-columns: 42px 178px;
+  align-items: center;
+  justify-content: end;
+  gap: 8px;
+  min-width: 0;
+  min-height: 158px;
+  padding: 0;
+}
+
+.menu-card-button::before {
+  width: 42px;
+  height: 56px;
+  justify-self: center;
+  align-self: center;
+}
+
+.menu-card-art {
+  width: 178px;
+  filter:
+    drop-shadow(0 16px 18px rgba(0, 0, 0, 0.56))
+    drop-shadow(0 0 16px rgba(255, 225, 161, 0.04));
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.menu-card-label {
+  display: none;
+}
+
+.menu-card-label strong {
+  font-size: 18px;
+  color: #24160f;
+}
+
+.menu-card-label span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(36, 23, 15, 0.78);
+  line-height: 1.2;
+}
+
+.menu-card-button:hover .menu-card-art,
+.menu-card-button.is-selected .menu-card-art {
+  transform: translateX(4px) translateY(-3px);
+}
+
+.menu-card-button:hover .menu-card-label,
+.menu-card-button.is-selected .menu-card-label {
+  border-color: rgba(198, 157, 102, 0.96);
+  box-shadow:
+    0 18px 24px rgba(0, 0, 0, 0.36),
+    inset 0 0 0 1px rgba(255, 248, 223, 0.14);
+}
+
+.title-side {
+  display: none;
+}
+
+.title-side .ledger-panel {
+  padding: 14px 16px 15px;
+  background:
+    linear-gradient(180deg, rgba(206, 181, 139, 0.95), rgba(156, 129, 94, 0.97)),
+    linear-gradient(90deg, rgba(255, 247, 226, 0.14), transparent 16%, rgba(108, 74, 40, 0.08) 50%, transparent 84%, rgba(255, 247, 226, 0.1));
+  color: var(--ink);
+}
+
+.title-side .ledger-panel:first-child {
+  transform: rotate(-2deg);
+}
+
+.title-side .ledger-panel:last-child {
+  transform: rotate(1.6deg);
+}
+
+.title-side .panel-kicker,
+.title-side .stat-row strong,
+.title-side .stat-row span {
+  color: rgba(31, 20, 13, 0.82);
+}
+
+.stat-column {
+  gap: 8px;
+}
+
+.stat-row {
+  padding-bottom: 5px;
+  border-bottom: 1px dashed rgba(62, 38, 21, 0.2);
+}
+
+.stat-row strong {
+  font-size: 12px;
+}
+
+#setup-screen .screen-stage {
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 220, 158, 0.08), transparent 16%),
+    url("../game assets/Decals/decal_smoke.png") center/62% no-repeat,
+    var(--scene-wood);
+}
+
+.setup-stage {
+  grid-template-rows: 92px minmax(0, 1fr) 110px;
+  gap: 0;
+}
+
+.setup-topbar {
+  display: grid;
+  grid-template-columns: 160px 1fr 160px;
+  align-items: start;
+  gap: 16px;
+  padding: 18px 28px 0;
+}
+
+.setup-heading {
+  text-align: center;
+}
+
+.setup-heading h2 {
+  margin-top: 4px;
+  font-size: 42px;
+  letter-spacing: 1.2px;
+}
+
+.setup-columns {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.15fr) minmax(280px, 0.8fr);
+  gap: 22px;
+  padding: 8px 42px 18px;
+  min-height: 0;
+}
+
+.setup-columns > .ledger-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: 18px 18px 20px;
+}
+
+.setup-center {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 18px;
+  padding: 24px 28px 26px;
+  transform: rotate(-0.7deg);
+  background:
+    url("../game assets/Decals/decal_stitches.png") 98% 4%/140px no-repeat,
+    url("../game assets/Decals/decal_paint_2.png") 6% 96%/170px no-repeat,
+    var(--panel-paper);
+}
+
+#setup-deck-detail {
+  display: grid;
+  gap: 8px;
+}
+
+.selection-stack {
+  gap: 8px;
+  margin-top: 14px;
+  padding-right: 0;
+}
+
+.selection-option,
+.challenge-option,
+.item-choice,
+.trial-choice {
+  padding: 12px 16px 12px 22px;
+  border: 1px solid rgba(132, 93, 53, 0.78);
+  background:
+    linear-gradient(180deg, rgba(89, 58, 36, 0.98), rgba(37, 23, 16, 0.98)),
+    linear-gradient(90deg, rgba(255, 240, 204, 0.06), transparent 18%, rgba(0, 0, 0, 0.12) 50%, transparent 82%, rgba(255, 240, 204, 0.05));
+  box-shadow:
+    0 12px 18px rgba(0, 0, 0, 0.24),
+    inset 0 0 0 1px rgba(255, 234, 198, 0.04);
+  transition: transform 0.14s ease, border-color 0.14s ease;
+}
+
+.selection-option::before,
+.challenge-option::before,
+.item-choice::before,
+.trial-choice::before {
+  left: -14px;
+  width: 34px;
+  height: 40px;
+}
+
+.selection-option strong,
+.challenge-option strong,
+.item-choice strong,
+.trial-choice strong {
+  font-size: 13px;
+  letter-spacing: 0.9px;
+}
+
+.selection-option small,
+.challenge-option small,
+.item-choice small,
+.trial-choice small {
+  margin-top: 5px;
+  color: rgba(225, 204, 168, 0.72);
+  line-height: 1.25;
+}
+
+.selection-option.is-selected,
+.challenge-option.is-selected,
+.item-choice:hover,
+.trial-choice:hover {
+  transform: translateX(6px);
+  border-color: rgba(205, 165, 104, 0.94);
+}
+
+.selection-option.is-locked,
+.challenge-option.is-locked {
+  opacity: 0.4;
+}
+
+.card-preview-strip {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 12px;
+}
+
+.setup-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 18px;
+  padding: 0 42px 28px;
+}
+
+.setup-requirements {
+  min-height: 84px;
+  padding: 16px 18px;
+  border-radius: 0;
+  border: 1px solid rgba(115, 81, 44, 0.64);
+  transform: rotate(0.9deg);
+  background:
+    url("../game assets/Decals/decal_smoke_abilityhole.png") 104% 88%/120px no-repeat,
+    var(--panel-paper);
+  color: var(--ink);
+}
+
+.setup-requirements .detail-copy {
+  color: rgba(33, 20, 13, 0.78);
+}
+
+#setup-start-btn {
+  min-width: 260px;
+  min-height: 58px;
+}
+
+#map-screen .screen-stage {
+  display: block;
+  background:
+    radial-gradient(circle at 50% 9%, rgba(255, 220, 158, 0.08), transparent 15%),
+    url("../game assets/Decals/decal_smoke.png") center/62% no-repeat,
+    var(--scene-wood);
+}
+
+.map-stage {
+  position: relative;
+}
+
+.map-board {
+  position: absolute;
+  inset: 20px 250px 20px 196px;
+  display: block;
+}
+
+.map-header {
+  position: absolute;
+  left: 50%;
+  top: 22px;
+  z-index: 3;
+  width: min(340px, 100%);
+  padding: 10px 14px 12px;
+  text-align: center;
+  transform: translateX(-50%) rotate(-1deg);
+  pointer-events: none;
+  border: 1px solid rgba(116, 82, 45, 0.56);
+  background:
+    linear-gradient(180deg, rgba(207, 183, 141, 0.93), rgba(163, 136, 100, 0.95)),
+    linear-gradient(90deg, rgba(255, 245, 217, 0.18), transparent 18%, rgba(116, 79, 42, 0.08) 50%, transparent 82%, rgba(255, 245, 217, 0.12));
+  box-shadow: 0 16px 24px rgba(0, 0, 0, 0.24);
+}
+
+.map-header h2 {
+  margin: 4px 0 0;
+  font-family: var(--font-label);
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: rgba(31, 19, 12, 0.88);
+  text-transform: uppercase;
+}
+
+.map-header .panel-kicker,
+.map-header .detail-copy {
+  color: rgba(31, 19, 12, 0.7);
+}
+
+.map-header .detail-copy {
+  display: none;
+}
+
+#map-parchment {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(116, 82, 45, 0.72);
+  box-shadow:
+    0 28px 40px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 244, 214, 0.14);
+  transform: rotate(-0.7deg);
+  background:
+    url("../game assets/Decals/decal_stitches.png") 98% 4%/150px no-repeat,
+    url("../game assets/Decals/decal_paint_1.png") 4% 96%/200px no-repeat,
+    url("../game assets/Decals/decal_blood_2.png") 88% 90%/160px no-repeat,
+    var(--panel-paper);
+}
+
+#map-parchment::before {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border: 1px solid rgba(102, 68, 37, 0.18);
+  pointer-events: none;
+}
+
+.map-lines,
+.map-node-layer {
+  position: absolute;
+  inset: 118px 84px 78px;
+}
+
+.map-node-layer {
+  pointer-events: none;
+}
+
+.map-lines line,
+.map-lines path {
+  stroke: rgba(63, 39, 20, 0.82);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.map-node {
+  width: 76px;
+  min-height: 76px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(102, 72, 40, 0.82);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 245, 217, 0.24), transparent 24%),
+    linear-gradient(180deg, rgba(96, 73, 47, 0.96), rgba(53, 35, 23, 0.98));
+  box-shadow:
+    0 14px 20px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(255, 244, 219, 0.08);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  overflow: visible;
+}
+
+.map-node-icon {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.26));
+}
+
+.map-node-icon.is-fire {
+  width: 34px;
+  height: 42px;
+}
+
+.map-node-icon.is-fire::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 78%, rgba(247, 212, 140, 0.98), rgba(247, 212, 140, 0.98) 16%, transparent 17%),
+    radial-gradient(circle at 50% 44%, rgba(255, 179, 88, 0.98), rgba(255, 179, 88, 0.98) 20%, transparent 21%),
+    radial-gradient(circle at 52% 24%, rgba(177, 48, 31, 0.98), rgba(177, 48, 31, 0.98) 16%, transparent 17%);
+  clip-path: polygon(50% 0, 72% 24%, 84% 54%, 50% 100%, 16% 54%, 28% 24%);
+}
+
+.map-node[data-type="boss"] {
+  width: 88px;
+  min-height: 88px;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 245, 217, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(71, 48, 36, 0.98), rgba(28, 17, 15, 0.98));
+}
+
+.map-node[data-type="boss"] .map-node-icon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(192, 157, 100, 0.86);
+  background:
+    linear-gradient(180deg, rgba(50, 31, 23, 0.98), rgba(20, 11, 10, 0.98)),
+    radial-gradient(circle at 50% 30%, rgba(255, 228, 180, 0.08), transparent 34%);
+  font-family: var(--font-label);
+  font-size: 22px;
+  color: #f0e1be;
+  letter-spacing: 1px;
+}
+
+.map-node-ribbon {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  padding: 4px 8px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(113, 79, 42, 0.42);
+  background: rgba(215, 194, 155, 0.92);
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(31, 19, 12, 0.8);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.map-node:hover .map-node-ribbon,
+.map-node.is-selected .map-node-ribbon {
+  opacity: 1;
+}
+
+.map-node.is-available {
+  border-color: rgba(208, 171, 111, 0.98);
+  box-shadow:
+    0 16px 24px rgba(0, 0, 0, 0.32),
+    0 0 0 2px rgba(255, 219, 161, 0.14),
+    inset 0 0 0 1px rgba(255, 244, 219, 0.08);
+}
+
+.map-node.is-selected::before {
+  inset: 18px auto auto -30px;
+  width: 28px;
+  height: 36px;
+}
+
+.map-node.is-cleared {
+  opacity: 0.36;
+  filter: grayscale(1);
+}
+
+.map-rail {
+  position: absolute;
+  left: 18px;
+  top: 22px;
+  width: 140px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 0;
+  z-index: 3;
+}
+
+.map-rail .stone-panel:first-child {
+  transform: rotate(-1.2deg);
+}
+
+.map-rail .stone-panel:nth-child(2) {
+  transform: rotate(1deg);
+}
+
+.map-rail .panel-kicker,
+.map-rail .stat-row strong,
+.map-rail .stat-row span,
+.boss-chip {
+  color: #f1e2c2;
+}
+
+.map-rail .stone-panel {
+  padding: 12px 12px 14px;
+}
+
+.map-actions {
+  gap: 8px;
+}
+
+.boss-order,
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.boss-chip,
+.chip-row span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(146, 105, 62, 0.84);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 245, 217, 0.12), transparent 24%),
+    linear-gradient(180deg, rgba(55, 34, 24, 0.98), rgba(23, 13, 10, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 243, 214, 0.04);
+  font-size: 14px;
+}
+
+.boss-chip.is-next {
+  border-color: rgba(210, 173, 112, 0.98);
+  box-shadow:
+    0 0 0 2px rgba(255, 216, 153, 0.08),
+    inset 0 0 0 1px rgba(255, 243, 214, 0.05);
+}
+
+#map-detail {
+  position: absolute;
+  width: 220px;
+  min-height: 132px;
+  z-index: 3;
+  padding: 14px 16px 16px;
+  transform: rotate(1deg);
+  border: 1px solid rgba(115, 81, 44, 0.68);
+  background:
+    url("../game assets/Decals/decal_smoke_abilityhole.png") 110% 106%/126px no-repeat,
+    var(--panel-paper);
+  color: var(--ink);
+  box-shadow:
+    0 18px 28px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 248, 223, 0.14);
+}
+
+#map-detail h3,
+#map-detail .panel-kicker,
+#map-detail .detail-copy,
+#map-detail .map-detail-meta {
+  color: rgba(32, 20, 13, 0.82);
+}
+
+.map-detail h3 {
+  margin: 4px 0 0;
+  font-family: var(--font-label);
+  font-size: 18px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.map-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.map-detail-actions .inscry-btn {
+  width: 100%;
+}
+
+#battle-screen .screen-stage {
+  background:
+    radial-gradient(circle at 50% 8%, rgba(255, 224, 171, 0.12), transparent 18%),
+    radial-gradient(circle at 14% 72%, rgba(131, 34, 28, 0.17), transparent 18%),
+    radial-gradient(circle at 86% 72%, rgba(131, 34, 28, 0.17), transparent 18%),
+    url("../game assets/Decals/decal_smoke.png") center/66% no-repeat,
+    var(--scene-wood);
+}
+
+.battle-stage {
+  grid-template-columns: 172px minmax(0, 1fr) 222px;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.battle-side {
+  grid-template-rows: auto 1fr;
+  gap: 18px;
+  padding: 88px 12px 20px;
+}
+
+.battle-side.right {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  align-content: center;
+}
+
+.plaque-stack {
+  gap: 12px;
+}
+
+.wood-plaque {
+  min-height: 62px;
+  padding: 10px 12px;
+  transform: rotate(-1deg);
+}
+
+.plaque-stack .wood-plaque:nth-child(even) {
+  transform: rotate(1deg);
+}
+
+.plaque-value {
+  margin-top: 4px;
+  font-size: 20px;
+  letter-spacing: 0.8px;
+}
+
+.item-bar {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-content: start;
+}
+
+.item-slot {
+  min-height: 84px;
+  padding: 10px 10px 12px;
+  text-align: left;
+}
+
+.item-slot strong {
+  font-size: 12px;
+}
+
+.battle-table {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+  padding: 18px 0 148px;
+}
+
+.battle-side.left,
+.battle-table,
+.battle-side.right {
+  order: initial;
+}
+
+.table-header {
+  display: block;
+  min-height: 38px;
+  padding: 0;
+}
+
+.table-header > div:first-child {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.table-header h2 {
+  margin-top: 2px;
+  font-family: var(--font-label);
+  font-size: 18px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.table-header .panel-kicker {
+  display: none;
+}
+
+.table-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 142px;
+  width: auto;
+  padding-top: 0;
+  display: block;
+}
+
+#battle-codex-btn,
+#pause-btn {
+  position: absolute;
+  top: 0;
+  min-width: 74px;
+  min-height: 30px;
+  padding: 8px 12px;
+  z-index: 2;
+}
+
+#battle-codex-btn {
+  left: 0;
+}
+
+#pause-btn {
+  right: 0;
+}
+
+#ring-bell-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  width: 132px;
+  min-height: 52px;
+  padding: 12px 18px;
+  transform: translateX(-50%);
+  font-size: 17px;
+  letter-spacing: 1.3px;
+  border-radius: 999px;
+  clip-path: none;
+}
+
+#draw-main-btn {
+  position: absolute;
+  left: 52px;
+  bottom: 0;
+}
+
+#draw-side-btn {
+  position: absolute;
+  right: 52px;
+  bottom: 0;
+}
+
+#draw-main-btn,
+#draw-side-btn {
+  width: 96px;
+  min-height: 132px;
+  padding: 0 8px 10px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  border: 0;
+  background-color: transparent;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  box-shadow: none;
+  clip-path: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.82);
+}
+
+#draw-main-btn {
+  background-image: url("../game assets/Base Card/card_back.png");
+}
+
+#draw-side-btn {
+  background-image: url("../game assets/Base Card/card_back_squirrel.png");
+}
+
+.selection-banner {
+  width: min(620px, calc(100% - 56px));
+  margin: 0 auto;
+  padding: 11px 16px;
+  border-radius: 0;
+  border: 1px solid rgba(124, 59, 46, 0.92);
+  background:
+    url("../game assets/Decals/decal_blood_1.png") 4% center/60px no-repeat,
+    linear-gradient(180deg, rgba(82, 26, 20, 0.98), rgba(34, 13, 11, 0.98));
+  box-shadow:
+    0 14px 22px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 224, 201, 0.04);
+}
+
+.battle-surface {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  gap: 14px;
+  min-height: 572px;
+  padding: 24px 28px 18px;
+  border: 1px solid rgba(93, 63, 37, 0.76);
+  background:
+    radial-gradient(circle at 50% 16%, rgba(255, 221, 166, 0.08), transparent 18%),
+    linear-gradient(180deg, rgba(55, 35, 24, 0.68), rgba(22, 14, 11, 0.82)),
+    linear-gradient(90deg, rgba(101, 66, 41, 0.28), rgba(20, 13, 10, 0.18) 18%, rgba(86, 57, 35, 0.22) 36%, rgba(22, 15, 12, 0.18) 54%, rgba(92, 59, 37, 0.21) 73%, rgba(20, 13, 10, 0.22));
+  box-shadow:
+    0 28px 38px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 241, 207, 0.05),
+    inset 0 18px 40px rgba(255, 226, 177, 0.02);
+}
+
+.battle-surface::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(228, 206, 163, 0.05);
+  pointer-events: none;
+}
+
+#battle-screen[data-boss]:not([data-boss="encounter"]) .battle-surface {
+  background:
+    radial-gradient(circle at 50% 15%, rgba(225, 188, 129, 0.08), transparent 18%),
+    radial-gradient(circle at 50% 85%, rgba(124, 28, 24, 0.12), transparent 16%),
+    linear-gradient(180deg, rgba(53, 31, 22, 0.72), rgba(18, 12, 10, 0.84)),
+    linear-gradient(90deg, rgba(95, 58, 33, 0.25), rgba(17, 11, 9, 0.16) 18%, rgba(74, 45, 27, 0.22) 36%, rgba(18, 12, 10, 0.16) 54%, rgba(79, 46, 28, 0.2) 73%, rgba(18, 12, 10, 0.2));
+}
+
+.queue-band,
+.scale-band,
+.hand-band {
+  gap: 6px;
+}
+
+.queue-band .panel-kicker,
+.scale-band .panel-kicker,
+.hand-band .panel-kicker {
+  text-align: center;
+}
+
+#enemy-queue,
+#enemy-row,
+#player-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+#hand-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 6px 4px 10px;
+}
+
+#hand-row .card {
+  flex: 0 0 auto;
+}
+
+.lane-slot,
+.queue-slot {
+  min-height: 198px;
+  border-radius: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.lane-slot {
+  padding: 0;
+}
+
+.queue-slot {
+  min-height: 136px;
+  border: 0;
+  background: none;
+  align-items: flex-end;
+}
+
+.queue-slot::before {
+  content: "";
+  position: absolute;
+  inset: 20px 18px 8px;
+  border: 1px solid rgba(88, 57, 34, 0.82);
+  background:
+    linear-gradient(180deg, rgba(28, 18, 15, 0.96), rgba(9, 5, 5, 0.98)),
+    linear-gradient(90deg, rgba(255, 230, 188, 0.04), transparent 18%, rgba(0, 0, 0, 0.16) 50%, transparent 82%, rgba(255, 230, 188, 0.04));
+  box-shadow:
+    0 10px 16px rgba(0, 0, 0, 0.26),
+    inset 0 0 0 1px rgba(255, 238, 207, 0.03);
+}
+
+.queue-cardback {
+  position: relative;
+  z-index: 1;
+  width: 82px;
+}
+
+.scale-track {
+  min-height: 32px;
+  padding: 8px 14px;
+  border: 1px solid rgba(90, 61, 34, 0.76);
+  background:
+    linear-gradient(180deg, rgba(58, 36, 25, 0.98), rgba(24, 14, 11, 0.98)),
+    linear-gradient(90deg, rgba(255, 229, 187, 0.05), transparent 18%, rgba(0, 0, 0, 0.12) 50%, transparent 82%, rgba(255, 229, 187, 0.05));
+}
+
+.scale-notch {
+  border-radius: 0;
+  min-height: 12px;
+}
+
+#inspect-panel {
+  padding: 16px 16px 18px;
+  transform: rotate(1.2deg);
+  border: 1px solid rgba(115, 81, 44, 0.68);
+  background:
+    url("../game assets/Decals/decal_smoke_abilityhole.png") 110% 0/110px no-repeat,
+    var(--panel-paper);
+  color: var(--ink);
+}
+
+#inspect-panel .panel-kicker,
+#inspect-panel .detail-copy,
+#inspect-panel .inspect-meta,
+#inspect-panel .inspect-meta strong,
+#inspect-panel .inspect-meta span {
+  color: rgba(31, 20, 13, 0.84);
+}
+
+.inspect-meta {
+  gap: 5px;
+}
+
+.inspect-meta strong {
+  font-family: var(--font-label);
+  font-weight: 400;
+  letter-spacing: 0.8px;
+}
+
+.battle-log-panel {
+  display: none;
+}
+
+.battle-log {
+  gap: 6px;
+  margin-top: 10px;
+  padding-right: 0;
+}
+
+.battle-log-entry {
+  padding: 8px 10px;
+  border-radius: 0;
+  border: 1px solid rgba(82, 55, 32, 0.52);
+  background: rgba(11, 7, 6, 0.34);
+}
+
+#event-screen .screen-stage {
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 217, 150, 0.08), transparent 15%),
+    url("../game assets/Decals/decal_smoke.png") center/66% no-repeat,
+    var(--scene-wood);
+}
+
+.event-panel {
+  width: min(1180px, calc(100% - 30px));
+  min-height: min(790px, calc(100% - 24px));
+  padding: 28px 32px 26px;
+  border: 1px solid rgba(105, 73, 40, 0.78);
+  background:
+    linear-gradient(180deg, rgba(58, 35, 24, 0.97), rgba(20, 11, 9, 0.98)),
+    linear-gradient(90deg, rgba(97, 62, 38, 0.18), rgba(17, 10, 8, 0.12) 18%, rgba(83, 54, 31, 0.15) 36%, rgba(18, 11, 9, 0.13) 54%, rgba(79, 50, 28, 0.14) 73%, rgba(16, 10, 8, 0.15));
+  box-shadow:
+    0 30px 42px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 241, 207, 0.05);
+}
+
+.event-panel--reward {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 222, 159, 0.08), transparent 16%),
+    url("../game assets/Decals/decal_smoke.png") center/58% no-repeat,
+    linear-gradient(180deg, rgba(61, 37, 25, 0.97), rgba(20, 12, 10, 0.98));
+}
+
+.event-panel--campfire {
+  background:
+    radial-gradient(circle at 50% 14%, rgba(255, 181, 103, 0.18), transparent 18%),
+    url("../game assets/Decals/decal_smoke.png") center/66% no-repeat,
+    linear-gradient(180deg, rgba(70, 34, 21, 0.97), rgba(22, 11, 9, 0.98));
+}
+
+.event-panel--backpack {
+  background:
+    url("../game assets/Decals/decal_paint_2.png") 94% 8%/180px no-repeat,
+    linear-gradient(180deg, rgba(63, 40, 28, 0.97), rgba(19, 12, 10, 0.98));
+}
+
+.event-panel--sacrificial-stones {
+  background:
+    url("../game assets/Decals/decal_stitches.png") 94% 8%/160px no-repeat,
+    linear-gradient(180deg, rgba(44, 32, 32, 0.98), rgba(11, 8, 8, 0.98));
+}
+
+.event-panel--trapper,
+.event-panel--trader {
+  background:
+    url("../game assets/Decals/decal_blood_2.png") 94% 10%/160px no-repeat,
+    linear-gradient(180deg, rgba(57, 35, 23, 0.97), rgba(17, 10, 8, 0.98));
+}
+
+.event-panel--deck-trial {
+  background:
+    url("../game assets/Decals/decal_stitches.png") 8% 92%/180px no-repeat,
+    linear-gradient(180deg, rgba(56, 34, 24, 0.97), rgba(18, 11, 9, 0.98));
+}
+
+.event-header {
+  width: min(760px, 100%);
+  gap: 10px;
+}
+
+.event-header h2 {
+  font-family: var(--font-label);
+  font-size: 32px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.event-body {
+  align-content: start;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.event-note,
+.trial-row {
+  padding: 14px 16px;
+}
+
+.event-note,
+.trial-row,
+.codex-card p,
+.ending-stat span,
+.option-meta span {
+  color: rgba(33, 20, 13, 0.82);
+}
+
+.reward-grid,
+.trader-grid,
+.event-choices {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.event-panel .codex-card {
+  padding: 14px 10px 16px;
+  justify-items: center;
+}
+
+.event-panel .codex-card .inscry-btn,
+.event-panel .codex-card .stone-btn {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.event-actions {
+  padding-top: 14px;
+  border-top: 1px solid rgba(241, 223, 188, 0.08);
+}
+
+#codex-screen .screen-stage {
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 223, 161, 0.08), transparent 16%),
+    var(--scene-wood);
+}
+
+.codex-stage {
+  grid-template-rows: auto auto 1fr;
+  gap: 14px;
+  padding: 34px 56px 28px;
+  background:
+    linear-gradient(90deg, rgba(201, 176, 136, 0.97) 0%, rgba(174, 146, 108, 0.98) 48.5%, rgba(124, 93, 63, 0.94) 50%, rgba(175, 147, 109, 0.98) 51.5%, rgba(201, 176, 136, 0.97) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(109, 77, 44, 0.7),
+    inset 0 0 0 8px rgba(124, 95, 64, 0.16);
+}
+
+.codex-topbar {
+  align-items: center;
+  padding: 0;
+}
+
+.codex-topbar h2 {
+  font-family: var(--font-label);
+  font-size: 32px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #24160f;
+}
+
+.codex-topbar .panel-kicker {
+  color: rgba(36, 22, 14, 0.64);
+}
+
+.codex-summary {
+  max-width: 520px;
+  padding: 14px 16px;
+  transform: rotate(-0.8deg);
+  background: rgba(255, 247, 224, 0.24);
+  border: 1px solid rgba(113, 79, 42, 0.34);
+  box-shadow: 0 12px 18px rgba(0, 0, 0, 0.18);
+}
+
+.codex-summary,
+.codex-summary .panel-kicker,
+.codex-summary .detail-copy {
+  color: rgba(30, 19, 12, 0.84);
+}
+
+.codex-grid {
+  padding: 10px 6px 0;
+  gap: 18px;
+}
+
+.codex-card {
+  padding: 16px 12px 18px;
+  justify-items: center;
+}
+
+.codex-card h4 {
+  color: rgba(31, 20, 13, 0.88);
+}
+
+#ending-screen .screen-stage {
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 223, 161, 0.08), transparent 16%),
+    url("../game assets/Decals/decal_smoke.png") center/64% no-repeat,
+    var(--scene-wood);
+}
+
+#ending-screen[data-outcome="defeat"] .ending-stage {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(176, 55, 39, 0.12), transparent 18%),
+    url("../game assets/Decals/decal_blood_4.png") 50% 12%/260px no-repeat,
+    var(--scene-wood);
+}
+
+#ending-screen[data-outcome="victory"] .ending-stage {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(186, 199, 226, 0.12), transparent 18%),
+    url("../game assets/Decals/decal_smoke.png") center/56% no-repeat,
+    var(--scene-wood);
+}
+
+.ending-panel {
+  width: min(760px, calc(100% - 40px));
+  padding: 30px 34px 28px;
+  text-align: center;
+}
+
+#ending-screen[data-outcome="defeat"] .ending-panel {
+  background:
+    url("../game assets/Decals/decal_blood_2.png") 50% 12%/170px no-repeat,
+    linear-gradient(180deg, rgba(68, 25, 20, 0.97), rgba(15, 8, 8, 0.98));
+}
+
+#ending-screen[data-outcome="victory"] .ending-panel {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(203, 213, 233, 0.1), transparent 16%),
+    linear-gradient(180deg, rgba(43, 35, 40, 0.97), rgba(9, 8, 11, 0.98));
+}
+
+.ending-panel h2 {
+  font-family: var(--font-label);
+  font-size: 34px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.ending-stats {
+  gap: 14px;
+}
+
+.ending-stat {
+  padding: 14px 12px;
+  transform: rotate(-0.8deg);
+}
+
+.ending-stat:nth-child(even) {
+  transform: rotate(0.8deg);
+}
+
+.overlay {
+  background: rgba(0, 0, 0, 0.76);
+  backdrop-filter: none;
+}
+
+.overlay-panel {
+  width: min(760px, calc(100% - 40px));
+  padding: 26px 30px 28px;
+}
+
+.overlay-panel h3 {
+  font-family: var(--font-label);
+  font-size: 28px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.options-list {
+  gap: 10px;
+}
+
+.option-row {
+  padding: 12px 14px;
+  border: 1px solid rgba(118, 85, 47, 0.76);
+}
+
+.option-meta strong {
+  font-size: 13px;
+  letter-spacing: 0.8px;
+}
+
+.pause-panel {
+  width: min(860px, calc(100% - 40px));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 196px;
+  gap: 12px 26px;
+  align-items: start;
+  justify-items: stretch;
+  text-align: left;
+}
+
+.pause-panel > .panel-kicker,
+.pause-panel > h3,
+.pause-panel > p,
+.pause-panel > .pause-actions {
+  grid-column: 1;
+}
+
+.pause-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pause-concede-card {
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  width: 180px;
+  justify-self: center;
+  align-self: center;
+  filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.54));
+}
+
+.concede-btn {
+  grid-column: 2;
+  align-self: end;
+  justify-self: center;
+  color: #f1dfc1;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 1400px) {
+  .menu-startscreen {
+    width: min(470px, 40vw);
+  }
+
+  .menu-card-cluster {
+    width: min(220px, 22vw);
+  }
+
+  .menu-card-button {
+    grid-template-columns: 38px 162px;
+    min-height: 146px;
+  }
+
+  .menu-card-art {
+    width: 162px;
+  }
+
+  .setup-columns {
+    grid-template-columns: 240px minmax(0, 1.1fr) 270px;
+    padding-inline: 28px;
+  }
+
+  .map-board {
+    inset: 20px 236px 20px 180px;
+  }
+
+  .battle-stage {
+    grid-template-columns: 156px minmax(0, 1fr) 206px;
+  }
+}
+
+@media (max-width: 1180px) {
+  #app-shell {
+    width: calc(100vw - 12px);
+    height: calc(100vh - 12px);
+    margin: 6px auto;
+  }
+
+  .screen {
+    padding: 8px;
+  }
+
+  .title-stage::after {
+    width: min(480px, 46vw);
+  }
+
+  .menu-card-cluster {
+    right: 4%;
+    width: min(204px, 22vw);
+  }
+
+  .menu-card-button {
+    grid-template-columns: 34px 148px;
+    gap: 8px;
+  }
+
+  .menu-card-art {
+    width: 148px;
+  }
+
+  .setup-topbar {
+    grid-template-columns: 130px 1fr 130px;
+    padding-inline: 18px;
+  }
+
+  .setup-columns {
+    grid-template-columns: 214px minmax(0, 1fr) 236px;
+    gap: 16px;
+    padding-inline: 18px;
+  }
+
+  .setup-footer {
+    padding-inline: 18px;
+  }
+
+  .map-board {
+    inset: 20px 214px 18px 156px;
+  }
+
+  .map-lines,
+  .map-node-layer {
+    inset: 104px 62px 68px;
+  }
+
+  .map-node {
+    width: 70px;
+    min-height: 70px;
+  }
+
+  .map-rail {
+    width: 124px;
+    left: 12px;
+  }
+
+  #map-detail {
+    width: 206px;
+    right: 12px;
+  }
+
+  .battle-stage {
+    grid-template-columns: 142px minmax(0, 1fr) 184px;
+    gap: 6px;
+  }
+
+  .battle-side {
+    padding-inline: 8px;
+  }
+
+  .battle-surface {
+    padding-inline: 18px;
+  }
+
+  #enemy-queue,
+  #enemy-row,
+  #player-row {
+    gap: 10px;
+  }
+
+  .lane-slot {
+    min-height: 184px;
+  }
+
+  .codex-stage {
+    padding-inline: 30px;
+  }
+}
+
+@media (max-width: 900px) {
+  .setup-heading h2 {
+    font-size: 34px;
+  }
+
+  .map-header h2 {
+    font-size: 18px;
+  }
+
+  .table-header h2 {
+    font-size: 16px;
+  }
+
+  .event-header h2,
+  .codex-topbar h2,
+  .ending-panel h2,
+  .overlay-panel h3 {
+    font-size: 24px;
+  }
+
+  .map-rail,
+  #map-detail {
+    font-size: 12px;
+  }
+
+  .selection-option small,
+  .challenge-option small,
+  .detail-copy {
+    font-size: 13px;
+  }
+
+  .battle-stage {
+    grid-template-columns: 132px minmax(0, 1fr) 168px;
+  }
+
+  .table-actions {
+    height: 132px;
+  }
+
+  #draw-main-btn,
+  #draw-side-btn {
+    width: 84px;
+    min-height: 118px;
+  }
+
+  #draw-main-btn {
+    left: 26px;
+  }
+
+  #draw-side-btn {
+    right: 26px;
+  }
+
+  .battle-surface {
+    min-height: 520px;
+  }
+
+  .pause-panel {
+    grid-template-columns: minmax(0, 1fr) 164px;
+  }
+
+  .pause-concede-card {
+    width: 156px;
+  }
+}
+
+@media (max-width: 640px) {
+  .title-stage::after {
+    width: min(360px, 72vw);
+    top: 20px;
+  }
+
+  .menu-startscreen {
+    width: min(300px, 56vw);
+    top: 58%;
+  }
+
+  .menu-card-cluster {
+    width: 172px;
+    right: 10px;
+    top: 28%;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .menu-card-button {
+    grid-template-columns: 28px 132px;
+    min-height: 118px;
+  }
+
+  .menu-card-art {
+    width: 132px;
+  }
+
+  .map-board {
+    inset: 18px 174px 18px 128px;
+  }
+
+  .map-lines,
+  .map-node-layer {
+    inset: 96px 46px 60px;
+  }
+
+  .map-node {
+    width: 60px;
+    min-height: 60px;
+  }
+
+  .map-node-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .map-node[data-type="boss"] {
+    width: 70px;
+    min-height: 70px;
+  }
+
+  .map-node[data-type="boss"] .map-node-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .map-rail {
+    width: 108px;
+  }
+
+  #map-detail {
+    width: 178px;
+  }
+
+  .battle-table {
+    padding-bottom: 126px;
+  }
+
+  .table-actions {
+    height: 120px;
+  }
+
+  #ring-bell-btn {
+    width: 108px;
+    min-height: 46px;
+    font-size: 14px;
+  }
+
+  #draw-main-btn,
+  #draw-side-btn {
+    width: 74px;
+    min-height: 104px;
+  }
+
+  #draw-main-btn {
+    left: 14px;
+  }
+
+  #draw-side-btn {
+    right: 14px;
+  }
+}
+
+/* Battle Scene Focus Override */
+
+#battle-screen .screen-stage {
+  background:
+    radial-gradient(circle at 50% 6%, rgba(255, 224, 171, 0.14), transparent 18%),
+    radial-gradient(circle at 8% 24%, rgba(255, 194, 106, 0.08), transparent 12%),
+    radial-gradient(circle at 92% 24%, rgba(255, 194, 106, 0.08), transparent 12%),
+    radial-gradient(circle at 12% 82%, rgba(131, 34, 28, 0.18), transparent 16%),
+    radial-gradient(circle at 88% 82%, rgba(131, 34, 28, 0.18), transparent 16%),
+    url("../game assets/Decals/decal_smoke.png") center/66% no-repeat,
+    var(--scene-wood);
+}
+
+.battle-stage {
+  display: block;
+  position: relative;
+}
+
+.battle-table {
+  width: min(980px, calc(100% - 360px));
+  margin: 0 auto;
+  padding: 56px 0 174px;
+}
+
+.battle-side {
+  position: absolute;
+  z-index: 3;
+  min-height: 0;
+}
+
+.battle-side.left {
+  left: 16px;
+  top: 88px;
+  bottom: 18px;
+  width: 136px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-content: start;
+  gap: 14px;
+  padding: 0;
+}
+
+.battle-side.right {
+  right: 18px;
+  top: 102px;
+  width: 222px;
+  display: block;
+  padding: 0;
+}
+
+.plaque-stack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.plaque-stack .wood-plaque:nth-child(4),
+.plaque-stack .wood-plaque:nth-child(5) {
+  display: none;
+}
+
+.wood-plaque {
+  min-height: 54px;
+  padding: 8px 10px;
+}
+
+.wood-plaque .panel-kicker {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+.plaque-value {
+  font-size: 17px;
+}
+
+.item-bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  align-content: end;
+}
+
+.item-slot {
+  min-height: 64px;
+  padding: 7px 8px 8px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+.item-slot::before {
+  content: attr(data-sig);
+  display: block;
+  font-family: var(--font-label);
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: #f0dfbc;
+}
+
+.item-slot strong {
+  margin-top: 3px;
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.item-slot span {
+  display: none;
+}
+
+.item-slot.is-empty::before {
+  content: "";
+}
+
+.item-slot.is-empty strong {
+  opacity: 0.28;
+}
+
+.table-header {
+  min-height: 26px;
+}
+
+.table-header > div:first-child {
+  top: 0;
+}
+
+.table-header h2 {
+  font-size: 16px;
+  letter-spacing: 1.8px;
+}
+
+.table-actions {
+  height: 160px;
+}
+
+#battle-codex-btn,
+#pause-btn {
+  top: -28px;
+  min-width: 66px;
+  min-height: 28px;
+  padding: 6px 10px;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+#ring-bell-btn {
+  bottom: 24px;
+  width: 128px;
+  min-height: 48px;
+  padding: 10px 18px;
+  border: 1px solid rgba(189, 152, 95, 0.88);
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255, 234, 198, 0.12), transparent 32%),
+    linear-gradient(180deg, rgba(124, 82, 42, 0.98), rgba(55, 32, 20, 0.98));
+  box-shadow:
+    0 12px 20px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 243, 214, 0.1);
+}
+
+#draw-main-btn,
+#draw-side-btn {
+  width: 104px;
+  min-height: 142px;
+  padding: 0 8px 12px;
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #efe0be;
+  overflow: visible;
+}
+
+#draw-main-btn::after,
+#draw-side-btn::after {
+  content: attr(data-count);
+  position: absolute;
+  top: 9px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(190, 154, 98, 0.76);
+  background:
+    linear-gradient(180deg, rgba(85, 54, 34, 0.98), rgba(29, 18, 14, 0.98));
+  font-size: 11px;
+  color: #f0dfbc;
+}
+
+#draw-main-btn:disabled,
+#draw-side-btn:disabled {
+  opacity: 0.54;
+}
+
+.selection-banner {
+  width: min(540px, calc(100% - 60px));
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.selection-banner .stone-btn {
+  min-width: 74px;
+  min-height: 28px;
+  padding: 6px 10px;
+  font-size: 10px;
+}
+
+.battle-surface {
+  min-height: 604px;
+  padding: 18px 34px 24px;
+  border: 1px solid rgba(79, 55, 33, 0.92);
+  background:
+    radial-gradient(circle at 50% 14%, rgba(255, 227, 178, 0.08), transparent 20%),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.16), transparent 42%),
+    linear-gradient(180deg, rgba(64, 41, 28, 0.82), rgba(22, 14, 11, 0.92)),
+    linear-gradient(90deg, rgba(101, 66, 41, 0.24), rgba(20, 13, 10, 0.14) 18%, rgba(86, 57, 35, 0.2) 36%, rgba(22, 15, 12, 0.16) 54%, rgba(92, 59, 37, 0.18) 73%, rgba(20, 13, 10, 0.2));
+  box-shadow:
+    0 32px 42px rgba(0, 0, 0, 0.36),
+    inset 0 0 0 1px rgba(255, 241, 207, 0.04),
+    inset 0 18px 40px rgba(255, 226, 177, 0.02);
+}
+
+.battle-surface::before {
+  inset: 12px;
+}
+
+.queue-band .panel-kicker,
+.scale-band .panel-kicker,
+.hand-band .panel-kicker {
+  display: none;
+}
+
+.queue-band {
+  width: min(660px, calc(100% - 40px));
+  margin: 0 auto 6px;
+}
+
+#enemy-queue,
+#enemy-row,
+#player-row {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+#enemy-row {
+  margin-bottom: 14px;
+}
+
+#player-row {
+  margin-top: 14px;
+}
+
+.lane-slot {
+  min-height: 206px;
+}
+
+.queue-slot {
+  min-height: 114px;
+}
+
+.queue-slot::before {
+  inset: 10px 14px 4px;
+  border-color: rgba(73, 48, 30, 0.74);
+  background:
+    linear-gradient(180deg, rgba(18, 12, 10, 0.9), rgba(7, 4, 4, 0.96));
+}
+
+.queue-cardback {
+  width: 74px;
+}
+
+.scale-band {
+  width: min(540px, calc(100% - 140px));
+  margin: 2px auto;
+}
+
+.scale-track {
+  min-height: 38px;
+  padding: 10px 16px;
+}
+
+.scale-notch {
+  min-height: 14px;
+}
+
+.hand-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+}
+
+#hand-row {
+  justify-content: center;
+  gap: 0;
+  overflow: visible;
+  padding: 0 126px 8px;
+}
+
+#hand-row .card {
+  margin-inline: -7px;
+  transform-origin: center bottom;
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+
+#hand-row .card:nth-child(odd) {
+  transform: translateY(10px) rotate(-4deg);
+}
+
+#hand-row .card:nth-child(even) {
+  transform: translateY(2px) rotate(3deg);
+}
+
+#hand-row .card:hover,
+#hand-row .card.is-selected {
+  transform: translateY(-10px) rotate(0deg) scale(1.04);
+  z-index: 3;
+}
+
+#inspect-panel {
+  width: 100%;
+  min-height: 248px;
+  padding: 14px 14px 16px;
+  transform: rotate(0.8deg);
+}
+
+#inspect-panel .panel-kicker {
+  margin-bottom: 6px;
+}
+
+#inspect-panel .card {
+  width: min(100%, 150px);
+}
+
+.battle-log-panel,
+.battle-log {
+  display: none !important;
+}
+
+@media (max-width: 1180px) {
+  .battle-table {
+    width: min(920px, calc(100% - 300px));
+    padding-bottom: 164px;
+  }
+
+  .battle-side.left {
+    width: 118px;
+  }
+
+  .battle-side.right {
+    width: 200px;
+  }
+
+  #hand-row {
+    padding-inline: 104px;
+  }
+}
+
+@media (max-width: 900px) {
+  .battle-table {
+    width: min(100%, calc(100% - 264px));
+    padding-bottom: 150px;
+  }
+
+  .battle-side.left {
+    width: 104px;
+  }
+
+  .battle-side.right {
+    width: 176px;
+  }
+
+  .plaque-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .queue-band {
+    width: min(560px, calc(100% - 20px));
+  }
+
+  #enemy-queue,
+  #enemy-row,
+  #player-row {
+    width: min(640px, 100%);
+    gap: 10px;
+  }
+
+  .lane-slot {
+    min-height: 190px;
+  }
+
+  #draw-main-btn,
+  #draw-side-btn {
+    width: 90px;
+    min-height: 126px;
+  }
+
+  #draw-main-btn {
+    left: 28px;
+  }
+
+  #draw-side-btn {
+    right: 28px;
+  }
+
+  #hand-row {
+    padding-inline: 92px;
+  }
+}
+
+@media (max-width: 640px) {
+  .battle-side.left {
+    left: 10px;
+    width: 94px;
+  }
+
+  .battle-side.right {
+    right: 10px;
+    width: 156px;
+  }
+
+  .battle-table {
+    width: calc(100% - 238px);
+    padding-bottom: 132px;
+  }
+
+  .battle-surface {
+    min-height: 528px;
+    padding-inline: 18px;
+  }
+
+  #draw-main-btn,
+  #draw-side-btn {
+    width: 76px;
+    min-height: 106px;
+    font-size: 9px;
+  }
+
+  #draw-main-btn {
+    left: 10px;
+  }
+
+  #draw-side-btn {
+    right: 10px;
+  }
+
+  #ring-bell-btn {
+    width: 104px;
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  #hand-row {
+    padding-inline: 78px;
+  }
+}
