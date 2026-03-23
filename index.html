@@ -1,419 +1,245 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SPUDGEON — Roguelike Survivor</title>
+<title>Ashen Hollow</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Spectral:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="styles/game.css">
 </head>
 <body>
-<div id="game-wrapper">
+<div id="app-shell">
+  <canvas id="atmosphere-canvas" aria-hidden="true"></canvas>
+  <div id="toast" class="toast" aria-live="polite"></div>
+  <div id="drag-card" class="drag-card hidden" aria-hidden="true"></div>
 
-<!-- TITLE -->
-<div id="title-screen" class="screen active">
-  <canvas id="title-canvas"></canvas>
-  <div class="title-content">
-    <div class="title-emoji">🥔</div>
-    <h1>SPUDGEON</h1>
-    <div class="title-sub">Roguelike · Survivor · Bullet Hell</div>
-    <div class="title-version">v3.4 — 24 CHARACTERS · 100 WAVES · 10 BOSSES</div>
-    <div id="title-hs" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-align:center;line-height:2;min-height:34px;"></div>
-    <div id="title-run-history" style="width:380px;max-width:92vw;margin:0 auto 4px;padding:4px 0;"></div>
-    <div class="title-btn-row">
-      <button class="pixel-btn green" onclick="showCharSelect()">▶ PLAY</button>
-      <button class="pixel-btn cyan" onclick="showHowToPlay()">HOW TO PLAY</button>
-      <button class="pixel-btn purple" onclick="openUnlockScreen()">💠 UPGRADES</button>
-    </div>
-    <div class="title-btn-row">
-      <button class="pixel-btn orange small" onclick="exportSaveData()">📤 EXPORT</button>
-      <button class="pixel-btn cyan small" onclick="triggerImport()">📥 IMPORT</button>
-    </div>
-    <div class="controls-row">
-      <div class="ctrl-chip"><span>WASD</span> MOVE</div>
-      <div class="ctrl-chip"><span>SPACE</span> ABILITY</div>
-      <div class="ctrl-chip"><span>TAB</span> STATS</div>
-      <div class="ctrl-chip"><span>P</span> PAUSE</div>
-    </div>
-  </div>
-</div>
-
-<!-- HOW TO PLAY -->
-<div id="howtoplay-screen" class="screen">
-  <h2>HOW TO PLAY</h2>
-  <div class="htp-grid">
-    <div class="htp-card">
-      <div class="htp-card-title">BASICS</div>
-      <div class="htp-card-body">
-        • Survive 100 waves — bosses every 5th wave<br>
-        • Auto-shoot — focus on moving &amp; dodging<br>
-        • Collect XP orbs to level up &amp; pick upgrades<br>
-        • Kill combos boost your XP drops<br>
-        • Beat all 100 waves to win
+  <section id="title-screen" class="screen active">
+    <div class="title-frame">
+      <div class="title-kicker">A Static Browser Occult Deckbuilder</div>
+      <h1>ASHEN HOLLOW</h1>
+      <p class="title-copy">
+        Build a living deck, read the telegraphs, and survive three candlelit regions of ritual combat.
+      </p>
+      <div class="title-actions">
+        <button id="new-run-btn" class="ash-btn ash-btn-primary">Begin New Run</button>
+        <button id="continue-run-btn" class="ash-btn ash-btn-secondary">Continue Run</button>
+        <button id="open-codex-btn" class="ash-btn ash-btn-secondary">Open Codex</button>
       </div>
-    </div>
-    <div class="htp-card">
-      <div class="htp-card-title">ENEMIES</div>
-      <div class="htp-card-body">
-        • <span style="color:var(--red)">GRUNT / RUNNER / TANK</span> — standard foes<br>
-        • <span style="color:var(--orange)">EXPLODER / BOMBER</span> — stay away!<br>
-        • <span style="color:var(--purple)">NECROMANCER</span> — heals nearby enemies<br>
-        • <span style="color:var(--blue)">TELEPORTER</span> — blinks behind you<br>
-        • <span style="color:var(--red)">JUGGERNAUT</span> — charges at full speed
-      </div>
-    </div>
-    <div class="htp-card">
-      <div class="htp-card-title">UPGRADES &amp; CHESTS</div>
-      <div class="htp-card-body">
-        • <span style="color:var(--muted2)">COMMON</span> — minor stat boost<br>
-        • <span style="color:var(--blue)">RARE</span> — strong improvement<br>
-        • <span style="color:var(--epic)">EPIC</span> — build-defining effects<br>
-        • Stats use diminishing returns — diversify!<br>
-        • Boss chests offer 9 choices · Reroll costs gold
-      </div>
-    </div>
-    <div class="htp-card">
-      <div class="htp-card-title">TIPS</div>
-      <div class="htp-card-body">
-        • Spam SPACE — abilities have short cooldowns<br>
-        • 🔥 RAMPAGE: 10 kills in 6s = 1.5× dmg for 8s<br>
-        • 👑 ELITE enemies drop 2.5× XP<br>
-        • Watch the minimap (top-right) for threats<br>
-        • TAB to view full stats &amp; items mid-run
-      </div>
-    </div>
-  </div>
-  <button class="pixel-btn green small" onclick="showTitle()" style="margin-top:4px">◀ BACK</button>
-</div>
-
-<!-- CHAR SELECT -->
-<div id="char-screen" class="screen">
-  <h2>SELECT CHARACTER</h2>
-  <div id="char-screen-shards" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--purple);letter-spacing:1px;"></div>
-
-  <!-- STEP 1: Grid -->
-  <div id="char-step-1" style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:900px;">
-    <div id="char-grid"></div>
-    <div class="char-select-footer">
-      <button class="pixel-btn purple small" onclick="openUnlockScreen()">💠 UPGRADES</button>
-      <button class="pixel-btn tiny" onclick="showTitle()">◀ BACK</button>
-    </div>
-  </div>
-
-  <!-- STEP 2: Detail + modifier -->
-  <div id="char-step-2" style="display:none;width:100%;max-width:920px;gap:10px;align-items:flex-start">
-    <div id="char-detail-panel"></div>
-    <div style="flex:2">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;text-align:center">— SELECT RUN MODIFIER —</div>
-      <div id="run-mod-grid"></div>
-      <div style="display:flex;gap:10px;justify-content:center;margin-top:10px">
-        <button class="pixel-btn small purple" onclick="charScreenBack()">◀ RESELECT</button>
-        <button class="pixel-btn green" onclick="startGame()">▶ START RUN</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- GAME -->
-<div id="game-screen" class="screen">
-  <div id="hud">
-    <div class="hud-section">
-      <div class="hud-bars">
-        <div class="hud-bar-row">
-          <div class="hud-label" style="color:var(--hp)">HP</div>
-          <div class="hud-bar"><div class="hud-bar-fill hp" id="hp-bar" style="width:100%"></div></div>
-          <div class="hud-val" id="hp-val">100/100</div>
+      <div class="title-meta">
+        <div class="meta-panel">
+          <div class="section-label">Best Record</div>
+          <div id="title-best-stats" class="meta-copy"></div>
         </div>
-        <div class="hud-bar-row">
-          <div class="hud-label" style="color:var(--xp)">XP</div>
-          <div class="hud-bar"><div class="hud-bar-fill xp" id="xp-bar" style="width:0%"></div></div>
-          <div class="hud-val" id="xp-val">0/10</div>
+        <div class="meta-panel">
+          <div class="section-label">Recovered Pages</div>
+          <div id="title-discovery-stats" class="meta-copy"></div>
         </div>
       </div>
     </div>
-    <div class="hud-section">
-      <div id="ability-bar">
-        <div id="ability-icon">⚡</div>
-        <div class="ab-inner">
-          <div id="ability-name">ABILITY</div>
-          <div id="ability-cooldown-wrap"><div id="ability-cooldown-fill" style="width:100%"></div></div>
-          <div id="ability-ready-text">READY</div>
+  </section>
+
+  <section id="starter-screen" class="screen">
+    <div class="screen-panel screen-panel-wide">
+      <div class="screen-head">
+        <div>
+          <div class="section-label">Choose Your First Rite</div>
+          <h2>Starter Deck</h2>
+        </div>
+        <button id="starter-back-btn" class="ash-btn ash-btn-secondary">Back</button>
+      </div>
+      <div class="starter-layout">
+        <div id="starter-decks" class="starter-decks"></div>
+        <aside id="starter-detail" class="panel detail-panel"></aside>
+      </div>
+      <div class="screen-actions">
+        <button id="starter-begin-btn" class="ash-btn ash-btn-primary">Enter The Hollow</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="map-screen" class="screen">
+    <div class="screen-panel screen-panel-wide">
+      <div class="screen-head">
+        <div>
+          <div id="map-region-kicker" class="section-label">Region I</div>
+          <h2 id="map-region-title">The Ashen Rise</h2>
+        </div>
+        <div class="head-actions">
+          <button id="map-codex-btn" class="ash-btn ash-btn-secondary">Codex</button>
+          <button id="map-save-btn" class="ash-btn ash-btn-secondary">Save &amp; Quit</button>
         </div>
       </div>
+      <div class="run-strip">
+        <div class="run-pill">Candles <span id="map-lives">2</span></div>
+        <div class="run-pill">Deck <span id="map-deck-count">10</span></div>
+        <div class="run-pill">Items <span id="map-item-count">0</span></div>
+        <div class="run-pill">Bosses <span id="map-boss-count">0</span>/3</div>
+      </div>
+      <div class="map-layout">
+        <div id="map-stage" class="map-stage"></div>
+        <aside id="map-detail" class="panel detail-panel">
+          <div class="section-label">Route Detail</div>
+          <h3>Pick A Node</h3>
+          <p>Study the branches, then commit to a path.</p>
+        </aside>
+      </div>
     </div>
-    <div class="hud-section">
-      <div class="hud-chip"><div class="hud-chip-val" id="kills-display">0</div><div class="hud-chip-lbl">KILLS</div></div>
-      <div class="hud-chip"><div class="hud-chip-val" id="gold-display">0</div><div class="hud-chip-lbl">GOLD</div></div>
-      <div class="hud-chip"><div class="hud-chip-val" id="level-display">1</div><div class="hud-chip-lbl">LVL</div></div>
-      <div class="hud-chip"><div class="hud-chip-val" id="combo-hud" style="color:var(--green)">×1</div><div class="hud-chip-lbl">COMBO</div></div>
+  </section>
+
+  <section id="battle-screen" class="screen">
+    <div class="battle-shell">
+      <div class="battle-topbar">
+        <div class="topbar-block">
+          <div class="section-label">Scale</div>
+          <div id="scale-readout" class="value-copy">0 / 5</div>
+        </div>
+        <div class="topbar-block">
+          <div class="section-label">Bones</div>
+          <div id="bones-readout" class="value-copy">0</div>
+        </div>
+        <div class="topbar-block">
+          <div class="section-label">Candles</div>
+          <div id="battle-lives" class="value-copy">2</div>
+        </div>
+        <div class="topbar-block">
+          <div class="section-label">Main Deck</div>
+          <div id="deck-readout" class="value-copy">10</div>
+        </div>
+        <div class="topbar-block">
+          <div class="section-label">Offering Deck</div>
+          <div id="offering-readout" class="value-copy">10</div>
+        </div>
+        <div class="topbar-actions">
+          <button id="draw-main-btn" class="ash-btn ash-btn-secondary">Draw Main</button>
+          <button id="draw-offering-btn" class="ash-btn ash-btn-secondary">Draw Offering</button>
+          <button id="end-turn-btn" class="ash-btn ash-btn-primary">End Turn [Space]</button>
+          <button id="battle-codex-btn" class="ash-btn ash-btn-secondary">Codex [Tab]</button>
+          <button id="pause-btn" class="ash-btn ash-btn-secondary">Pause [Esc]</button>
+        </div>
+      </div>
+
+      <div id="selection-banner" class="selection-banner hidden">
+        <span id="selection-text">Select a lane.</span>
+        <button id="selection-cancel-btn" class="ash-btn ash-btn-secondary ash-btn-small">Cancel</button>
+      </div>
+
+      <div class="battle-layout">
+        <div class="board-column">
+          <div class="board-panel">
+            <div class="section-label">Next Enemy Plays</div>
+            <div id="enemy-queue" class="queue-row"></div>
+          </div>
+
+          <div class="board-panel">
+            <div class="section-label">Enemy Lanes</div>
+            <div id="enemy-row" class="lane-row enemy-row"></div>
+          </div>
+
+          <div class="board-panel scale-panel">
+            <div class="section-label">Fate Scale</div>
+            <div id="scale-track" class="scale-track"></div>
+          </div>
+
+          <div class="board-panel">
+            <div class="section-label">Your Lanes</div>
+            <div id="player-row" class="lane-row player-row"></div>
+          </div>
+
+          <div class="board-panel">
+            <div class="section-label">Items</div>
+            <div id="item-bar" class="item-bar"></div>
+          </div>
+
+          <div class="board-panel">
+            <div class="section-label">Hand</div>
+            <div id="hand-row" class="hand-row"></div>
+          </div>
+        </div>
+
+        <aside class="battle-aside">
+          <div id="inspect-panel" class="panel inspect-panel"></div>
+          <div class="panel log-panel">
+            <div class="section-label">Ritual Log</div>
+            <div id="battle-log" class="battle-log"></div>
+          </div>
+        </aside>
+      </div>
     </div>
-    <div class="hud-section grow">
-      <div class="wave-display">
-        <div id="wave-display">WAVE 1</div>
-        <div id="zone-display" style="font-family:'Barlow Condensed',sans-serif;font-size:9px;color:#555;letter-spacing:2px;text-align:center;"></div>
-        <div id="wave-timer-bar-wrap"><div id="wave-timer-fill" style="width:100%"></div></div>
-        <div id="timer" title="Time survived">0:00</div>
+  </section>
+
+  <section id="flow-screen" class="screen">
+    <div class="screen-panel flow-panel">
+      <div id="flow-kicker" class="section-label">Reward</div>
+      <h2 id="flow-title">A Choice Awaits</h2>
+      <p id="flow-description" class="flow-description"></p>
+      <div id="flow-card-grid" class="flow-card-grid"></div>
+      <div id="flow-deck-grid" class="flow-deck-grid"></div>
+      <div id="flow-button-row" class="flow-button-row"></div>
+      <div class="screen-actions">
+        <button id="flow-close-btn" class="ash-btn ash-btn-secondary hidden">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="deckbook-screen" class="screen">
+    <div class="screen-panel screen-panel-wide">
+      <div class="screen-head">
+        <div>
+          <div class="section-label">Ritual Ledger</div>
+          <h2>Deckbook</h2>
+        </div>
+        <button id="deckbook-close-btn" class="ash-btn ash-btn-secondary">Close</button>
+      </div>
+      <div class="deckbook-toolbar">
+        <button id="deckbook-current-tab" class="ash-btn ash-btn-secondary is-active">Current Deck</button>
+        <button id="deckbook-discovered-tab" class="ash-btn ash-btn-secondary">Recovered Pages</button>
+      </div>
+      <div id="deckbook-summary" class="deckbook-summary"></div>
+      <div id="deckbook-grid" class="deckbook-grid"></div>
+    </div>
+  </section>
+
+  <section id="gameover-screen" class="screen">
+    <div class="screen-panel end-panel">
+      <div class="section-label">The Last Candle Fails</div>
+      <h2>Game Over</h2>
+      <p id="gameover-copy" class="flow-description"></p>
+      <div id="gameover-stats" class="end-stats"></div>
+      <div class="screen-actions">
+        <button id="gameover-restart-btn" class="ash-btn ash-btn-primary">New Run</button>
+        <button id="gameover-codex-btn" class="ash-btn ash-btn-secondary">Codex</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="victory-screen" class="screen">
+    <div class="screen-panel end-panel">
+      <div class="section-label">The Third Seal Is Broken</div>
+      <h2>Victory</h2>
+      <p id="victory-copy" class="flow-description"></p>
+      <div id="victory-stats" class="end-stats"></div>
+      <div class="screen-actions">
+        <button id="victory-new-run-btn" class="ash-btn ash-btn-primary">New Run</button>
+        <button id="victory-codex-btn" class="ash-btn ash-btn-secondary">Codex</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="pause-overlay" class="overlay hidden">
+    <div class="overlay-panel">
+      <div class="section-label">The Table Waits</div>
+      <h3>Paused</h3>
+      <p>Resume the ritual, inspect your deck, or preserve the run and return to the title screen.</p>
+      <div class="screen-actions">
+        <button id="resume-btn" class="ash-btn ash-btn-primary">Resume</button>
+        <button id="pause-codex-btn" class="ash-btn ash-btn-secondary">Codex</button>
+        <button id="save-quit-btn" class="ash-btn ash-btn-secondary">Save &amp; Quit</button>
       </div>
     </div>
   </div>
-  <div id="boss-bar-wrap">
-    <div id="boss-name">BOSS</div>
-    <div id="boss-bar"><div id="boss-bar-fill" style="width:100%"></div></div>
-    <div id="boss-hp-text">—</div>
-  </div>
-  <div id="game-area">
-    <canvas id="canvas"></canvas>
-    <canvas id="starfield"></canvas>
-    <div id="wave-announce"></div>
-    <div class="status-stack">
-      <div id="surge-hud"></div>
-      <div id="active-mods-hud"></div>
-    </div>
-    <div id="wave-cleared"></div>
-    <div id="dps-display"><span id="dps-val">0</span> DPS</div>
-    <div id="minimap"></div>
-    <div id="damage-flash"></div>
-    <div id="danger-vignette"></div>
-    <div id="blizzard-flash"></div>
-    <div id="ability-flash"></div>
-    <div id="rage-vignette"></div>
-    <div id="void-flash"></div>
-    <div id="barrier-flash"></div>
-    <div id="harvest-flash"></div>
-    <div id="hammer-flash"></div>
-    <div id="earthbind-flash"></div>
-    <div id="combo-display"><span id="combo-text"></span><div id="combo-timer-bar"><div id="combo-timer-fill" style="width:100%"></div></div></div>
-    <div id="rampage-display">🔥 RAMPAGE</div>
-    <div id="streak-display"></div>
-    <div id="pyro-heat-bar">
-      <div id="pyro-heat-label">🔥 HEAT 0%</div>
-      <div style="height:3px;background:rgba(0,0,0,.5);border:1px solid var(--orange);width:88px;">
-        <div id="pyro-heat-fill" style="height:100%;background:var(--orange);width:0%;transition:width .1s;"></div>
-      </div>
-    </div>
-    <div id="minigun-ramp">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--orange);margin-bottom:2px;">SUPPRESS</div>
-      <div style="height:3px;background:rgba(0,0,0,.5);border:1px solid var(--orange);width:78px;">
-        <div id="minigun-ramp-fill" style="height:100%;background:var(--orange);width:0%;transition:width .1s;"></div>
-      </div>
-    </div>
-    <div id="ach-toast"></div>
-    <div id="shard-hud">💠 <span id="shard-val">0</span> SHARDS</div>
-    <div id="run-mod-hud"></div>
-    <div class="hud-buttons">
-      <button class="pixel-btn tiny purple" onclick="togglePause()">PAUSE [P]</button>
-      <button class="pixel-btn tiny cyan" onclick="openStats()">STATS [TAB]</button>
-    </div>
-  </div>
-  <div id="pause-overlay">
-    <h2>PAUSED</h2>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">Press P or ESC to resume</div>
-    <div style="display:flex;gap:10px;margin-top:4px;">
-      <button class="pixel-btn green" onclick="togglePause()">▶ RESUME</button>
-      <button class="pixel-btn cyan" onclick="openStats()">STATS</button>
-      <button class="pixel-btn" onclick="showTitle()">QUIT</button>
-    </div>
-  </div>
 </div>
-
-<!-- LEVEL UP -->
-<div id="levelup-screen" class="screen">
-  <h2 id="levelup-title">⚡ LEVEL UP!</h2>
-  <div id="slot-hud" style="margin-bottom:8px"></div>
-  <div id="upgrade-cards"></div>
-  <div class="levelup-hint">CLICK A CARD TO CHOOSE YOUR UPGRADE</div>
-</div>
-
-<!-- BOSS LOOT -->
-<div id="boss-loot-screen" class="screen" style="padding:0;overflow:hidden;">
-  <!-- Phase 1: Victory splash -->
-  <div id="bloot-splash" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:0;">
-    <div id="bloot-boss-icon" style="font-size:64px;margin-bottom:4px;"></div>
-    <div id="bloot-title" style="font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;letter-spacing:4px;color:#fff;text-shadow:0 0 24px #ff8800,0 0 48px #ff4400;"></div>
-    <div id="bloot-subtitle" style="font-family:'Barlow Condensed',sans-serif;font-size:14px;color:#ffaa44;letter-spacing:3px;margin-top:4px;"></div>
-    <div id="bloot-stats-row" style="display:flex;gap:32px;margin-top:20px;"></div>
-    <div id="bloot-rewards-row" style="display:flex;gap:24px;margin-top:16px;align-items:center;flex-wrap:wrap;justify-content:center;"></div>
-    <div id="bloot-prompt" style="margin-top:24px;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:#888;letter-spacing:2px;animation:blink 1s step-end infinite;">PRESS ANY KEY OR CLICK TO CLAIM REWARD</div>
-  </div>
-  <!-- Phase 2: Loot picker -->
-  <div id="bloot-picker" style="display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:0;padding:20px 0;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:#ff8800;letter-spacing:3px;margin-bottom:6px;">✦ LEGENDARY REWARD ✦</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:#ffd700;letter-spacing:2px;margin-bottom:18px;">CHOOSE YOUR SPOILS</div>
-    <div id="boss-loot-cards" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;max-width:860px;"></div>
-    <div style="margin-top:14px;font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#555;letter-spacing:2px;">CHOOSE WISELY — ONLY ONE</div>
-  </div>
-</div>
-
-<!-- ADMIN PANEL (secret: L×5) -->
-<div id="admin-panel" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;font-family:'Barlow Condensed',sans-serif;">
-  <div style="font-size:11px;color:#ff4444;letter-spacing:4px;">⚠ ADMIN PANEL ⚠</div>
-  <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:3px;">SPUDGEON DEBUG MODE</div>
-  <div style="font-size:10px;color:#555;letter-spacing:2px;margin-bottom:8px;">shhh... this is a secret</div>
-
-  <div id="admin-char-select" style="display:flex;flex-direction:column;gap:8px;align-items:center;width:340px;">
-    <div style="font-size:10px;color:#888;letter-spacing:2px;margin-bottom:4px;">CHOOSE STARTING WAVE</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
-      <button class="admin-wave-btn pixel-btn small" data-wave="1" onclick="adminSetWave(1)">Wave 1</button>
-      <button class="admin-wave-btn pixel-btn small" data-wave="5" onclick="adminSetWave(5)">Wave 5 🐱</button>
-      <button class="admin-wave-btn pixel-btn small" data-wave="10" onclick="adminSetWave(10)">Wave 10 💀</button>
-      <button class="admin-wave-btn pixel-btn small" data-wave="25" onclick="adminSetWave(25)">Wave 25 ☠️</button>
-      <button class="admin-wave-btn pixel-btn small" data-wave="50" onclick="adminSetWave(50)">Wave 50 👹</button>
-    </div>
-    <div style="font-size:10px;color:#888;letter-spacing:2px;margin-top:8px;margin-bottom:4px;">STARTING ITEMS</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
-      <button class="admin-items-btn pixel-btn small" data-items="none" onclick="adminSetItems('none')">None</button>
-      <button class="admin-items-btn pixel-btn small" data-items="meta" onclick="adminSetItems('meta')">Max Upgrades</button>
-      <button class="admin-items-btn pixel-btn small" data-items="all" onclick="adminSetItems('all')">ALL ITEMS 🔥</button>
-    </div>
-  </div>
-
-  <div style="width:340px;background:rgba(255,255,255,0.04);border:1px solid #333;border-radius:4px;padding:14px 18px;margin-top:4px;">
-    <div style="font-size:10px;color:#ffaa00;letter-spacing:2px;margin-bottom:10px;">👑 ADMIN CHARACTER</div>
-    <div style="display:flex;gap:12px;align-items:center;margin-bottom:6px;">
-      <span style="font-size:32px;">🛡️</span>
-      <div>
-        <div style="font-size:16px;font-weight:900;color:#fff;">THE ADMIN</div>
-        <div style="font-size:9px;color:#888;">Unkillable. Infinite ammo. No cooldowns.</div>
-      </div>
-    </div>
-    <div style="font-size:9px;color:#555;line-height:1.8;">
-      DMG: 9999 &nbsp;|&nbsp; SPD: 4.5 &nbsp;|&nbsp; HP: 99999<br>
-      Piercing: 99 &nbsp;|&nbsp; Multishot: 5 &nbsp;|&nbsp; Regen: 999/s<br>
-      All items active &nbsp;|&nbsp; All legendaries active
-    </div>
-  </div>
-
-  <div style="display:flex;gap:12px;margin-top:6px;">
-    <button class="pixel-btn green" onclick="startAdminRun()" style="font-size:13px;padding:10px 28px;letter-spacing:2px;">▶ START ADMIN RUN</button>
-    <button class="pixel-btn" onclick="closeAdminPanel()" style="font-size:13px;padding:10px 20px;">CANCEL</button>
-  </div>
-  <div style="font-size:9px;color:#333;margin-top:4px;">press ESC to close</div>
-</div>
-
-<!-- STATS PANEL -->
-<div id="stats-screen" class="screen">
-  <div class="stats-header">
-    <h2>STATS &amp; ITEMS</h2>
-    <button class="pixel-btn small green" onclick="closeStats()">◀ BACK [TAB/ESC]</button>
-  </div>
-  <div id="stats-layout">
-    <div id="stats-left">
-      <div id="char-info-wrap"></div>
-      <div class="ssec"><div class="ssec-title">COMBAT STATS</div><div id="combat-stats"></div></div>
-      <div class="ssec"><div class="ssec-title">DEFENSE &amp; UTILITY</div><div id="defense-stats"></div></div>
-    </div>
-    <div id="stats-right">
-      <div class="ssec" style="flex:1;">
-        <div class="ssec-title">ITEMS COLLECTED (<span id="item-count">0</span>)</div>
-        <div id="items-grid"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- GAME OVER -->
-<div id="gameover-screen" class="screen">
-  <!-- Header -->
-  <div id="go-header" style="display:flex;align-items:center;gap:18px;margin-bottom:2px">
-    <div id="go-skull" style="font-size:48px;animation:titleBob 1.5s ease-in-out infinite">💀</div>
-    <div>
-      <div id="run-grade" class="D">D</div>
-      <div id="go-title" style="font-size:28px;font-weight:900;letter-spacing:8px;color:var(--red)">YOU DIED</div>
-    </div>
-    <div id="go-char-badge" style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-left:8px">
-      <div id="go-char-icon" style="font-size:38px"></div>
-      <div id="go-char-name" style="font-size:9px;letter-spacing:2px;color:var(--muted2)"></div>
-    </div>
-  </div>
-
-  <!-- Killer banner -->
-  <div id="go-killer" style="display:none;background:rgba(255,40,60,.12);border:1px solid rgba(255,40,60,.35);padding:6px 20px;font-size:11px;letter-spacing:2px;color:#ff4455;text-align:center"></div>
-
-  <!-- New record badge -->
-  <div id="go-newbest" style="display:none;background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.4);padding:5px 18px;font-size:10px;letter-spacing:3px;color:#ffd700;text-align:center">🏆 NEW PERSONAL BEST!</div>
-
-  <!-- Main two-column layout -->
-  <div style="display:flex;gap:14px;width:100%;max-width:820px">
-
-    <!-- Left: core stats -->
-    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
-      <div style="font-size:8px;letter-spacing:3px;color:var(--green);margin-bottom:4px">── RUN STATS ──</div>
-      <div id="go-stats-left" class="end-stat-table" style="flex:1;gap:3px;padding:10px 16px;min-width:0"></div>
-    </div>
-
-    <!-- Right: combat breakdown -->
-    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
-      <div style="font-size:8px;letter-spacing:3px;color:var(--blue);margin-bottom:4px">── COMBAT ──</div>
-      <div id="go-stats-right" class="end-stat-table" style="flex:1;gap:3px;padding:10px 16px;min-width:0"></div>
-    </div>
-  </div>
-
-  <!-- Items collected -->
-  <div style="width:100%;max-width:820px">
-    <div style="font-size:8px;letter-spacing:3px;color:var(--gold);margin-bottom:6px">── ITEMS COLLECTED ──</div>
-    <div id="go-items" style="display:flex;flex-wrap:wrap;gap:5px;background:var(--surface);border:1px solid var(--border);padding:10px 14px;min-height:42px"></div>
-  </div>
-
-  <!-- Bosses killed timeline -->
-  <div style="width:100%;max-width:820px">
-    <div style="font-size:8px;letter-spacing:3px;color:var(--purple);margin-bottom:6px">── BOSSES DEFEATED ──</div>
-    <div id="go-bosses" style="display:flex;flex-wrap:wrap;gap:6px;background:var(--surface);border:1px solid var(--border);padding:8px 14px;min-height:36px"></div>
-  </div>
-
-  <!-- Shards + achievements row -->
-  <div style="display:flex;gap:10px;align-items:center;font-size:11px">
-    <div id="go-shards" style="color:#cc88ff;letter-spacing:1px"></div>
-    <div style="color:var(--border)">·</div>
-    <div id="gameover-ach" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green);letter-spacing:1px"></div>
-  </div>
-
-  <!-- Buttons -->
-  <div style="display:flex;gap:10px;margin-top:2px">
-    <button class="pixel-btn green" onclick="showCharSelect()">↺ RETRY</button>
-    <button class="pixel-btn" onclick="goRetryChar()">↺ SAME CHAR</button>
-    <button class="pixel-btn purple" onclick="showTitle()">TITLE</button>
-  </div>
-</div>
-
-<!-- WIN -->
-<div id="win-screen" class="screen">
-  <div style="font-size:60px;animation:titleBob 2s ease-in-out infinite">🏆</div>
-  <h2>VICTORY!</h2>
-  <div style="font-size:13px;color:var(--green);font-family:'JetBrains Mono',monospace">All 100 waves conquered!</div>
-  <div class="end-stat-table" id="win-stats"></div>
-  <div style="display:flex;gap:10px;margin-top:4px;">
-    <button class="pixel-btn green" onclick="showCharSelect()">▶ PLAY AGAIN</button>
-    <button class="pixel-btn purple" onclick="showTitle()">TITLE</button>
-  </div>
-</div>
-
-<!-- UNLOCK SCREEN -->
-<div id="unlock-screen" class="screen">
-  <div class="unlock-topbar">
-    <button class="pixel-btn purple small" onclick="closeUnlockScreen()">◀ BACK</button>
-    <div class="unlock-title-block">
-      <h2>SHARD UPGRADES</h2>
-      <div class="shard-count"><span id="shard-total-val">0</span> SHARDS AVAILABLE</div>
-    </div>
-    <div class="unlock-save-btns">
-      <button class="pixel-btn green tiny" onclick="exportSaveData()">📤 EXPORT</button>
-      <button class="pixel-btn cyan tiny" onclick="triggerImport()">📥 IMPORT</button>
-    </div>
-  </div>
-  <div class="upg-tabs" id="upgrade-tabs">
-    <button class="upg-tab active" onclick="setUpgradeTab('stats')" id="tab-stats">STAT BOOSTS</button>
-    <button class="upg-tab" onclick="setUpgradeTab('power')" id="tab-power">POWER BOOSTS</button>
-    <button class="upg-tab" onclick="setUpgradeTab('chars')" id="tab-chars">CHARACTERS</button>
-  </div>
-  <div id="upg-panel-stats" class="upg-panel"></div>
-  <div id="upg-panel-power" class="upg-panel" style="display:none;"></div>
-  <div id="upg-panel-chars" class="upg-panel" style="display:none;"></div>
-  <div id="save-preview"></div>
-</div>
-
-</div><!-- end game-wrapper -->
 <script src="scripts/game.js"></script>
 </body>
 </html>
