@@ -14,20 +14,13 @@
 
   <section id="title-screen" class="screen active">
     <div class="screen-stage title-stage">
-      <div class="title-main">
-        <div id="menu-startscreen" class="menu-startscreen pixel-image" aria-hidden="true"></div>
-        <div id="title-menu-cards" class="menu-card-cluster"></div>
+      <div class="title-cabin">
+        <div class="title-table">
+          <div id="menu-startscreen" class="menu-startscreen pixel-image" aria-hidden="true"></div>
+          <div id="title-menu-cards" class="menu-card-cluster" role="menu" aria-label="Main menu"></div>
+          <div id="title-meta-plaque" class="title-meta-plaque"></div>
+        </div>
       </div>
-      <aside class="title-side">
-        <div class="ledger-panel">
-          <div class="panel-kicker">Run Record</div>
-          <div id="profile-summary"></div>
-        </div>
-        <div class="ledger-panel">
-          <div class="panel-kicker">Unlocks</div>
-          <div id="unlock-summary"></div>
-        </div>
-      </aside>
     </div>
   </section>
 
@@ -64,23 +57,12 @@
 
   <section id="map-screen" class="screen">
     <div class="screen-stage map-stage">
-      <aside class="map-rail">
-        <div class="stone-panel">
-          <div class="panel-kicker">Run</div>
-          <div id="map-run-summary" class="stat-column"></div>
-        </div>
-        <div class="stone-panel">
-          <div class="panel-kicker">Bosses</div>
-          <div id="map-boss-order" class="boss-order"></div>
-        </div>
-        <div class="map-actions">
-          <button id="map-codex-btn" class="stone-btn" type="button">Ledger</button>
-          <button id="map-pause-btn" class="stone-btn" type="button">Pause</button>
-        </div>
+      <aside class="map-prop-cluster map-prop-cluster--left">
+        <div id="map-run-summary" class="map-prop-stack"></div>
       </aside>
 
       <div class="map-board">
-        <div class="map-header">
+        <div class="map-title-plaque">
           <div class="panel-kicker" id="map-region-kicker">Map I</div>
           <h2 id="map-region-title">Trail Of Smoke</h2>
           <p id="map-region-copy" class="detail-copy"></p>
@@ -88,54 +70,44 @@
         <div id="map-parchment" class="map-parchment">
           <svg id="map-lines" class="map-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
           <div id="map-node-layer" class="map-node-layer"></div>
+          <aside id="map-detail" class="note-panel"></aside>
         </div>
       </div>
 
-      <aside id="map-detail" class="note-panel"></aside>
+      <aside class="map-prop-cluster map-prop-cluster--right">
+        <div id="map-boss-order" class="boss-order"></div>
+        <div class="map-actions">
+          <button id="map-codex-btn" class="stone-btn" type="button">Ledger</button>
+          <button id="map-pause-btn" class="stone-btn" type="button">Pause</button>
+        </div>
+      </aside>
     </div>
   </section>
 
   <section id="battle-screen" class="screen">
     <div class="screen-stage battle-stage">
-      <div class="battle-side left">
-        <div class="plaque-stack">
-          <div class="wood-plaque">
-            <div class="panel-kicker">Candles</div>
-            <div id="battle-candles" class="plaque-value">2</div>
+      <aside class="battle-props battle-props-left">
+        <div class="battle-prop-stack">
+          <div class="battle-prop battle-prop--tall" data-prop="candles">
+            <div class="prop-kicker">Candles</div>
+            <div id="battle-candles" class="prop-value">2</div>
           </div>
-          <div class="wood-plaque">
-            <div class="panel-kicker">Teeth</div>
-            <div id="battle-teeth" class="plaque-value">0</div>
+          <div class="battle-prop" data-prop="teeth">
+            <div class="prop-kicker">Teeth</div>
+            <div id="battle-teeth" class="prop-value">0</div>
           </div>
-          <div class="wood-plaque">
-            <div class="panel-kicker">Bones</div>
-            <div id="battle-bones" class="plaque-value">0</div>
-          </div>
-          <div class="wood-plaque">
-            <div class="panel-kicker">Deck</div>
-            <div id="battle-main-count" class="plaque-value">0</div>
-          </div>
-          <div class="wood-plaque">
-            <div class="panel-kicker">Squirrels</div>
-            <div id="battle-side-count" class="plaque-value">0</div>
+          <div class="battle-prop" data-prop="bones">
+            <div class="prop-kicker">Bones</div>
+            <div id="battle-bones" class="prop-value">0</div>
           </div>
         </div>
         <div id="item-bar" class="item-bar"></div>
-      </div>
+      </aside>
 
       <div class="battle-table">
-        <div class="table-header">
-          <div>
-            <div id="battle-encounter-kicker" class="panel-kicker">Encounter</div>
-            <h2 id="battle-encounter-title">The Table Waits</h2>
-          </div>
-          <div class="table-actions">
-            <button id="draw-main-btn" class="stone-btn" type="button">Draw Deck</button>
-            <button id="draw-side-btn" class="stone-btn" type="button">Draw Squirrel</button>
-            <button id="ring-bell-btn" class="inscry-btn" type="button">Ring Bell</button>
-            <button id="battle-codex-btn" class="stone-btn" type="button">Ledger</button>
-            <button id="pause-btn" class="stone-btn" type="button">Pause</button>
-          </div>
+        <div class="battle-title-plaque">
+          <div id="battle-encounter-kicker" class="panel-kicker">Encounter</div>
+          <h2 id="battle-encounter-title">The Table Waits</h2>
         </div>
 
         <div id="selection-banner" class="selection-banner hidden">
@@ -144,30 +116,31 @@
         </div>
 
         <div class="battle-surface">
+          <button id="battle-codex-btn" class="stone-btn" type="button">Ledger</button>
+          <button id="pause-btn" class="stone-btn" type="button">Pause</button>
           <div class="queue-band">
-            <div class="panel-kicker">Enemy Telegraphs</div>
             <div id="enemy-queue" class="queue-row"></div>
           </div>
           <div id="enemy-row" class="lane-row enemy-row"></div>
           <div class="scale-band">
-            <div class="panel-kicker">Scale</div>
             <div id="scale-track" class="scale-track"></div>
           </div>
           <div id="player-row" class="lane-row player-row"></div>
-        </div>
-
-        <div class="hand-band">
-          <div class="panel-kicker">Hand</div>
-          <div id="hand-row" class="hand-row"></div>
+          <div class="hand-band">
+            <div id="hand-row" class="hand-row"></div>
+          </div>
+          <button id="draw-main-btn" class="stone-btn draw-pile" type="button">Deck</button>
+          <button id="ring-bell-btn" class="inscry-btn" type="button">Bell</button>
+          <button id="draw-side-btn" class="stone-btn draw-pile" type="button">Squirrel</button>
         </div>
       </div>
 
-      <div class="battle-side right">
+      <aside class="battle-props battle-props-right">
         <div id="inspect-panel" class="note-panel"></div>
-        <div class="ledger-panel battle-log-panel">
-          <div class="panel-kicker">Whispers</div>
-          <div id="battle-log" class="battle-log"></div>
-        </div>
+      </aside>
+
+      <div class="battle-log-hidden" aria-hidden="true">
+        <div id="battle-log" class="battle-log"></div>
       </div>
     </div>
   </section>

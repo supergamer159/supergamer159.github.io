@@ -182,6 +182,22 @@ const NODE_TYPE_META = {
   boss: { label: "Boss", copy: "A mask-bearing boss blocks the trail." },
 };
 
+const MAP_NODE_ASSETS = Object.freeze({
+  battle: ASSETS.misc.attackMark,
+  backpack: "game assets/Portraits/portrait_packrat.png",
+  "sacrificial-stones": "game assets/Portraits/portrait_stones.png",
+  trapper: "game assets/Portraits/portrait_trap_closed.png",
+  trader: "game assets/Portraits/portrait_pelt_hare.png",
+  "deck-trial": ASSETS.trials.wisdom,
+});
+
+const MAP_NODE_GLYPHS = Object.freeze({
+  prospector: "P",
+  angler: "A",
+  "trapper-trader": "T",
+  leshy: "L",
+});
+
 const MAP_BLUEPRINTS = [
   [
     ["battle", "campfire", "backpack"],
@@ -209,6 +225,18 @@ const MAP_BLUEPRINTS = [
   ],
   [["boss"]],
 ];
+
+const MAP_ROUTE_LINKS = Object.freeze({
+  "1-1": [[0, [0]]],
+  "1-2": [[0, [0, 1]]],
+  "1-3": [[0, [0, 1, 2]]],
+  "2-1": [[0, [0]], [1, [0]]],
+  "2-2": [[0, [0]], [1, [1]]],
+  "2-3": [[0, [0, 1]], [1, [1, 2]]],
+  "3-1": [[0, [0]], [1, [0]], [2, [0]]],
+  "3-2": [[0, [0]], [1, [0, 1]], [2, [1]]],
+  "3-3": [[0, [0, 1]], [1, [1]], [2, [1, 2]]],
+});
 
 const SIGIL_DEFS = Object.freeze({
   airborne: { name: "Airborne", text: "Strikes past creatures unless blocked by Mighty Leap." },
@@ -632,6 +660,68 @@ function takeRandomDistinct(run, values, count) {
   return shuffle(run, values).slice(0, Math.min(count, values.length));
 }
 
+function mapRowXPositions(count) {
+  if (count <= 1) return [50];
+  if (count === 2) return [38, 62];
+  if (count === 3) return [28, 50, 72];
+  if (count === 4) return [20, 40, 60, 80];
+  const step = 64 / Math.max(1, count - 1);
+  return Array.from({ length: count }, (_, index) => 18 + (index * step));
+}
+
+function mapRowYPosition(rowCount, rowIndex) {
+  if (rowCount <= 1) return 52;
+  const top = 14;
+  const bottom = 84;
+  const step = (bottom - top) / Math.max(1, rowCount - 1);
+  return bottom - (rowIndex * step);
+}
+
+function mapAnchorJitter(mapIndex, rowIndex, laneIndex) {
+  const xSeed = ((mapIndex + 1) * 17) + ((rowIndex + 1) * 13) + ((laneIndex + 1) * 9);
+  const ySeed = ((mapIndex + 1) * 11) + ((rowIndex + 1) * 19) + ((laneIndex + 1) * 7);
+  return {
+    x: (((xSeed % 5) - 2) * 0.8),
+    y: (((ySeed % 5) - 2) * 0.45),
+  };
+}
+
+function getMapRouteLinks(previousCount, nextCount) {
+  const template = MAP_ROUTE_LINKS[`${previousCount}-${nextCount}`];
+  if (template) return template.map(([fromIndex, targets]) => [fromIndex, [...targets]]);
+  if (previousCount === nextCount) {
+    return Array.from({ length: previousCount }, (_, index) => [index, [index]]);
+  }
+  if (previousCount > nextCount) {
+    return Array.from({ length: previousCount }, (_, index) => {
+      const target = Math.round((index / Math.max(1, previousCount - 1)) * Math.max(0, nextCount - 1));
+      return [index, [target]];
+    });
+  }
+  return Array.from({ length: previousCount }, (_, index) => {
+    const primary = Math.round((index / Math.max(1, previousCount - 1)) * Math.max(0, nextCount - 1));
+    const secondary = clamp(primary + 1, 0, Math.max(0, nextCount - 1));
+    return [index, unique([primary, secondary])];
+  });
+}
+
+function getMapNodeVisual(node) {
+  if (node.type === "boss") {
+    return {
+      glyph: MAP_NODE_GLYPHS[node.bossId] || "B",
+      label: titleCase(node.bossId),
+      copy: `Face ${titleCase(node.bossId)}.`,
+    };
+  }
+  const meta = getNodeMeta(node);
+  return {
+    asset: MAP_NODE_ASSETS[node.type] || "",
+    glyph: node.type === "campfire" ? "fire" : "",
+    label: meta.label,
+    copy: meta.copy,
+  };
+}
+
 function hasChallenge(run, challengeId) {
   return Boolean(run.challengeIds?.includes(challengeId));
 }
@@ -806,20 +896,26 @@ function createNewRun(deckId, challengeIds) {
 }
 
 function generateMaps(run) {
-  return MAP_BLUEPRINTS.map((columns, mapIndex) => {
+  return MAP_BLUEPRINTS.map((rows, mapIndex) => {
     const map = [];
-    let previousColumn = [];
-    columns.forEach((columnTypes, depth) => {
-      const column = columnTypes.map((type, laneIndex) => {
-        const verticalStep = 100 / (columnTypes.length + 1);
+    let previousRow = [];
+    rows.forEach((rowTypes, rowIndex) => {
+      const xPositions = mapRowXPositions(rowTypes.length);
+      const yBase = mapRowYPosition(rows.length, rowIndex);
+      const row = rowTypes.map((type, laneIndex) => {
+        const xBase = xPositions[laneIndex] ?? 50;
+        const jitter = mapAnchorJitter(mapIndex, rowIndex, laneIndex);
         const node = {
-          id: `map-${mapIndex}-node-${depth}-${laneIndex}`,
+          id: `map-${mapIndex}-node-${rowIndex}-${laneIndex}`,
           mapIndex,
-          depth,
+          depth: rowIndex,
+          rowIndex,
           laneIndex,
+          anchorX: xBase,
+          anchorY: yBase,
           type,
-          x: 12 + (depth * (76 / Math.max(1, columns.length - 1))),
-          y: (laneIndex + 1) * verticalStep + (columnTypes.length === 1 ? 0 : (rand(run) - 0.5) * 8),
+          x: clamp(xBase + jitter.x, 16, 84),
+          y: clamp(yBase + jitter.y, 12, 86),
           parentIds: [],
           childIds: [],
           state: "future",
@@ -828,19 +924,19 @@ function generateMaps(run) {
         map.push(node);
         return node;
       });
-      if (previousColumn.length) {
-        previousColumn.forEach((prevNode, prevIndex) => {
-          const targetIndex = Math.round((prevIndex / Math.max(1, previousColumn.length - 1)) * Math.max(0, column.length - 1));
-          const candidates = unique([targetIndex, clamp(targetIndex + (prevIndex % 2 === 0 ? 1 : -1), 0, column.length - 1)]);
-          candidates.forEach((candidateIndex) => {
-            const nextNode = column[candidateIndex];
+      if (previousRow.length) {
+        getMapRouteLinks(previousRow.length, row.length).forEach(([prevIndex, targetIndexes]) => {
+          const prevNode = previousRow[prevIndex];
+          if (!prevNode) return;
+          targetIndexes.forEach((targetIndex) => {
+            const nextNode = row[targetIndex];
             if (!nextNode) return;
             if (!nextNode.parentIds.includes(prevNode.id)) nextNode.parentIds.push(prevNode.id);
             if (!prevNode.childIds.includes(nextNode.id)) prevNode.childIds.push(nextNode.id);
           });
         });
       }
-      previousColumn = column;
+      previousRow = row;
     });
     return map;
   });
@@ -917,6 +1013,8 @@ function showScreen(screenId) {
   document.querySelectorAll(".screen").forEach((screen) => {
     screen.classList.toggle("active", screen.id === screenId);
   });
+  document.body.dataset.screen = screenId;
+  el("app-shell").dataset.screen = screenId;
 }
 
 function getSourceModel(source, battle) {
@@ -1007,12 +1105,16 @@ function createCardElement(source, options = {}) {
 
 function renderTitle() {
   showScreen("title-screen");
+  el("title-screen").dataset.hasRun = app.run ? "true" : "false";
   const titleMenu = el("title-menu-cards");
   clearElement(titleMenu);
   MENU_CARDS.forEach((menuCard) => {
     const buttonEl = document.createElement("button");
     buttonEl.type = "button";
     buttonEl.className = `menu-card-button${app.menuSelection === menuCard.id ? " is-selected" : ""}`;
+    buttonEl.dataset.card = menuCard.id;
+    buttonEl.setAttribute("aria-label", menuCard.title);
+    buttonEl.title = menuCard.id === "continue" && !app.run ? "No saved run exists yet." : menuCard.title;
     if (menuCard.id === "continue" && !app.run) buttonEl.disabled = true;
     buttonEl.addEventListener("mouseenter", () => {
       app.menuSelection = menuCard.id;
@@ -1022,48 +1124,27 @@ function renderTitle() {
     const art = document.createElement("div");
     art.className = "menu-card-art pixel-image";
     art.style.backgroundImage = `url("${menuCard.asset}")`;
-    const label = document.createElement("div");
-    label.className = "menu-card-label";
-    const strong = document.createElement("strong");
-    strong.textContent = menuCard.title;
-    const span = document.createElement("span");
-    span.textContent = menuCard.id === "continue" && !app.run ? "No saved run exists yet." : menuCard.copy;
-    label.append(strong, span);
-    buttonEl.append(art, label);
+    buttonEl.appendChild(art);
     titleMenu.appendChild(buttonEl);
   });
 
-  const summary = el("profile-summary");
-  clearElement(summary);
+  const meta = el("title-meta-plaque");
+  clearElement(meta);
   [
     ["Ascension", String(app.profile.ascensionLevel)],
-    ["Highest CP", app.profile.highestClearedCP >= 0 ? String(app.profile.highestClearedCP) : "None"],
-    ["Victories", String(app.profile.stats.victories)],
-    ["Bosses", String(app.profile.stats.bossesDefeated)],
+    ["Highest CP", app.profile.highestClearedCP >= 0 ? String(app.profile.highestClearedCP) : "-"],
+    ["Run", app.run ? "Continue" : "Empty"],
   ].forEach(([label, value]) => {
     const row = document.createElement("div");
-    row.className = "stat-row";
-    row.innerHTML = `<strong>${label}</strong><span>${value}</span>`;
-    summary.appendChild(row);
-  });
-
-  const unlock = el("unlock-summary");
-  clearElement(unlock);
-  [
-    ["Required CP", String(getRequiredCp())],
-    ["Decks", `${app.profile.unlockedDeckIds.length}/${STARTER_DECKS.length}`],
-    ["Challenges", `${app.profile.unlockedChallengeIds.length}/${CHALLENGES.length}`],
-    ["Collection", `${app.profile.discoveredCardIds.length} cards`],
-  ].forEach(([label, value]) => {
-    const row = document.createElement("div");
-    row.className = "stat-row";
-    row.innerHTML = `<strong>${label}</strong><span>${value}</span>`;
-    unlock.appendChild(row);
+    row.className = "title-meta-row";
+    row.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
+    meta.appendChild(row);
   });
 }
 
 function renderSetup() {
   showScreen("setup-screen");
+  el("setup-screen").dataset.deck = app.setupDeckId;
   const deckList = el("setup-deck-list");
   clearElement(deckList);
   STARTER_DECKS.forEach((deck) => {
@@ -1123,6 +1204,7 @@ function renderSetup() {
 function renderMap() {
   showScreen("map-screen");
   const run = app.run;
+  el("map-screen").dataset.map = String(run.mapIndex);
   const currentMap = getCurrentMap();
   const region = REGION_INFO[run.mapIndex];
   el("map-region-kicker").textContent = region.kicker;
@@ -1132,16 +1214,16 @@ function renderMap() {
   const summary = el("map-run-summary");
   clearElement(summary);
   [
-    ["Deck", `${run.deck.length} cards`],
-    ["Teeth", `${run.teeth}`],
-    ["Candles", `${run.candles}`],
-    ["Items", `${run.items.length}/${getItemCapacity(run)}`],
-    ["CP", `${run.cp}`],
-  ].forEach(([label, value]) => {
-    const row = document.createElement("div");
-    row.className = "stat-row";
-    row.innerHTML = `<strong>${label}</strong><span>${value}</span>`;
-    summary.appendChild(row);
+    ["candles", "Candles", String(run.candles)],
+    ["teeth", "Teeth", String(run.teeth)],
+    ["deck", "Deck", String(run.deck.length)],
+    ["items", "Items", `${run.items.length}/${getItemCapacity(run)}`],
+  ].forEach(([prop, label, value]) => {
+    const token = document.createElement("div");
+    token.className = "map-prop-token";
+    token.dataset.prop = prop;
+    token.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
+    summary.appendChild(token);
   });
 
   const bossOrder = el("map-boss-order");
@@ -1149,7 +1231,9 @@ function renderMap() {
   run.bossOrder.forEach((bossId, index) => {
     const chip = document.createElement("div");
     chip.className = `boss-chip${index === run.mapIndex ? " is-next" : ""}`;
-    chip.textContent = titleCase(bossId);
+    chip.textContent = MAP_NODE_GLYPHS[bossId] || titleCase(bossId).charAt(0);
+    chip.setAttribute("aria-label", titleCase(bossId));
+    chip.title = titleCase(bossId);
     bossOrder.appendChild(chip);
   });
 
@@ -1161,6 +1245,9 @@ function renderMap() {
     const buttonEl = document.createElement("button");
     buttonEl.type = "button";
     buttonEl.className = `map-node${node.state === "available" ? " is-available" : ""}${node.id === app.selectedMapNodeId ? " is-selected" : ""}${node.state === "cleared" ? " is-cleared" : ""}`;
+    buttonEl.dataset.type = node.type;
+    buttonEl.dataset.nodeId = node.id;
+    if (node.bossId) buttonEl.dataset.boss = node.bossId;
     buttonEl.style.left = `${node.x}%`;
     buttonEl.style.top = `${node.y}%`;
     buttonEl.disabled = node.state !== "available";
@@ -1168,12 +1255,19 @@ function renderMap() {
       app.selectedMapNodeId = node.id;
       renderMap();
     });
-    const meta = getNodeMeta(node);
-    const strong = document.createElement("strong");
-    strong.textContent = meta.label;
-    const span = document.createElement("span");
-    span.textContent = node.type === "boss" ? titleCase(node.bossId) : meta.copy;
-    buttonEl.append(strong, span);
+    const visual = getMapNodeVisual(node);
+    buttonEl.setAttribute("aria-label", visual.label);
+    const icon = document.createElement("div");
+    icon.className = "map-node-icon pixel-image";
+    if (visual.asset) icon.style.backgroundImage = `url("${visual.asset}")`;
+    if (visual.glyph) {
+      icon.classList.add(`is-${visual.glyph}`);
+      if (node.type === "boss") icon.textContent = visual.glyph;
+    }
+    const ribbon = document.createElement("div");
+    ribbon.className = "map-node-ribbon";
+    ribbon.textContent = visual.label;
+    buttonEl.append(icon, ribbon);
     nodeLayer.appendChild(buttonEl);
   });
 
@@ -1183,12 +1277,16 @@ function renderMap() {
     node.childIds.forEach((childId) => {
       const child = currentMap.find((candidate) => candidate.id === childId);
       if (!child) return;
-      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("x1", String(node.x));
-      line.setAttribute("y1", String(node.y));
-      line.setAttribute("x2", String(child.x));
-      line.setAttribute("y2", String(child.y));
-      lineSvg.appendChild(line);
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const midX = (node.x + child.x) / 2;
+      const midY = ((node.y + child.y) / 2) + (node.laneIndex <= child.laneIndex ? -2.2 : 2.2);
+      const controlOffset = ((node.rowIndex + child.laneIndex + 1) % 2 === 0 ? -1 : 1) * 1.4;
+      path.setAttribute(
+        "d",
+        `M ${node.x} ${node.y} Q ${midX + controlOffset} ${midY}, ${child.x} ${child.y}`,
+      );
+      if (node.state === "cleared") path.classList.add("is-cleared");
+      lineSvg.appendChild(path);
     });
   });
   renderMapDetail(selectedNode);
@@ -1198,17 +1296,21 @@ function renderMapDetail(node) {
   const detail = el("map-detail");
   clearElement(detail);
   if (!node) {
-    detail.innerHTML = "<div class='panel-kicker'>Trail Note</div><p class='detail-copy'>Choose an available node to continue.</p>";
+    detail.innerHTML = "<div class='panel-kicker'>Trail Note</div><p class='detail-copy'>Choose a marked stop.</p>";
+    detail.style.left = "";
+    detail.style.top = "";
+    detail.style.right = "";
+    detail.style.bottom = "";
     return;
   }
   const meta = getNodeMeta(node);
   detail.innerHTML = `
-    <div class="panel-kicker">${node.type === "boss" ? "Boss Node" : "Trail Node"}</div>
+    <div class="panel-kicker">${node.type === "boss" ? "Boss" : "Trail Stop"}</div>
     <h3>${node.type === "boss" ? titleCase(node.bossId) : meta.label}</h3>
-    <p class="detail-copy">${node.type === "boss" ? `Face ${titleCase(node.bossId)} and claim a rare reward if you survive.` : meta.copy}</p>
+    <p class="detail-copy">${node.type === "boss" ? `Face ${titleCase(node.bossId)}.` : meta.copy}</p>
     <div class="map-detail-meta">
-      <span>Status: ${titleCase(node.state)}</span>
-      <span>Depth: ${node.depth + 1}</span>
+      <span>${node.state === "available" ? "Open" : titleCase(node.state)}</span>
+      <span>Stop ${node.depth + 1}</span>
     </div>
   `;
   const actions = document.createElement("div");
@@ -1217,6 +1319,30 @@ function renderMapDetail(node) {
   travel.disabled = node.state !== "available";
   actions.appendChild(travel);
   detail.appendChild(actions);
+  positionMapDetail(node.id);
+}
+
+function positionMapDetail(nodeId) {
+  const detail = el("map-detail");
+  if (!detail || typeof document.querySelector !== "function") return;
+  const selectedNode = document.querySelector(`.map-node[data-node-id="${nodeId}"]`);
+  const stage = document.querySelector("#map-screen #map-parchment");
+  if (!selectedNode || !stage) return;
+  if (typeof selectedNode.getBoundingClientRect !== "function" || typeof stage.getBoundingClientRect !== "function") return;
+  const stageRect = stage.getBoundingClientRect();
+  const nodeRect = selectedNode.getBoundingClientRect();
+  const detailRect = detail.getBoundingClientRect();
+  let left = nodeRect.right - stageRect.left + 18;
+  if (left + detailRect.width > stageRect.width - 18) {
+    left = nodeRect.left - stageRect.left - detailRect.width - 18;
+  }
+  let top = nodeRect.top - stageRect.top - 26;
+  left = clamp(left, 18, Math.max(18, stageRect.width - detailRect.width - 18));
+  top = clamp(top, 28, Math.max(28, stageRect.height - detailRect.height - 18));
+  detail.style.left = `${left}px`;
+  detail.style.top = `${top}px`;
+  detail.style.right = "auto";
+  detail.style.bottom = "auto";
 }
 
 function startNewGameFromSetup() {
@@ -1367,13 +1493,20 @@ function getBoard(battle, side) {
 function renderBattle() {
   showScreen("battle-screen");
   const battle = app.run.battle;
+  el("battle-screen").dataset.boss = battle.bossId || "encounter";
+  el("battle-screen").dataset.phase = String(battle.phaseIndex);
+  el("battle-screen").dataset.mustDraw = battle.mustDraw ? "true" : "false";
+  el("battle-screen").dataset.selection = app.selection?.type || "";
   el("battle-candles").textContent = String(app.run.candles);
   el("battle-teeth").textContent = String(app.run.teeth);
   el("battle-bones").textContent = String(battle.playerBones);
-  el("battle-main-count").textContent = String(battle.mainDeck.length);
-  el("battle-side-count").textContent = String(battle.sideDeck.length);
   el("battle-encounter-kicker").textContent = battle.bossId ? "Boss Battle" : "Encounter";
   el("battle-encounter-title").textContent = battle.bossId ? `${battle.title} - ${battle.phases[battle.phaseIndex].name}` : battle.title;
+  el("draw-main-btn").textContent = "Deck";
+  el("draw-side-btn").textContent = "Squirrel";
+  el("ring-bell-btn").textContent = "Bell";
+  el("draw-main-btn").dataset.count = String(battle.mainDeck.length);
+  el("draw-side-btn").dataset.count = String(battle.sideDeck.length);
   el("draw-main-btn").disabled = !battle.mustDraw;
   el("draw-side-btn").disabled = !battle.mustDraw;
   el("ring-bell-btn").disabled = battle.mustDraw || Boolean(app.selection);
@@ -1397,13 +1530,25 @@ function renderItemBar() {
     const slot = document.createElement("button");
     slot.type = "button";
     slot.className = `item-slot${itemId ? "" : " is-empty"}`;
+    slot.dataset.item = itemId || "empty";
     slot.disabled = !itemId || Boolean(app.selection);
     if (itemId) {
       const item = ITEM_BY_ID[itemId];
-      slot.innerHTML = `<strong>${item.name}</strong><span>${item.description}</span>`;
+      const abbreviation = item.name
+        .split(/\s+/)
+        .map((part) => part.charAt(0))
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+      slot.dataset.sig = abbreviation || item.name.slice(0, 2).toUpperCase();
+      slot.setAttribute("aria-label", item.name);
+      slot.title = item.description;
+      slot.innerHTML = `<strong>${item.name}</strong>`;
       slot.addEventListener("click", () => handleItemUse(itemId));
     } else {
-      slot.innerHTML = "<strong>Empty Slot</strong><span>No item is stored here.</span>";
+      slot.dataset.sig = "";
+      slot.setAttribute("aria-label", "Empty item slot");
+      slot.innerHTML = "<strong>Empty</strong>";
     }
     itemBar.appendChild(slot);
   }
@@ -1476,7 +1621,7 @@ function renderSelectionBanner() {
   const text = el("selection-text");
   if (battle.mustDraw) {
     banner.classList.remove("hidden");
-    text.textContent = "Draw from your main deck or your squirrel deck before doing anything else.";
+    text.textContent = "Draw from the deck or the squirrel pile.";
     return;
   }
   if (!app.selection) {
@@ -1505,7 +1650,7 @@ function renderInspectPanel() {
   if (!app.inspect) {
     const copy = document.createElement("p");
     copy.className = "detail-copy";
-    copy.textContent = "Click a card on the board or in your hand to inspect it here.";
+    copy.textContent = "Touch a creature to read it.";
     panel.appendChild(copy);
     return;
   }
@@ -2278,6 +2423,7 @@ function renderEvent() {
   showScreen("event-screen");
   const event = app.run.event;
   const panel = el("event-panel");
+  panel.className = `event-panel event-panel--${event.kind}${event.rare ? " is-rare" : ""}`;
   clearElement(panel);
   const header = document.createElement("div");
   header.className = "event-header";
@@ -2490,6 +2636,7 @@ function evaluateTrial(trialId) {
 
 function renderCodex() {
   showScreen("codex-screen");
+  el("codex-screen").dataset.tab = app.codexTab;
   el("codex-current-tab").classList.toggle("is-active", app.codexTab === "current");
   el("codex-discovered-tab").classList.toggle("is-active", app.codexTab === "discovered");
   const summary = el("codex-summary");
@@ -2520,6 +2667,7 @@ function renderCodex() {
 function renderEnding() {
   showScreen("ending-screen");
   if (!app.endingState) return;
+  el("ending-screen").dataset.outcome = app.endingState.kicker === "The Table Breaks" ? "victory" : "defeat";
   el("ending-kicker").textContent = app.endingState.kicker;
   el("ending-title").textContent = app.endingState.title;
   el("ending-copy").textContent = app.endingState.copy;
