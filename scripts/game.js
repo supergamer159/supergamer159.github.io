@@ -356,6 +356,12 @@ const BATTLE_LAYOUT = Object.freeze({
     drawWidth: 104,
     drawHeight: 142,
     bellBottom: 28,
+    propsLeftInset: 14,
+    propsLeftTop: 128,
+    propsLeftWidth: 108,
+    propsRightInset: 16,
+    propsRightTop: 108,
+    propsRightWidth: 184,
   },
 });
 
@@ -764,7 +770,7 @@ function loadRun() {
     const raw = localStorage.getItem(STORAGE_KEYS.run);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed.version !== 2) return null;
+    if (parsed.version !== 3) return null;
     return parsed;
   } catch (error) {
     console.warn("Failed to load run", error);
@@ -941,51 +947,6 @@ function recordDeathcardFromRun(run) {
   return deathcard;
 }
 
-function mapRowXPositions(count) {
-  if (count <= 1) return [50];
-  if (count === 2) return [38, 62];
-  if (count === 3) return [28, 50, 72];
-  if (count === 4) return [20, 40, 60, 80];
-  const step = 64 / Math.max(1, count - 1);
-  return Array.from({ length: count }, (_, index) => 18 + (index * step));
-}
-
-function mapRowYPosition(rowCount, rowIndex) {
-  if (rowCount <= 1) return 52;
-  const top = 14;
-  const bottom = 84;
-  const step = (bottom - top) / Math.max(1, rowCount - 1);
-  return bottom - (rowIndex * step);
-}
-
-function mapAnchorJitter(mapIndex, rowIndex, laneIndex) {
-  const xSeed = ((mapIndex + 1) * 17) + ((rowIndex + 1) * 13) + ((laneIndex + 1) * 9);
-  const ySeed = ((mapIndex + 1) * 11) + ((rowIndex + 1) * 19) + ((laneIndex + 1) * 7);
-  return {
-    x: (((xSeed % 5) - 2) * 0.8),
-    y: (((ySeed % 5) - 2) * 0.45),
-  };
-}
-
-function getMapRouteLinks(previousCount, nextCount) {
-  const template = MAP_ROUTE_LINKS[`${previousCount}-${nextCount}`];
-  if (template) return template.map(([fromIndex, targets]) => [fromIndex, [...targets]]);
-  if (previousCount === nextCount) {
-    return Array.from({ length: previousCount }, (_, index) => [index, [index]]);
-  }
-  if (previousCount > nextCount) {
-    return Array.from({ length: previousCount }, (_, index) => {
-      const target = Math.round((index / Math.max(1, previousCount - 1)) * Math.max(0, nextCount - 1));
-      return [index, [target]];
-    });
-  }
-  return Array.from({ length: previousCount }, (_, index) => {
-    const primary = Math.round((index / Math.max(1, previousCount - 1)) * Math.max(0, nextCount - 1));
-    const secondary = clamp(primary + 1, 0, Math.max(0, nextCount - 1));
-    return [index, unique([primary, secondary])];
-  });
-}
-
 function getMapNodeVisual(node) {
   if (node.type === "boss") {
     return {
@@ -996,7 +957,7 @@ function getMapNodeVisual(node) {
   }
   const meta = getNodeMeta(node);
   return {
-    asset: MAP_NODE_ASSETS[node.type] || "",
+    asset: MAP_NODE_ASSETS[node.iconKey || node.type] || "",
     glyph: node.type === "campfire" ? "fire" : "",
     label: meta.label,
     copy: meta.copy,
@@ -1300,8 +1261,47 @@ function getLaneSlotElement(side, lane) {
   return el("battle-screen")?.querySelector(`.lane-slot[data-side="${side}"][data-lane="${lane}"]`) || null;
 }
 
+function getLaneCardElement(side, lane) {
+  return getLaneSlotElement(side, lane)?.querySelector(".card") || null;
+}
+
 function getQueueSlotElement(lane) {
   return el("enemy-queue")?.querySelector(`.queue-slot[data-lane="${lane}"]`) || null;
+}
+
+function applyBattleReferenceLayout() {
+  const battleScreen = el("battle-screen");
+  if (!battleScreen) return;
+  const layout = BATTLE_LAYOUT.desktop;
+  battleScreen.style.setProperty("--battle-table-width", `${layout.tableWidth}px`);
+  battleScreen.style.setProperty("--battle-surface-top", `${layout.surfaceTop}px`);
+  battleScreen.style.setProperty("--battle-surface-bottom", `${layout.surfaceBottom}px`);
+  battleScreen.style.setProperty("--battle-queue-top", `${layout.queueTop}px`);
+  battleScreen.style.setProperty("--battle-queue-width", `${layout.queueWidth}px`);
+  battleScreen.style.setProperty("--battle-rows-width", `${layout.rowsWidth}px`);
+  battleScreen.style.setProperty("--battle-enemy-row-top", `${layout.enemyRowTop}px`);
+  battleScreen.style.setProperty("--battle-scale-top", `${layout.scaleTop}px`);
+  battleScreen.style.setProperty("--battle-scale-width", `${layout.scaleWidth}px`);
+  battleScreen.style.setProperty("--battle-player-row-top", `${layout.playerRowTop}px`);
+  battleScreen.style.setProperty("--battle-lane-height", `${layout.laneHeight}px`);
+  battleScreen.style.setProperty("--battle-hand-padding", `0 ${layout.handPaddingRight}px ${layout.handPaddingBottom}px ${layout.handPaddingLeft}px`);
+  battleScreen.style.setProperty("--battle-draw-bottom", `${layout.drawBottom}px`);
+  battleScreen.style.setProperty("--battle-draw-inset", `${layout.drawInset}px`);
+  battleScreen.style.setProperty("--battle-draw-width", `${layout.drawWidth}px`);
+  battleScreen.style.setProperty("--battle-draw-height", `${layout.drawHeight}px`);
+  battleScreen.style.setProperty("--battle-bell-bottom", `${layout.bellBottom}px`);
+  battleScreen.style.setProperty("--battle-props-left-inset", `${layout.propsLeftInset}px`);
+  battleScreen.style.setProperty("--battle-props-left-top", `${layout.propsLeftTop}px`);
+  battleScreen.style.setProperty("--battle-props-left-width", `${layout.propsLeftWidth}px`);
+  battleScreen.style.setProperty("--battle-props-right-inset", `${layout.propsRightInset}px`);
+  battleScreen.style.setProperty("--battle-props-right-top", `${layout.propsRightTop}px`);
+  battleScreen.style.setProperty("--battle-props-right-width", `${layout.propsRightWidth}px`);
+  battleScreen.style.setProperty("--battle-main-deck-art", `url("${BATTLE_SKIN_ASSETS.mainDeck}")`);
+  battleScreen.style.setProperty("--battle-side-deck-art", `url("${BATTLE_SKIN_ASSETS.sideDeck}")`);
+  battleScreen.style.setProperty("--battle-queue-back-art", `url("${BATTLE_SKIN_ASSETS.queueBack}")`);
+  battleScreen.style.setProperty("--battle-slot-art", `url("${BATTLE_SKIN_ASSETS.slot}")`);
+  battleScreen.style.setProperty("--battle-slot-host-art", `url("${BATTLE_SKIN_ASSETS.slotHost}")`);
+  battleScreen.style.setProperty("--battle-slot-sacrifice-art", `url("${BATTLE_SKIN_ASSETS.slotSacrifice}")`);
 }
 
 async function animateQueueTakeoff(lane) {
@@ -1320,27 +1320,33 @@ async function animateQueueTakeoff(lane) {
 async function animateEnemyDeployment(lane) {
   if (app.profile?.options?.reducedMotion) return;
   const slot = getLaneSlotElement("enemy", lane);
-  const card = slot?.querySelector(".card");
+  const card = getLaneCardElement("enemy", lane);
   if (!slot || !card) return;
-  slot.classList.remove("is-deploying-enemy");
+  slot.classList.remove("is-card-active");
+  card.classList.remove("is-deploying-enemy");
   void card.offsetWidth;
-  slot.classList.add("is-deploying-enemy");
+  slot.classList.add("is-card-active");
+  card.classList.add("is-deploying-enemy");
   await sleep(220);
-  slot.classList.remove("is-deploying-enemy");
+  card.classList.remove("is-deploying-enemy");
+  slot.classList.remove("is-card-active");
   await sleep(50);
 }
 
 async function animateAttackLunge(side, lane) {
   if (app.profile?.options?.reducedMotion) return;
   const slot = getLaneSlotElement(side, lane);
-  const card = slot?.querySelector(".card");
+  const card = getLaneCardElement(side, lane);
   if (!slot || !card) return;
   const lungeClass = side === "player" ? "is-lunging-player" : "is-lunging-enemy";
-  slot.classList.remove("is-lunging-player", "is-lunging-enemy");
+  slot.classList.remove("is-card-active");
+  card.classList.remove("is-lunging-player", "is-lunging-enemy");
   void card.offsetWidth;
-  slot.classList.add(lungeClass);
+  slot.classList.add("is-card-active");
+  card.classList.add(lungeClass);
   await sleep(220);
-  slot.classList.remove(lungeClass);
+  card.classList.remove(lungeClass);
+  slot.classList.remove("is-card-active");
   await sleep(50);
 }
 
@@ -1767,6 +1773,8 @@ function renderMap() {
   const run = app.run;
   el("map-screen").dataset.map = String(run.mapIndex);
   const currentMap = getCurrentMap();
+  const currentNodes = getCurrentMapNodes(currentMap);
+  const currentEdges = getCurrentMapEdges(currentMap);
   const region = REGION_INFO[run.mapIndex];
   el("map-region-kicker").textContent = region.kicker;
   el("map-region-title").textContent = region.title;
@@ -1800,9 +1808,9 @@ function renderMap() {
 
   const nodeLayer = el("map-node-layer");
   clearElement(nodeLayer);
-  const selectedNode = getNodeById(app.selectedMapNodeId) || currentMap.find((node) => node.state === "available") || currentMap[0] || null;
+  const selectedNode = getNodeById(app.selectedMapNodeId) || currentNodes.find((node) => node.state === "available") || currentNodes[0] || null;
   app.selectedMapNodeId = selectedNode?.id || null;
-  currentMap.forEach((node) => {
+  currentNodes.forEach((node) => {
     const buttonEl = document.createElement("button");
     buttonEl.type = "button";
     buttonEl.className = `map-node${node.state === "available" ? " is-available" : ""}${node.id === app.selectedMapNodeId ? " is-selected" : ""}${node.state === "cleared" ? " is-cleared" : ""}`;
@@ -1825,30 +1833,20 @@ function renderMap() {
       icon.classList.add(`is-${visual.glyph}`);
       if (node.type === "boss") icon.textContent = visual.glyph;
     }
-    const ribbon = document.createElement("div");
-    ribbon.className = "map-node-ribbon";
-    ribbon.textContent = visual.label;
-    buttonEl.append(icon, ribbon);
+    buttonEl.appendChild(icon);
     nodeLayer.appendChild(buttonEl);
   });
 
   const lineSvg = el("map-lines");
   clearElement(lineSvg);
-  currentMap.forEach((node) => {
-    node.childIds.forEach((childId) => {
-      const child = currentMap.find((candidate) => candidate.id === childId);
-      if (!child) return;
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      const midX = (node.x + child.x) / 2;
-      const midY = ((node.y + child.y) / 2) + (node.laneIndex <= child.laneIndex ? -2.2 : 2.2);
-      const controlOffset = ((node.rowIndex + child.laneIndex + 1) % 2 === 0 ? -1 : 1) * 1.4;
-      path.setAttribute(
-        "d",
-        `M ${node.x} ${node.y} Q ${midX + controlOffset} ${midY}, ${child.x} ${child.y}`,
-      );
-      if (node.state === "cleared") path.classList.add("is-cleared");
-      lineSvg.appendChild(path);
-    });
+  currentEdges.forEach((edge) => {
+    const child = currentNodes.find((candidate) => candidate.id === edge.to);
+    if (!child) return;
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", edge.d);
+    if ((currentMap.traversedEdgeIds || []).includes(edge.id)) path.classList.add("is-traversed");
+    else if (child.state === "available" && child.unlockedFromEdgeId === edge.id) path.classList.add("is-frontier");
+    lineSvg.appendChild(path);
   });
   renderMapDetail(selectedNode);
 }
@@ -1858,12 +1856,10 @@ function renderMapDetail(node) {
   clearElement(detail);
   if (!node) {
     detail.innerHTML = "<div class='panel-kicker'>Trail Note</div><p class='detail-copy'>Choose a marked stop.</p>";
-    detail.style.left = "";
-    detail.style.top = "";
-    detail.style.right = "";
-    detail.style.bottom = "";
+    detail.dataset.anchor = "right";
     return;
   }
+  detail.dataset.anchor = node.panelAnchor || "right";
   const meta = getNodeMeta(node);
   detail.innerHTML = `
     <div class="panel-kicker">${node.type === "boss" ? "Boss" : "Trail Stop"}</div>
@@ -1880,30 +1876,6 @@ function renderMapDetail(node) {
   travel.disabled = node.state !== "available";
   actions.appendChild(travel);
   detail.appendChild(actions);
-  positionMapDetail(node.id);
-}
-
-function positionMapDetail(nodeId) {
-  const detail = el("map-detail");
-  if (!detail || typeof document.querySelector !== "function") return;
-  const selectedNode = document.querySelector(`.map-node[data-node-id="${nodeId}"]`);
-  const stage = document.querySelector("#map-screen #map-parchment");
-  if (!selectedNode || !stage) return;
-  if (typeof selectedNode.getBoundingClientRect !== "function" || typeof stage.getBoundingClientRect !== "function") return;
-  const stageRect = stage.getBoundingClientRect();
-  const nodeRect = selectedNode.getBoundingClientRect();
-  const detailRect = detail.getBoundingClientRect();
-  let left = nodeRect.right - stageRect.left + 18;
-  if (left + detailRect.width > stageRect.width - 18) {
-    left = nodeRect.left - stageRect.left - detailRect.width - 18;
-  }
-  let top = nodeRect.top - stageRect.top - 26;
-  left = clamp(left, 18, Math.max(18, stageRect.width - detailRect.width - 18));
-  top = clamp(top, 28, Math.max(28, stageRect.height - detailRect.height - 18));
-  detail.style.left = `${left}px`;
-  detail.style.top = `${top}px`;
-  detail.style.right = "auto";
-  detail.style.bottom = "auto";
 }
 
 function startNewGameFromSetup() {
@@ -1921,7 +1893,7 @@ function startNewGameFromSetup() {
   app.profile.stats.runsStarted += 1;
   saveProfile();
   app.run = createNewRun(chosenDeck.id, selectedChallenges);
-  app.selectedMapNodeId = getCurrentMap().find((node) => node.state === "available")?.id || null;
+  app.selectedMapNodeId = getCurrentMapNodes().find((node) => node.state === "available")?.id || null;
   app.selection = null;
   app.inspect = null;
   app.endingState = null;
@@ -2060,6 +2032,7 @@ function renderBattle() {
   const battle = app.run.battle;
   const battleBusy = app.battleAnimating;
   const battleScreen = el("battle-screen");
+  applyBattleReferenceLayout();
   const scaleLean = clamp(battle.scale, -SCALE_LIMIT, SCALE_LIMIT);
   battleScreen.dataset.boss = battle.bossId || "encounter";
   battleScreen.dataset.phase = String(battle.phaseIndex);
@@ -2999,11 +2972,15 @@ function startEventForNode(node) {
 
 function markNodeCleared(nodeId) {
   const map = getCurrentMap();
-  const node = map.find((entry) => entry.id === nodeId);
+  const node = getCurrentMapNodes(map).find((entry) => entry.id === nodeId);
   if (!node) return;
   node.state = "cleared";
-  const clearedIds = map.filter((entry) => entry.state === "cleared").map((entry) => entry.id);
-  unlockAvailableNodes(map, clearedIds);
+  if (node.unlockedFromEdgeId) map.traversedEdgeIds = unique([...(map.traversedEdgeIds || []), node.unlockedFromEdgeId]);
+  const frontier = getCurrentMapEdges(map)
+    .filter((edge) => edge.from === node.id)
+    .map((edge) => ({ nodeId: edge.to, edgeId: edge.id }))
+    .filter((entry) => getCurrentMapNodes(map).some((candidate) => candidate.id === entry.nodeId && candidate.state !== "cleared"));
+  unlockAvailableNodes(map, frontier);
 }
 
 function completeNodeAndReturnToMap(nodeId) {
@@ -3012,11 +2989,11 @@ function completeNodeAndReturnToMap(nodeId) {
   markNodeCleared(nodeId);
   if (node.type === "boss" && app.run.mapIndex < app.run.maps.length - 1) {
     app.run.mapIndex += 1;
-    unlockAvailableNodes(getCurrentMap(), []);
+    initializeMapProgress(getCurrentMap());
   }
   app.run.scene = "map";
   app.run.event = null;
-  app.selectedMapNodeId = getCurrentMap().find((entry) => entry.state === "available")?.id || null;
+  app.selectedMapNodeId = getCurrentMapNodes().find((entry) => entry.state === "available")?.id || null;
   saveRun();
   renderMap();
 }
