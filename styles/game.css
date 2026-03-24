@@ -1143,6 +1143,13 @@ body.reduced-motion *::after {
   font-size: 9px;
 }
 
+.card .card-name,
+#battle-screen .card .card-name,
+#codex-screen .card .card-name {
+  color: #120a06;
+  text-shadow: none;
+}
+
 .card-cost {
   top: auto;
   bottom: 18.5%;
