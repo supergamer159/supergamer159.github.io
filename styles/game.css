@@ -154,6 +154,27 @@ body.reduced-motion *::after {
   pointer-events: none;
 }
 
+#three-root {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s ease;
+}
+
+#three-root canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#app-shell[data-renderer="3d"] #three-root {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .screen {
   position: absolute;
   inset: 0;
@@ -6319,4 +6340,70 @@ body::before {
   #map-screen #map-tooltip {
     width: 156px;
   }
+}
+
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen .map-stage,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-stage {
+  background: transparent !important;
+}
+
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen .map-board {
+  pointer-events: none;
+}
+
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen #map-parchment {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen #map-parchment::before,
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen #map-parchment::after,
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen .map-scene-layer,
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen .map-lines,
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen .map-node-layer {
+  display: none !important;
+}
+
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen .map-actions,
+#app-shell[data-renderer="3d"][data-screen="map-screen"] #map-screen #map-tooltip {
+  pointer-events: auto;
+}
+
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-cabin-backdrop,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .queue-band,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #enemy-row,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .scale-band,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #player-row,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .hand-band,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #draw-main-btn,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #draw-side-btn,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #ring-bell-btn,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #item-bar {
+  display: none !important;
+}
+
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-stage::before,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-stage::after,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-surface::before,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-surface::after {
+  display: none !important;
+}
+
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-table,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-surface,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-props-left,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-props-right {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-surface {
+  pointer-events: none;
+}
+
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #battle-codex-btn,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #pause-btn,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .selection-banner,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #inspect-panel {
+  pointer-events: auto;
 }

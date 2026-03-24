@@ -321,10 +321,36 @@ function buildSceneDecorations(treeDecorations, mountainDecorations) {
   ];
 }
 
+function createMapScene3DConfig(extra = {}) {
+  return {
+    table: {
+      width: extra.table?.width || 11.2,
+      height: extra.table?.height || 16.2,
+      raise: extra.table?.raise || 0.12,
+      borderHeight: extra.table?.borderHeight || 0.18,
+    },
+    camera: {
+      fov: extra.camera?.fov || 31,
+      position: [...(extra.camera?.position || [0, 8.3, 8.9])],
+      lookAt: [...(extra.camera?.lookAt || [0, 0.1, 0.4])],
+    },
+    drift: {
+      amount: extra.drift?.amount || 0.09,
+      speed: extra.drift?.speed || 0.3,
+    },
+    nodeLift: extra.nodeLift || 0.16,
+    decorationLift: extra.decorationLift || 0.05,
+  };
+}
+
 const MAP_REGION_TEMPLATES = Object.freeze([
   {
     id: "woodland",
     viewBox: "0 0 100 100",
+    scene3d: createMapScene3DConfig({
+      camera: { position: [-0.28, 8.45, 8.96], lookAt: [0.05, 0.08, 0.26] },
+      drift: { amount: 0.08, speed: 0.28 },
+    }),
     entryNodeIds: ["woodland-top-left", "woodland-top-right"],
     nodes: [
       createMapNodeDef("woodland-top-left", "campfire", 34, 9, 0),
@@ -376,6 +402,10 @@ const MAP_REGION_TEMPLATES = Object.freeze([
   {
     id: "marsh",
     viewBox: "0 0 100 100",
+    scene3d: createMapScene3DConfig({
+      camera: { position: [0.22, 8.55, 9.14], lookAt: [0, 0.1, 0.18] },
+      drift: { amount: 0.1, speed: 0.24 },
+    }),
     entryNodeIds: ["marsh-top-left", "marsh-top-right"],
     nodes: [
       createMapNodeDef("marsh-top-left", "battle", 33, 10, 0),
@@ -427,6 +457,10 @@ const MAP_REGION_TEMPLATES = Object.freeze([
   {
     id: "snowline",
     viewBox: "0 0 100 100",
+    scene3d: createMapScene3DConfig({
+      camera: { position: [0.1, 8.72, 9.22], lookAt: [0, 0.05, 0.22] },
+      drift: { amount: 0.075, speed: 0.34 },
+    }),
     entryNodeIds: ["snow-top-left", "snow-top-right"],
     nodes: [
       createMapNodeDef("snow-top-left", "backpack", 34, 10, 0),
@@ -478,6 +512,10 @@ const MAP_REGION_TEMPLATES = Object.freeze([
   {
     id: "cabin-door",
     viewBox: "0 0 100 100",
+    scene3d: createMapScene3DConfig({
+      camera: { position: [0, 8.14, 8.52], lookAt: [0, 0.12, 0.12] },
+      drift: { amount: 0.06, speed: 0.22 },
+    }),
     entryNodeIds: ["cabin-start"],
     nodes: [
       createMapNodeDef("cabin-start", "battle", 50, 22, 0, { tooltipTitle: "Question", tooltipCopy: "The trail tightens into Leshy's last path." }),
@@ -534,6 +572,26 @@ const BATTLE_LAYOUT = Object.freeze({
     propsRightInset: 16,
     propsRightTop: 108,
     propsRightWidth: 184,
+    scene3d: {
+      table: { width: 18, height: 13.4, thickness: 0.45 },
+      camera: { fov: 33, position: [0, 8.7, 8.8], lookAt: [0, 0.7, -0.65] },
+      drift: { amount: 0.055, speed: 0.22 },
+      cardTilt: 0.98,
+      cardScale: 1.18,
+      queueZ: -4.55,
+      enemyRowZ: -2.24,
+      scaleZ: -0.2,
+      playerRowZ: 2.28,
+      handZ: 5.5,
+      laneXs: [-4.35, -1.45, 1.45, 4.35],
+      deckLeft: { x: -7.2, z: 5.48 },
+      deckRight: { x: 7.2, z: 5.48 },
+      bell: { x: 0, z: 5.66 },
+      itemOrigin: { x: -8.08, z: 1.8 },
+      itemStepZ: 1.58,
+      inspectAnchor: { x: 7.78, z: 1.2 },
+      scaleWidth: 4.8,
+    },
   },
 });
 
@@ -880,6 +938,244 @@ const app = {
     frameId: 0,
     width: 0,
     height: 0,
+  },
+};
+
+const THREE_BRIDGE_LISTENERS = new Set();
+
+function notifyThreeBridge(event = { type: "state" }) {
+  THREE_BRIDGE_LISTENERS.forEach((listener) => {
+    try {
+      listener(event);
+    } catch (error) {
+      console.warn("Three bridge listener failed", error);
+    }
+  });
+}
+
+function build3DCardState(model, extra = {}) {
+  return {
+    id: model.id || model.cardId || "",
+    name: model.name || "",
+    portrait: model.portrait || "",
+    emission: model.emission || "",
+    costBlood: Number(model.costBlood) || 0,
+    costBones: Number(model.costBones) || 0,
+    attack: Number(model.attack) || 0,
+    health: Number(model.health) || 0,
+    maxHealth: Number(model.maxHealth ?? model.health) || 0,
+    sigils: [...(model.sigils || [])],
+    addedSigils: [...(model.addedSigils || [])],
+    text: model.text || "",
+    frame: model.frame || (model.rare ? "rare" : "normal"),
+    rare: Boolean(model.rare),
+    tribe: model.tribe || "none",
+    special: model.special || null,
+    ...extra,
+  };
+}
+
+function build3DEntryState(entry) {
+  const model = getEntryModel(entry);
+  return build3DCardState(model, {
+    uid: entry.uid,
+    sourceUid: entry.sourceUid || null,
+    temporary: Boolean(entry.temporary),
+    attackBuff: Number(entry.attackBuff) || 0,
+    healthBuff: Number(entry.healthBuff) || 0,
+    removedSigils: [...(entry.removedSigils || [])],
+  });
+}
+
+function build3DUnitState(battle, unit) {
+  if (!unit) return null;
+  const base = getCardDef(unit.cardId) || {};
+  return build3DCardState({
+    id: unit.cardId,
+    name: unit.name,
+    portrait: base.portrait || "",
+    emission: base.emission || "",
+    costBlood: base.costBlood || 0,
+    costBones: base.costBones || 0,
+    attack: getUnitBaseAttack(battle, unit),
+    health: unit.health,
+    maxHealth: unit.maxHealth,
+    sigils: [...unit.sigils],
+    addedSigils: [...(unit.addedSigils || [])],
+    text: unit.text || base.text || "",
+    frame: unit.frame || base.frame || (unit.rare ? "rare" : "normal"),
+    rare: Boolean(unit.rare),
+    tribe: unit.tribe || base.tribe || "none",
+    special: unit.special || base.special || null,
+  }, {
+    uid: unit.uid,
+    sourceUid: unit.sourceUid || null,
+    side: unit.side,
+    lane: unit.lane,
+    baseAttack: unit.baseAttack,
+    flags: { ...(unit.flags || {}) },
+    turnsInPlay: Number(unit.turnsInPlay) || 0,
+    removedSigils: [...(unit.removedSigils || [])],
+  });
+}
+
+function getScreenState() {
+  return {
+    screenId: document.body.dataset.screen || "title-screen",
+    runScene: app.run?.scene || null,
+    reducedMotion: Boolean(app.profile?.options?.reducedMotion),
+    pixelScaling: Boolean(app.profile?.options?.pixelScaling),
+    hasRun: Boolean(app.run),
+  };
+}
+
+function getMapState() {
+  const map = getCurrentMap();
+  const nodes = getCurrentMapNodes(map).map((node) => ({
+    ...node,
+    parentIds: [...(node.parentIds || [])],
+    childIds: [...(node.childIds || [])],
+    visual: { ...getMapNodeVisual(node) },
+  }));
+  const tooltipNode = getMapTooltipNode(nodes);
+  const traversedEdgeIds = [...(map?.traversedEdgeIds || [])];
+  return {
+    active: app.run?.scene === "map",
+    mapIndex: app.run?.mapIndex ?? 0,
+    region: REGION_INFO[app.run?.mapIndex || 0] ? { ...REGION_INFO[app.run.mapIndex || 0] } : null,
+    selectedNodeId: app.selectedMapNodeId || null,
+    hoverNodeId: app.mapHoverNodeId || null,
+    tooltipNodeId: tooltipNode?.id || null,
+    viewBox: map?.viewBox || "0 0 100 100",
+    scene3d: clone(map?.scene3d || MAP_REGION_TEMPLATES[app.run?.mapIndex || 0]?.scene3d || {}),
+    traversedEdgeIds,
+    nodes,
+    edges: getCurrentMapEdges(map).map((edge) => ({
+      ...edge,
+      traversed: traversedEdgeIds.includes(edge.id),
+      frontier: nodes.some((node) => node.id === edge.to && node.state === "available" && node.unlockedFromEdgeId === edge.id),
+    })),
+    decorations: getCurrentMapDecorations(map).map((decoration) => ({
+      ...decoration,
+      visual: getMapDecorationVisual(decoration),
+    })),
+  };
+}
+
+function getBattleState() {
+  const battle = app.run?.battle;
+  const capacity = app.run ? getItemCapacity(app.run) : 0;
+  return {
+    active: app.run?.scene === "battle" && Boolean(battle),
+    bossId: battle?.bossId || null,
+    title: battle?.title || "",
+    phaseName: battle?.phases?.[battle?.phaseIndex || 0]?.name || "",
+    phaseIndex: battle?.phaseIndex || 0,
+    turn: battle?.turn || 0,
+    mustDraw: Boolean(battle?.mustDraw),
+    busy: Boolean(app.battleAnimating),
+    selection: app.selection ? clone(app.selection) : null,
+    inspect: app.inspect ? clone(app.inspect) : null,
+    scale: battle?.scale || 0,
+    candles: app.run?.candles || 0,
+    teeth: app.run?.teeth || 0,
+    playerBones: battle?.playerBones || 0,
+    maxLanes: MAX_LANES,
+    layout: clone(BATTLE_LAYOUT.desktop),
+    scene3d: clone(BATTLE_LAYOUT.desktop.scene3d || {}),
+    assets: {
+      frames: { ...ASSETS.frames },
+      backs: { ...ASSETS.backs },
+      costs: { ...ASSETS.costs },
+      sigils: { ...ASSETS.sigils },
+      misc: { ...ASSETS.misc },
+      slots: { ...ASSETS.slots },
+      battleSkin: { ...BATTLE_SKIN_ASSETS },
+    },
+    itemCapacity: capacity,
+    items: Array.from({ length: capacity }, (_, index) => {
+      const itemId = app.run?.items?.[index] || null;
+      return itemId ? { ...ITEM_BY_ID[itemId] } : null;
+    }),
+    queue: battle
+      ? battle.queue.map((cardId, lane) => ({ lane, cardId, isBoss: Boolean(battle.bossId), back: battle.bossId ? ASSETS.backs.rare : BATTLE_SKIN_ASSETS.queueBack }))
+      : [],
+    hand: battle ? battle.hand.map((entry) => build3DEntryState(entry)) : [],
+    playerBoard: battle ? battle.playerBoard.map((unit) => build3DUnitState(battle, unit)) : [],
+    enemyBoard: battle ? battle.enemyBoard.map((unit) => build3DUnitState(battle, unit)) : [],
+    mainDeckCount: battle?.mainDeck?.length || 0,
+    sideDeckCount: battle?.sideDeck?.length || 0,
+  };
+}
+
+async function dispatchThreeBridgeAction(action) {
+  if (!action || typeof action.type !== "string") return false;
+  switch (action.type) {
+    case "select-node":
+      if (!action.nodeId) return false;
+      app.selectedMapNodeId = action.nodeId;
+      if (!app.mapHoverNodeId) app.mapHoverNodeId = action.nodeId;
+      if (app.run?.scene === "map") renderMap();
+      return true;
+    case "hover-node":
+      app.mapHoverNodeId = action.nodeId || null;
+      if (app.run?.scene === "map") {
+        renderMapTooltip(getMapTooltipNode(getCurrentMapNodes()));
+        notifyThreeBridge({ type: "map-state" });
+      }
+      return true;
+    case "clear-hover-node":
+      app.mapHoverNodeId = null;
+      if (app.run?.scene === "map") {
+        renderMapTooltip(getMapTooltipNode(getCurrentMapNodes()));
+        notifyThreeBridge({ type: "map-state" });
+      }
+      return true;
+    case "enter-node":
+      enterNode(action.nodeId || app.selectedMapNodeId);
+      return true;
+    case "draw-main":
+      handleDrawMain();
+      return true;
+    case "draw-side":
+      handleDrawSide();
+      return true;
+    case "ring-bell":
+      await handleBell();
+      return true;
+    case "select-hand-card":
+      if (!action.handUid) return false;
+      handleHandCardClick(action.handUid);
+      return true;
+    case "play-hand-card-to-lane":
+      if (!action.handUid || typeof action.lane !== "number") return false;
+      attemptHandCardDrop(action.handUid, action.lane);
+      return true;
+    case "select-lane":
+      if (typeof action.lane !== "number") return false;
+      handleLaneClick(action.side || "player", action.lane);
+      return true;
+    case "select-item":
+      if (!action.itemId) return false;
+      handleItemUse(action.itemId);
+      return true;
+    case "cancel-selection":
+      cancelSelection();
+      return true;
+    default:
+      return false;
+  }
+}
+
+window.Inscryption3DBridge = {
+  getScreenState,
+  getMapState,
+  getBattleState,
+  dispatch: dispatchThreeBridgeAction,
+  subscribe(listener) {
+    if (typeof listener !== "function") return () => {};
+    THREE_BRIDGE_LISTENERS.add(listener);
+    return () => THREE_BRIDGE_LISTENERS.delete(listener);
   },
 };
 
@@ -1332,6 +1628,7 @@ function buildMapFromTemplate(run, template, mapIndex) {
     id: template.id,
     mapIndex,
     viewBox: template.viewBox || "0 0 100 100",
+    scene3d: clone(template.scene3d || createMapScene3DConfig()),
     entryNodeIds: [...template.entryNodeIds],
     traversedEdgeIds: [],
     decorations: (template.decorations || []).map((decoration) => ({ ...decoration })),
@@ -1404,6 +1701,7 @@ function getMapTooltipNode(nodes = getCurrentMapNodes()) {
 function applyOptions() {
   document.body.classList.toggle("reduced-motion", Boolean(app.profile.options.reducedMotion));
   document.body.classList.toggle("pixel-soft", !app.profile.options.pixelScaling);
+  notifyThreeBridge({ type: "options-changed" });
 }
 
 function showToast(message) {
@@ -1496,6 +1794,7 @@ function applyBattleReferenceLayout() {
 
 async function animateQueueTakeoff(lane) {
   if (app.profile?.options?.reducedMotion) return;
+  notifyThreeBridge({ type: "battle-effect", effect: "queue-takeoff", lane });
   const slot = getQueueSlotElement(lane);
   const cardback = slot?.querySelector(".queue-cardback");
   if (!slot || !cardback) return;
@@ -1509,6 +1808,7 @@ async function animateQueueTakeoff(lane) {
 
 async function animateEnemyDeployment(lane) {
   if (app.profile?.options?.reducedMotion) return;
+  notifyThreeBridge({ type: "battle-effect", effect: "enemy-deploy", lane });
   const slot = getLaneSlotElement("enemy", lane);
   const card = getLaneCardElement("enemy", lane);
   if (!slot || !card) return;
@@ -1525,6 +1825,7 @@ async function animateEnemyDeployment(lane) {
 
 async function animateAttackLunge(side, lane) {
   if (app.profile?.options?.reducedMotion) return;
+  notifyThreeBridge({ type: "battle-effect", effect: "attack-lunge", side, lane });
   const slot = getLaneSlotElement(side, lane);
   const card = getLaneCardElement(side, lane);
   if (!slot || !card) return;
@@ -1767,6 +2068,7 @@ function showScreen(screenId) {
   });
   document.body.dataset.screen = screenId;
   el("app-shell").dataset.screen = screenId;
+  notifyThreeBridge({ type: "screen-changed", screenId });
 }
 
 function getSourceModel(source, battle) {
@@ -2063,6 +2365,7 @@ function renderMap() {
     lineSvg.appendChild(path);
   });
   renderMapTooltip(getMapTooltipNode(currentNodes));
+  notifyThreeBridge({ type: "map-state" });
 }
 
 function renderMapScene(map) {
@@ -2327,6 +2630,7 @@ function renderBattle() {
   renderSelectionBanner();
   renderInspectPanel();
   renderBattleLog();
+  notifyThreeBridge({ type: "battle-state" });
 }
 
 function renderItemBar() {
@@ -3151,6 +3455,7 @@ async function handleBell() {
     showToast("Finish the current selection first.");
     return;
   }
+  notifyThreeBridge({ type: "battle-effect", effect: "bell" });
   app.battleAnimating = true;
   renderBattle();
   try {
