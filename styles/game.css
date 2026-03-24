@@ -6369,17 +6369,8 @@ body::before {
   pointer-events: auto;
 }
 
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-cabin-backdrop,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .queue-band,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #enemy-row,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .scale-band,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #player-row,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .hand-band,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #draw-main-btn,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #draw-side-btn,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #ring-bell-btn,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #item-bar {
-  display: none !important;
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #three-root {
+  pointer-events: none;
 }
 
 #app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-stage::before,
@@ -6397,13 +6388,15 @@ body::before {
   box-shadow: none !important;
 }
 
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-surface {
-  pointer-events: none;
-}
-
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #battle-codex-btn,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #pause-btn,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .selection-banner,
-#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #inspect-panel {
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .battle-surface,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .queue-band,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #enemy-row,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .scale-band,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #player-row,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen .hand-band,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #draw-main-btn,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #draw-side-btn,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #ring-bell-btn,
+#app-shell[data-renderer="3d"][data-screen="battle-screen"] #battle-screen #item-bar {
   pointer-events: auto;
 }

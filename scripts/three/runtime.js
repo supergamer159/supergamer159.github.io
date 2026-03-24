@@ -3,6 +3,8 @@ import { TextureFactory } from "./texture-factory.js";
 import { MapScene } from "./map-scene.js";
 import { BattleScene } from "./battle-scene.js";
 
+const ENABLE_3D_BATTLE = true;
+
 export class ThreeRuntime {
   constructor({ root, bridge }) {
     this.root = root;
@@ -109,11 +111,13 @@ export class ThreeRuntime {
     const screenState = this.bridge.getScreenState();
     let nextSceneName = null;
     if (screenState.screenId === "map-screen" && this.bridge.getMapState()?.active) nextSceneName = "map";
-    if (screenState.screenId === "battle-screen" && this.bridge.getBattleState()?.active) nextSceneName = "battle";
+    if (ENABLE_3D_BATTLE && screenState.screenId === "battle-screen" && this.bridge.getBattleState()?.active) nextSceneName = "battle";
 
     if (!nextSceneName) {
       this.activeSceneName = null;
       this.activeScene = null;
+      this.mapScene?.setVisible(false);
+      this.battleScene?.setVisible(false);
       this.setRendererMode(null);
       return;
     }

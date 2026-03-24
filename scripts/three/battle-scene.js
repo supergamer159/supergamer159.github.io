@@ -56,14 +56,10 @@ export class BattleScene {
     if (!state) return;
     this.applyCameraBase();
     if (!this.staticBuilt) this.buildStaticScene();
-    this.syncSlots();
+    this.slotGroup.visible = false;
+    this.dynamicGroup.visible = false;
     this.syncDeckProps();
     this.syncScale();
-    this.syncQueueCards();
-    this.syncBoardCards("enemy");
-    this.syncBoardCards("player");
-    this.syncHandCards();
-    this.syncItems();
     this.rebuildInteractives();
   }
 
@@ -504,9 +500,6 @@ export class BattleScene {
 
   rebuildInteractives() {
     this.interactives = [];
-    this.root.traverse((object) => {
-      if (object.visible !== false && object.userData?.action) this.interactives.push(object);
-    });
   }
 
   startAnimation(targetGroup, animation) {
@@ -518,16 +511,7 @@ export class BattleScene {
 
   handleEffect(event) {
     if (!event) return;
-    if (event.effect === "queue-takeoff") {
-      const record = this.queueCards.get(`queue:${event.lane}`);
-      if (record) this.startAnimation(record.group, { kind: "queue-takeoff", duration: 220 });
-    } else if (event.effect === "enemy-deploy") {
-      const record = [...this.boardCards.entries()].find(([key, entry]) => key.startsWith("enemy:") && entry.hit.userData.action?.lane === event.lane)?.[1];
-      if (record) this.startAnimation(record.group, { kind: "enemy-deploy", duration: 260 });
-    } else if (event.effect === "attack-lunge") {
-      const record = [...this.boardCards.entries()].find(([key, entry]) => key.startsWith(`${event.side}:`) && entry.hit.userData.action?.lane === event.lane)?.[1];
-      if (record) this.startAnimation(record.group, { kind: `attack-${event.side}`, duration: 250 });
-    } else if (event.effect === "bell") {
+    if (event.effect === "bell") {
       this.startAnimation(this.bellGroup, { kind: "bell", duration: 260 });
     }
   }
