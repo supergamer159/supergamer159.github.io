@@ -1147,7 +1147,11 @@ body.reduced-motion *::after {
   left: 8%;
   width: 22%;
   height: 15%;
-  background: center/contain no-repeat;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .card-stat {
@@ -1497,7 +1501,7 @@ body.reduced-motion *::after {
 }
 
 .drag-card {
-  position: absolute;
+  position: fixed;
   z-index: 10;
   width: 128px;
   pointer-events: none;

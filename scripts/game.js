@@ -1423,9 +1423,13 @@ function createCardElement(source, options = {}) {
       ? ASSETS.costs[`bone-${model.costBones}`]
       : "";
   if (costAsset) {
-    const cost = document.createElement("div");
-    cost.className = "card-cost";
-    cost.style.backgroundImage = `url("${costAsset}")`;
+    const cost = document.createElement("img");
+    cost.className = "card-cost pixel-image";
+    cost.src = costAsset;
+    cost.alt = model.costBlood > 0
+      ? `${model.costBlood} blood cost`
+      : `${model.costBones} bone cost`;
+    cost.draggable = false;
     face.appendChild(cost);
   }
 
