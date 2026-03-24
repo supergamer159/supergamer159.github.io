@@ -260,12 +260,11 @@ export class BattleScene {
 
   createCardRecord(card, action, useBack = false, backTextureUrl = "") {
     const group = new this.THREE.Group();
-    const cardThickness = 0.08;
     const body = new this.THREE.Mesh(
-      new this.THREE.BoxGeometry(1.46, 2.02, cardThickness),
+      new this.THREE.BoxGeometry(1.46, 0.08, 2.02),
       new this.THREE.MeshStandardMaterial({ color: 0x2f2018, roughness: 0.78 }),
     );
-    body.position.z = -0.01;
+    body.position.y = 0.04;
     group.add(body);
 
     const face = new this.THREE.Mesh(
@@ -277,16 +276,17 @@ export class BattleScene {
         transparent: true,
       }),
     );
-    face.position.z = 0.045;
+    face.rotation.x = -Math.PI / 2;
+    face.position.y = 0.082;
     group.add(face);
 
     const hit = this.createInteractivePlane(1.56, 2.1, action);
-    hit.position.z = 0.08;
+    hit.rotation.x = -Math.PI / 2;
+    hit.position.y = 0.1;
     group.add(hit);
 
-    group.rotation.x = -(this.state.scene3d.cardTilt || 0.98);
     group.userData.basePosition = new this.THREE.Vector3();
-    group.userData.baseRotation = new this.THREE.Euler(group.rotation.x, 0, 0);
+    group.userData.baseRotation = new this.THREE.Euler(0, 0, 0);
     group.userData.baseScale = 1;
     group.userData.animation = null;
     return { group, body, face, hit, card };
@@ -368,8 +368,8 @@ export class BattleScene {
       validKeys.add(key);
       const record = this.ensureRecord(this.queueCards, key, () => this.createCardRecord(slot, null, true, slot.back));
       this.updateCardTexture(record, slot, true, slot.back);
-      record.group.userData.basePosition.set(this.laneX(slot.lane), 0.26, this.state.scene3d.queueZ || -4.55);
-      record.group.userData.baseRotation.set(-(this.state.scene3d.cardTilt || 0.98), 0, (slot.lane - 1.5) * 0.03);
+      record.group.userData.basePosition.set(this.laneX(slot.lane), 0.1, this.state.scene3d.queueZ || -4.55);
+      record.group.userData.baseRotation.set(0, 0, (slot.lane - 1.5) * 0.03);
       record.group.userData.baseScale = slot.isBoss ? 1.05 : 1;
     });
     this.removeMissingRecords(this.queueCards, validKeys);
@@ -385,8 +385,8 @@ export class BattleScene {
       const record = this.ensureRecord(this.boardCards, key, () => this.createCardRecord(card, { type: "select-lane", side, lane }));
       this.updateCardTexture(record, card);
       record.hit.userData.action = { type: "select-lane", side, lane };
-      record.group.userData.basePosition.set(this.laneX(lane), 0.2, this.boardZ(side));
-      record.group.userData.baseRotation.set(-(this.state.scene3d.cardTilt || 0.98), 0, (lane - 1.5) * (side === "enemy" ? -0.03 : 0.03));
+      record.group.userData.basePosition.set(this.laneX(lane), 0.11, this.boardZ(side));
+      record.group.userData.baseRotation.set(0, 0, (lane - 1.5) * (side === "enemy" ? -0.03 : 0.03));
       record.group.userData.baseScale = this.state.inspect?.uid === card.uid ? 1.06 : 1;
     });
     [...this.boardCards.keys()].forEach((key) => {
@@ -410,11 +410,11 @@ export class BattleScene {
       const normalized = count <= 1 ? 0 : ((index / (count - 1)) - 0.5);
       const x = normalized * span;
       const z = (this.state.scene3d.handZ || 5.5) + Math.abs(normalized) * 0.4;
-      const y = this.state.selection?.handUid === card.uid ? 0.62 : 0.38;
+      const y = this.state.selection?.handUid === card.uid ? 0.34 : 0.15;
       record.hit.userData.action = { type: "select-hand-card", handUid: card.uid };
       record.group.userData.basePosition.set(x, y, z);
       record.group.userData.baseRotation.set(
-        -(this.state.scene3d.cardTilt || 0.98) + 0.08,
+        0,
         0,
         normalized * -0.26,
       );
