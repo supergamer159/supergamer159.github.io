@@ -1110,13 +1110,13 @@ body.reduced-motion *::after {
 
 .card-portrait,
 .card-emission {
-  left: 20.5%;
-  top: 26%;
-  width: 59%;
-  height: 31%;
-  background-position: center;
+  left: 14.5%;
+  top: 21.5%;
+  width: 71%;
+  height: 40%;
+  background-position: center 42%;
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: cover;
 }
 
 .card-emission {
@@ -1126,27 +1126,29 @@ body.reduced-motion *::after {
 }
 
 .card-name {
-  top: 11.2%;
-  left: 15%;
-  right: 15%;
+  top: 10.4%;
+  left: 16%;
+  right: 16%;
   text-align: center;
   font-family: var(--font-label);
-  font-size: 13px;
-  letter-spacing: 0.4px;
+  font-size: 11px;
+  letter-spacing: 0.75px;
   text-transform: uppercase;
-  color: #23140e;
+  color: #120a06;
+  text-shadow: none;
 }
 
 .card.compact .card-name,
 .card.tiny .card-name {
-  font-size: 11px;
+  font-size: 9px;
 }
 
 .card-cost {
-  top: 5.8%;
-  left: 8%;
-  width: 22%;
-  height: 15%;
+  top: auto;
+  bottom: 18.5%;
+  left: 8.5%;
+  width: 16%;
+  height: 11%;
   object-fit: contain;
   object-position: center;
   display: block;
@@ -1155,27 +1157,28 @@ body.reduced-motion *::after {
 }
 
 .card-stat {
-  bottom: 11%;
-  width: 17%;
+  bottom: 7.2%;
+  width: 15%;
   text-align: center;
   font-family: var(--font-label);
-  font-size: 20px;
-  color: #f5e4c6;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+  font-size: 17px;
+  line-height: 1;
+  color: #100906;
+  text-shadow: none;
 }
 
 .card.compact .card-stat,
 .card.tiny .card-stat {
-  bottom: 10%;
-  font-size: 17px;
+  bottom: 6.8%;
+  font-size: 15px;
 }
 
 .card-stat.attack {
-  left: 9%;
+  left: 10.5%;
 }
 
 .card-stat.health {
-  right: 10%;
+  right: 11%;
 }
 
 .card-sigils {
