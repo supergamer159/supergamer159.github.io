@@ -207,131 +207,303 @@ function createMapNodeDef(id, type, x, y, depth, extra = {}) {
     y,
     depth,
     iconKey: extra.iconKey || type,
-    panelAnchor: extra.panelAnchor || "right",
+    tooltipTitle: extra.tooltipTitle || NODE_TYPE_META[type]?.label || titleCase(type),
+    tooltipCopy: extra.tooltipCopy || NODE_TYPE_META[type]?.copy || "",
     bossId: extra.bossId || null,
   };
 }
 
-function createMapEdgeDef(id, from, to, d) {
-  return { id, from, to, d };
+function createMapEdgeDef(id, from, to, d, extra = {}) {
+  return {
+    id,
+    from,
+    to,
+    d,
+    branchGroupId: extra.branchGroupId || null,
+  };
+}
+
+function createMapDecorationDef(kind, variant, x, y, scale = 1, extra = {}) {
+  return {
+    kind,
+    variant,
+    x,
+    y,
+    scale,
+    rotation: extra.rotation || 0,
+    opacity: extra.opacity ?? 1,
+  };
+}
+
+function svgDataUri(svg) {
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg.replace(/\s+/g, " ").trim())}`;
+}
+
+const MAP_TREE_SILHOUETTE = '<path fill="#060504" d="M16 0 L11 10 H14 L8 20 H11 L6 30 H10 L2 42 H13 V56 H19 V42 H30 L22 30 H26 L21 20 H24 L18 10 H21 Z"/>';
+
+function buildTreeClusterAsset(trees) {
+  return svgDataUri(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+      ${trees.map(([x, y, scale]) => `<g transform="translate(${x} ${y}) scale(${scale})">${MAP_TREE_SILHOUETTE}</g>`).join("")}
+    </svg>
+  `);
+}
+
+function buildMountainAsset(paths) {
+  return svgDataUri(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" fill="none" stroke="#070605" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+      ${paths.map((path) => `<path d="${path}"/>`).join("")}
+    </svg>
+  `);
+}
+
+const MAP_DECORATION_VISUALS = Object.freeze({
+  "tree-canopy-a": {
+    asset: buildTreeClusterAsset([
+      [8, 10, 1.7], [48, 30, 1.15], [96, 6, 1.8], [140, 34, 1.2],
+      [178, 12, 1.5], [22, 114, 1.45], [78, 92, 1.2], [132, 112, 1.7], [186, 96, 1.32],
+    ]),
+    aspectRatio: "1 / 1",
+    baseWidth: 24,
+  },
+  "tree-canopy-b": {
+    asset: buildTreeClusterAsset([
+      [14, 8, 1.25], [56, 26, 1.85], [118, 22, 1.25], [160, 6, 1.55],
+      [198, 32, 1.2], [18, 106, 1.6], [72, 88, 1.28], [126, 116, 1.18], [180, 96, 1.72],
+    ]),
+    aspectRatio: "1 / 1",
+    baseWidth: 25,
+  },
+  "tree-canopy-c": {
+    asset: buildTreeClusterAsset([
+      [10, 20, 1.6], [52, 2, 1.25], [96, 28, 1.3], [148, 10, 1.92],
+      [194, 24, 1.18], [26, 104, 1.2], [84, 112, 1.78], [136, 92, 1.3], [188, 114, 1.24],
+    ]),
+    aspectRatio: "1 / 1",
+    baseWidth: 24,
+  },
+  "mountain-range-a": {
+    asset: buildMountainAsset([
+      "M 14 156 L 66 98 L 92 116 L 148 54 L 198 108 L 236 66 L 308 156",
+      "M 62 154 L 114 84 L 154 110 L 206 40",
+      "M 148 54 L 136 88",
+      "M 194 106 L 178 130",
+    ]),
+    aspectRatio: "16 / 9",
+    baseWidth: 30,
+  },
+  "mountain-range-b": {
+    asset: buildMountainAsset([
+      "M 12 160 L 78 110 L 112 126 L 158 72 L 218 118 L 250 94 L 308 160",
+      "M 74 154 L 138 92 L 170 110 L 214 56",
+      "M 154 72 L 148 102",
+      "M 214 118 L 194 138",
+    ]),
+    aspectRatio: "16 / 9",
+    baseWidth: 28,
+  },
+});
+
+function sceneTree(variant, x, y, scale, extra = {}) {
+  return createMapDecorationDef("tree", variant, x, y, scale, extra);
+}
+
+function sceneMountain(variant, x, y, scale, extra = {}) {
+  return createMapDecorationDef("mountain", variant, x, y, scale, extra);
+}
+
+function buildSceneDecorations(treeDecorations, mountainDecorations) {
+  return [
+    createMapDecorationDef("border", "double", 50, 50, 1),
+    createMapDecorationDef("grid", "faint", 50, 50, 1),
+    ...treeDecorations,
+    ...mountainDecorations,
+  ];
 }
 
 const MAP_REGION_TEMPLATES = Object.freeze([
   {
     id: "woodland",
-    entryNodeIds: ["woodland-start-left", "woodland-start-mid", "woodland-start-right"],
+    viewBox: "0 0 100 100",
+    entryNodeIds: ["woodland-top-left", "woodland-top-right"],
     nodes: [
-      createMapNodeDef("woodland-start-left", "battle", 15, 14, 0),
-      createMapNodeDef("woodland-start-mid", "campfire", 38, 14, 0),
-      createMapNodeDef("woodland-start-right", "backpack", 63, 14, 0, { panelAnchor: "left" }),
-      createMapNodeDef("woodland-trapper", "trapper", 28, 32, 1),
-      createMapNodeDef("woodland-fight-a", "battle", 52, 32, 1, { panelAnchor: "left" }),
-      createMapNodeDef("woodland-stones", "sacrificial-stones", 18, 50, 2),
-      createMapNodeDef("woodland-trial", "deck-trial", 40, 50, 2),
-      createMapNodeDef("woodland-camp", "campfire", 62, 50, 2, { panelAnchor: "left" }),
-      createMapNodeDef("woodland-fight-b", "battle", 30, 68, 3),
-      createMapNodeDef("woodland-trader", "trader", 52, 68, 3, { panelAnchor: "left" }),
-      createMapNodeDef("woodland-fight-c", "battle", 40, 84, 4),
-      createMapNodeDef("woodland-boss", "boss", 40, 97, 5, { panelAnchor: "left" }),
+      createMapNodeDef("woodland-top-left", "campfire", 34, 9, 0),
+      createMapNodeDef("woodland-top-right", "backpack", 66, 9, 0),
+      createMapNodeDef("woodland-spine-a", "battle", 50, 23, 1, { tooltipCopy: "A narrow trail opens beneath the trees." }),
+      createMapNodeDef("woodland-left-a", "trapper", 34, 37, 2),
+      createMapNodeDef("woodland-mid-a", "deck-trial", 50, 39, 2),
+      createMapNodeDef("woodland-right-a", "sacrificial-stones", 66, 37, 2),
+      createMapNodeDef("woodland-spine-b", "battle", 50, 53, 3),
+      createMapNodeDef("woodland-left-b", "campfire", 39, 67, 4),
+      createMapNodeDef("woodland-right-b", "trader", 61, 67, 4),
+      createMapNodeDef("woodland-spine-c", "battle", 50, 79, 5),
+      createMapNodeDef("woodland-spine-d", "battle", 50, 90, 6, { tooltipTitle: "Skull", tooltipCopy: "The trail narrows. A hard fight waits ahead." }),
+      createMapNodeDef("woodland-boss", "boss", 50, 97, 7),
     ],
     edges: [
-      createMapEdgeDef("woodland-e1", "woodland-start-left", "woodland-trapper", "M 15 14 C 16 22, 19 27, 28 32"),
-      createMapEdgeDef("woodland-e2", "woodland-start-mid", "woodland-trapper", "M 38 14 C 35 21, 32 26, 28 32"),
-      createMapEdgeDef("woodland-e3", "woodland-start-mid", "woodland-fight-a", "M 38 14 C 43 21, 47 26, 52 32"),
-      createMapEdgeDef("woodland-e4", "woodland-start-right", "woodland-fight-a", "M 63 14 C 60 21, 57 26, 52 32"),
-      createMapEdgeDef("woodland-e5", "woodland-trapper", "woodland-stones", "M 28 32 C 24 38, 20 44, 18 50"),
-      createMapEdgeDef("woodland-e6", "woodland-trapper", "woodland-trial", "M 28 32 C 31 39, 35 45, 40 50"),
-      createMapEdgeDef("woodland-e7", "woodland-fight-a", "woodland-trial", "M 52 32 C 48 39, 44 45, 40 50"),
-      createMapEdgeDef("woodland-e8", "woodland-fight-a", "woodland-camp", "M 52 32 C 55 39, 59 45, 62 50"),
-      createMapEdgeDef("woodland-e9", "woodland-stones", "woodland-fight-b", "M 18 50 C 20 57, 24 63, 30 68"),
-      createMapEdgeDef("woodland-e10", "woodland-trial", "woodland-fight-b", "M 40 50 C 36 57, 33 63, 30 68"),
-      createMapEdgeDef("woodland-e11", "woodland-trial", "woodland-trader", "M 40 50 C 43 57, 47 63, 52 68"),
-      createMapEdgeDef("woodland-e12", "woodland-camp", "woodland-trader", "M 62 50 C 58 57, 55 63, 52 68"),
-      createMapEdgeDef("woodland-e13", "woodland-fight-b", "woodland-fight-c", "M 30 68 C 32 75, 35 81, 40 84"),
-      createMapEdgeDef("woodland-e14", "woodland-trader", "woodland-fight-c", "M 52 68 C 49 75, 45 81, 40 84"),
-      createMapEdgeDef("woodland-e15", "woodland-fight-c", "woodland-boss", "M 40 84 C 40 89, 40 93, 40 97"),
+      createMapEdgeDef("woodland-e1", "woodland-top-left", "woodland-spine-a", "M 34 9 C 38 13, 44 18, 50 23", { branchGroupId: "woodland-open" }),
+      createMapEdgeDef("woodland-e2", "woodland-top-right", "woodland-spine-a", "M 66 9 C 62 13, 56 18, 50 23", { branchGroupId: "woodland-open" }),
+      createMapEdgeDef("woodland-e3", "woodland-spine-a", "woodland-left-a", "M 50 23 C 44 27, 39 32, 34 37", { branchGroupId: "woodland-mid" }),
+      createMapEdgeDef("woodland-e4", "woodland-spine-a", "woodland-mid-a", "M 50 23 C 50 28, 50 34, 50 39", { branchGroupId: "woodland-mid" }),
+      createMapEdgeDef("woodland-e5", "woodland-spine-a", "woodland-right-a", "M 50 23 C 56 27, 61 32, 66 37", { branchGroupId: "woodland-mid" }),
+      createMapEdgeDef("woodland-e6", "woodland-left-a", "woodland-spine-b", "M 34 37 C 40 42, 45 47, 50 53"),
+      createMapEdgeDef("woodland-e7", "woodland-mid-a", "woodland-spine-b", "M 50 39 C 50 43, 50 48, 50 53"),
+      createMapEdgeDef("woodland-e8", "woodland-right-a", "woodland-spine-b", "M 66 37 C 60 42, 55 47, 50 53"),
+      createMapEdgeDef("woodland-e9", "woodland-spine-b", "woodland-left-b", "M 50 53 C 46 58, 42 63, 39 67", { branchGroupId: "woodland-low" }),
+      createMapEdgeDef("woodland-e10", "woodland-spine-b", "woodland-right-b", "M 50 53 C 54 58, 58 63, 61 67", { branchGroupId: "woodland-low" }),
+      createMapEdgeDef("woodland-e11", "woodland-left-b", "woodland-spine-c", "M 39 67 C 43 71, 47 75, 50 79"),
+      createMapEdgeDef("woodland-e12", "woodland-right-b", "woodland-spine-c", "M 61 67 C 57 71, 53 75, 50 79"),
+      createMapEdgeDef("woodland-e13", "woodland-spine-c", "woodland-spine-d", "M 50 79 C 50 83, 50 87, 50 90"),
+      createMapEdgeDef("woodland-e14", "woodland-spine-d", "woodland-boss", "M 50 90 C 50 93, 50 95, 50 97"),
     ],
+    decorations: buildSceneDecorations(
+      [
+        sceneTree("tree-canopy-a", 14, 10, 1.1),
+        sceneTree("tree-canopy-b", 49, 8, 1.14),
+        sceneTree("tree-canopy-c", 84, 10, 1.08),
+        sceneTree("tree-canopy-b", 16, 35, 1.05),
+        sceneTree("tree-canopy-a", 84, 36, 1.04),
+        sceneTree("tree-canopy-c", 16, 68, 1.08),
+        sceneTree("tree-canopy-a", 85, 73, 1.08),
+        sceneTree("tree-canopy-b", 47, 88, 1.06),
+      ],
+      [
+        sceneMountain("mountain-range-a", 22, 43, 1.12, { opacity: 0.96 }),
+        sceneMountain("mountain-range-b", 83, 82, 0.86, { opacity: 0.94 }),
+      ],
+    ),
   },
   {
     id: "marsh",
-    entryNodeIds: ["marsh-start-left", "marsh-start-mid", "marsh-start-right"],
+    viewBox: "0 0 100 100",
+    entryNodeIds: ["marsh-top-left", "marsh-top-right"],
     nodes: [
-      createMapNodeDef("marsh-start-left", "battle", 18, 15, 0),
-      createMapNodeDef("marsh-start-mid", "backpack", 42, 15, 0),
-      createMapNodeDef("marsh-start-right", "battle", 66, 15, 0, { panelAnchor: "left" }),
-      createMapNodeDef("marsh-fight-a", "battle", 24, 33, 1),
-      createMapNodeDef("marsh-fire", "campfire", 50, 33, 1),
-      createMapNodeDef("marsh-trapper", "trapper", 72, 33, 1, { panelAnchor: "left" }),
-      createMapNodeDef("marsh-trial", "deck-trial", 32, 51, 2),
-      createMapNodeDef("marsh-stones", "sacrificial-stones", 56, 51, 2, { panelAnchor: "left" }),
-      createMapNodeDef("marsh-fight-b", "battle", 22, 69, 3),
-      createMapNodeDef("marsh-trader", "trader", 46, 69, 3),
-      createMapNodeDef("marsh-camp", "campfire", 68, 69, 3, { panelAnchor: "left" }),
-      createMapNodeDef("marsh-fight-c", "battle", 46, 85, 4),
-      createMapNodeDef("marsh-boss", "boss", 46, 97, 5, { panelAnchor: "left" }),
+      createMapNodeDef("marsh-top-left", "battle", 33, 10, 0),
+      createMapNodeDef("marsh-top-right", "campfire", 67, 10, 0),
+      createMapNodeDef("marsh-spine-a", "backpack", 50, 24, 1),
+      createMapNodeDef("marsh-left-a", "deck-trial", 35, 39, 2),
+      createMapNodeDef("marsh-mid-a", "battle", 50, 41, 2),
+      createMapNodeDef("marsh-right-a", "trapper", 65, 39, 2),
+      createMapNodeDef("marsh-spine-b", "battle", 50, 55, 3),
+      createMapNodeDef("marsh-left-b", "sacrificial-stones", 40, 70, 4),
+      createMapNodeDef("marsh-right-b", "trader", 60, 70, 4),
+      createMapNodeDef("marsh-spine-c", "battle", 50, 82, 5),
+      createMapNodeDef("marsh-spine-d", "battle", 50, 91, 6, { tooltipTitle: "Skull", tooltipCopy: "The reeds go still. The next stop is hungry." }),
+      createMapNodeDef("marsh-boss", "boss", 50, 97, 7),
     ],
     edges: [
-      createMapEdgeDef("marsh-e1", "marsh-start-left", "marsh-fight-a", "M 18 15 C 19 22, 21 28, 24 33"),
-      createMapEdgeDef("marsh-e2", "marsh-start-mid", "marsh-fight-a", "M 42 15 C 37 22, 31 28, 24 33"),
-      createMapEdgeDef("marsh-e3", "marsh-start-mid", "marsh-fire", "M 42 15 C 45 22, 48 27, 50 33"),
-      createMapEdgeDef("marsh-e4", "marsh-start-right", "marsh-fire", "M 66 15 C 61 22, 56 27, 50 33"),
-      createMapEdgeDef("marsh-e5", "marsh-start-right", "marsh-trapper", "M 66 15 C 69 22, 71 27, 72 33"),
-      createMapEdgeDef("marsh-e6", "marsh-fight-a", "marsh-trial", "M 24 33 C 25 39, 28 45, 32 51"),
-      createMapEdgeDef("marsh-e7", "marsh-fire", "marsh-trial", "M 50 33 C 45 39, 38 45, 32 51"),
-      createMapEdgeDef("marsh-e8", "marsh-fire", "marsh-stones", "M 50 33 C 52 39, 54 45, 56 51"),
-      createMapEdgeDef("marsh-e9", "marsh-trapper", "marsh-stones", "M 72 33 C 67 39, 61 45, 56 51"),
-      createMapEdgeDef("marsh-e10", "marsh-trial", "marsh-fight-b", "M 32 51 C 28 57, 24 63, 22 69"),
-      createMapEdgeDef("marsh-e11", "marsh-trial", "marsh-trader", "M 32 51 C 36 57, 40 63, 46 69"),
-      createMapEdgeDef("marsh-e12", "marsh-stones", "marsh-trader", "M 56 51 C 53 57, 50 63, 46 69"),
-      createMapEdgeDef("marsh-e13", "marsh-stones", "marsh-camp", "M 56 51 C 60 57, 64 63, 68 69"),
-      createMapEdgeDef("marsh-e14", "marsh-fight-b", "marsh-fight-c", "M 22 69 C 28 75, 36 81, 46 85"),
-      createMapEdgeDef("marsh-e15", "marsh-trader", "marsh-fight-c", "M 46 69 C 46 75, 46 80, 46 85"),
-      createMapEdgeDef("marsh-e16", "marsh-camp", "marsh-fight-c", "M 68 69 C 62 75, 55 81, 46 85"),
-      createMapEdgeDef("marsh-e17", "marsh-fight-c", "marsh-boss", "M 46 85 C 46 90, 46 94, 46 97"),
+      createMapEdgeDef("marsh-e1", "marsh-top-left", "marsh-spine-a", "M 33 10 C 38 15, 44 19, 50 24", { branchGroupId: "marsh-open" }),
+      createMapEdgeDef("marsh-e2", "marsh-top-right", "marsh-spine-a", "M 67 10 C 62 15, 56 19, 50 24", { branchGroupId: "marsh-open" }),
+      createMapEdgeDef("marsh-e3", "marsh-spine-a", "marsh-left-a", "M 50 24 C 44 29, 39 34, 35 39", { branchGroupId: "marsh-mid" }),
+      createMapEdgeDef("marsh-e4", "marsh-spine-a", "marsh-mid-a", "M 50 24 C 50 29, 50 35, 50 41", { branchGroupId: "marsh-mid" }),
+      createMapEdgeDef("marsh-e5", "marsh-spine-a", "marsh-right-a", "M 50 24 C 56 29, 61 34, 65 39", { branchGroupId: "marsh-mid" }),
+      createMapEdgeDef("marsh-e6", "marsh-left-a", "marsh-spine-b", "M 35 39 C 40 44, 45 49, 50 55"),
+      createMapEdgeDef("marsh-e7", "marsh-mid-a", "marsh-spine-b", "M 50 41 C 50 45, 50 50, 50 55"),
+      createMapEdgeDef("marsh-e8", "marsh-right-a", "marsh-spine-b", "M 65 39 C 60 44, 55 49, 50 55"),
+      createMapEdgeDef("marsh-e9", "marsh-spine-b", "marsh-left-b", "M 50 55 C 46 60, 43 65, 40 70", { branchGroupId: "marsh-low" }),
+      createMapEdgeDef("marsh-e10", "marsh-spine-b", "marsh-right-b", "M 50 55 C 54 60, 57 65, 60 70", { branchGroupId: "marsh-low" }),
+      createMapEdgeDef("marsh-e11", "marsh-left-b", "marsh-spine-c", "M 40 70 C 44 74, 47 78, 50 82"),
+      createMapEdgeDef("marsh-e12", "marsh-right-b", "marsh-spine-c", "M 60 70 C 56 74, 53 78, 50 82"),
+      createMapEdgeDef("marsh-e13", "marsh-spine-c", "marsh-spine-d", "M 50 82 C 50 85, 50 88, 50 91"),
+      createMapEdgeDef("marsh-e14", "marsh-spine-d", "marsh-boss", "M 50 91 C 50 94, 50 95, 50 97"),
     ],
+    decorations: buildSceneDecorations(
+      [
+        sceneTree("tree-canopy-b", 15, 12, 1.08),
+        sceneTree("tree-canopy-c", 50, 9, 1.08),
+        sceneTree("tree-canopy-a", 84, 12, 1.08),
+        sceneTree("tree-canopy-c", 16, 38, 1.04),
+        sceneTree("tree-canopy-a", 83, 39, 1.02),
+        sceneTree("tree-canopy-a", 17, 72, 1.02),
+        sceneTree("tree-canopy-b", 49, 86, 1.06),
+        sceneTree("tree-canopy-c", 84, 74, 1.02),
+      ],
+      [
+        sceneMountain("mountain-range-b", 22, 34, 1.04, { opacity: 0.92 }),
+        sceneMountain("mountain-range-a", 80, 84, 0.88, { opacity: 0.92 }),
+      ],
+    ),
   },
   {
     id: "snowline",
-    entryNodeIds: ["snow-start-left", "snow-start-mid", "snow-start-right"],
+    viewBox: "0 0 100 100",
+    entryNodeIds: ["snow-top-left", "snow-top-right"],
     nodes: [
-      createMapNodeDef("snow-start-left", "battle", 16, 14, 0),
-      createMapNodeDef("snow-start-mid", "campfire", 40, 14, 0),
-      createMapNodeDef("snow-start-right", "battle", 64, 14, 0, { panelAnchor: "left" }),
-      createMapNodeDef("snow-trapper", "trapper", 26, 32, 1),
-      createMapNodeDef("snow-fight-a", "battle", 52, 32, 1, { panelAnchor: "left" }),
-      createMapNodeDef("snow-stones", "sacrificial-stones", 18, 50, 2),
-      createMapNodeDef("snow-pack", "backpack", 40, 50, 2),
-      createMapNodeDef("snow-trial", "deck-trial", 64, 50, 2, { panelAnchor: "left" }),
-      createMapNodeDef("snow-fight-b", "battle", 28, 68, 3),
-      createMapNodeDef("snow-trader", "trader", 52, 68, 3, { panelAnchor: "left" }),
-      createMapNodeDef("snow-fight-c", "battle", 40, 84, 4),
-      createMapNodeDef("snow-boss", "boss", 40, 97, 5, { panelAnchor: "left" }),
+      createMapNodeDef("snow-top-left", "backpack", 34, 10, 0),
+      createMapNodeDef("snow-top-right", "battle", 66, 10, 0),
+      createMapNodeDef("snow-spine-a", "campfire", 50, 24, 1),
+      createMapNodeDef("snow-left-a", "trapper", 34, 39, 2),
+      createMapNodeDef("snow-mid-a", "battle", 50, 41, 2),
+      createMapNodeDef("snow-right-a", "deck-trial", 66, 39, 2),
+      createMapNodeDef("snow-spine-b", "battle", 50, 55, 3),
+      createMapNodeDef("snow-left-b", "trader", 39, 70, 4),
+      createMapNodeDef("snow-right-b", "backpack", 61, 70, 4),
+      createMapNodeDef("snow-spine-c", "battle", 50, 82, 5),
+      createMapNodeDef("snow-spine-d", "battle", 50, 91, 6, { tooltipTitle: "Skull", tooltipCopy: "The snow hushes the trail before the final climb." }),
+      createMapNodeDef("snow-boss", "boss", 50, 97, 7),
     ],
     edges: [
-      createMapEdgeDef("snow-e1", "snow-start-left", "snow-trapper", "M 16 14 C 18 21, 22 27, 26 32"),
-      createMapEdgeDef("snow-e2", "snow-start-mid", "snow-trapper", "M 40 14 C 35 21, 30 27, 26 32"),
-      createMapEdgeDef("snow-e3", "snow-start-mid", "snow-fight-a", "M 40 14 C 44 21, 48 27, 52 32"),
-      createMapEdgeDef("snow-e4", "snow-start-right", "snow-fight-a", "M 64 14 C 60 21, 56 27, 52 32"),
-      createMapEdgeDef("snow-e5", "snow-trapper", "snow-stones", "M 26 32 C 22 38, 19 44, 18 50"),
-      createMapEdgeDef("snow-e6", "snow-trapper", "snow-pack", "M 26 32 C 30 39, 35 45, 40 50"),
-      createMapEdgeDef("snow-e7", "snow-fight-a", "snow-pack", "M 52 32 C 48 39, 44 45, 40 50"),
-      createMapEdgeDef("snow-e8", "snow-fight-a", "snow-trial", "M 52 32 C 57 39, 61 45, 64 50"),
-      createMapEdgeDef("snow-e9", "snow-stones", "snow-fight-b", "M 18 50 C 20 57, 23 63, 28 68"),
-      createMapEdgeDef("snow-e10", "snow-pack", "snow-fight-b", "M 40 50 C 36 57, 32 63, 28 68"),
-      createMapEdgeDef("snow-e11", "snow-pack", "snow-trader", "M 40 50 C 43 57, 47 63, 52 68"),
-      createMapEdgeDef("snow-e12", "snow-trial", "snow-trader", "M 64 50 C 60 57, 56 63, 52 68"),
-      createMapEdgeDef("snow-e13", "snow-fight-b", "snow-fight-c", "M 28 68 C 31 75, 35 81, 40 84"),
-      createMapEdgeDef("snow-e14", "snow-trader", "snow-fight-c", "M 52 68 C 49 75, 45 81, 40 84"),
-      createMapEdgeDef("snow-e15", "snow-fight-c", "snow-boss", "M 40 84 C 40 89, 40 94, 40 97"),
+      createMapEdgeDef("snow-e1", "snow-top-left", "snow-spine-a", "M 34 10 C 39 15, 44 19, 50 24", { branchGroupId: "snow-open" }),
+      createMapEdgeDef("snow-e2", "snow-top-right", "snow-spine-a", "M 66 10 C 61 15, 56 19, 50 24", { branchGroupId: "snow-open" }),
+      createMapEdgeDef("snow-e3", "snow-spine-a", "snow-left-a", "M 50 24 C 44 29, 39 34, 34 39", { branchGroupId: "snow-mid" }),
+      createMapEdgeDef("snow-e4", "snow-spine-a", "snow-mid-a", "M 50 24 C 50 29, 50 35, 50 41", { branchGroupId: "snow-mid" }),
+      createMapEdgeDef("snow-e5", "snow-spine-a", "snow-right-a", "M 50 24 C 56 29, 61 34, 66 39", { branchGroupId: "snow-mid" }),
+      createMapEdgeDef("snow-e6", "snow-left-a", "snow-spine-b", "M 34 39 C 39 44, 45 49, 50 55"),
+      createMapEdgeDef("snow-e7", "snow-mid-a", "snow-spine-b", "M 50 41 C 50 45, 50 50, 50 55"),
+      createMapEdgeDef("snow-e8", "snow-right-a", "snow-spine-b", "M 66 39 C 61 44, 55 49, 50 55"),
+      createMapEdgeDef("snow-e9", "snow-spine-b", "snow-left-b", "M 50 55 C 45 60, 42 65, 39 70", { branchGroupId: "snow-low" }),
+      createMapEdgeDef("snow-e10", "snow-spine-b", "snow-right-b", "M 50 55 C 55 60, 58 65, 61 70", { branchGroupId: "snow-low" }),
+      createMapEdgeDef("snow-e11", "snow-left-b", "snow-spine-c", "M 39 70 C 43 74, 47 78, 50 82"),
+      createMapEdgeDef("snow-e12", "snow-right-b", "snow-spine-c", "M 61 70 C 57 74, 53 78, 50 82"),
+      createMapEdgeDef("snow-e13", "snow-spine-c", "snow-spine-d", "M 50 82 C 50 85, 50 88, 50 91"),
+      createMapEdgeDef("snow-e14", "snow-spine-d", "snow-boss", "M 50 91 C 50 94, 50 95, 50 97"),
     ],
+    decorations: buildSceneDecorations(
+      [
+        sceneTree("tree-canopy-c", 14, 10, 1.08),
+        sceneTree("tree-canopy-a", 50, 8, 1.12),
+        sceneTree("tree-canopy-b", 84, 10, 1.08),
+        sceneTree("tree-canopy-a", 16, 38, 1.05),
+        sceneTree("tree-canopy-b", 83, 38, 1.05),
+        sceneTree("tree-canopy-b", 18, 71, 1.06),
+        sceneTree("tree-canopy-c", 49, 87, 1.06),
+        sceneTree("tree-canopy-a", 84, 73, 1.06),
+      ],
+      [
+        sceneMountain("mountain-range-a", 21, 41, 1.06, { opacity: 0.94 }),
+        sceneMountain("mountain-range-b", 81, 84, 0.9, { opacity: 0.94 }),
+      ],
+    ),
   },
   {
     id: "cabin-door",
-    entryNodeIds: ["cabin-boss"],
+    viewBox: "0 0 100 100",
+    entryNodeIds: ["cabin-start"],
     nodes: [
-      createMapNodeDef("cabin-boss", "boss", 42, 56, 0, { bossId: "leshy" }),
+      createMapNodeDef("cabin-start", "battle", 50, 22, 0, { tooltipTitle: "Question", tooltipCopy: "The trail tightens into Leshy's last path." }),
+      createMapNodeDef("cabin-mid-a", "campfire", 50, 42, 1),
+      createMapNodeDef("cabin-mid-b", "battle", 50, 62, 2),
+      createMapNodeDef("cabin-mid-c", "deck-trial", 50, 82, 3, { tooltipTitle: "Question", tooltipCopy: "One final omen hangs over the trail." }),
+      createMapNodeDef("cabin-boss", "boss", 50, 96, 4, { bossId: "leshy" }),
     ],
-    edges: [],
+    edges: [
+      createMapEdgeDef("cabin-e1", "cabin-start", "cabin-mid-a", "M 50 22 C 50 28, 50 35, 50 42"),
+      createMapEdgeDef("cabin-e2", "cabin-mid-a", "cabin-mid-b", "M 50 42 C 50 48, 50 55, 50 62"),
+      createMapEdgeDef("cabin-e3", "cabin-mid-b", "cabin-mid-c", "M 50 62 C 50 68, 50 75, 50 82"),
+      createMapEdgeDef("cabin-e4", "cabin-mid-c", "cabin-boss", "M 50 82 C 50 88, 50 93, 50 96"),
+    ],
+    decorations: buildSceneDecorations(
+      [
+        sceneTree("tree-canopy-a", 16, 12, 0.98),
+        sceneTree("tree-canopy-b", 84, 12, 0.98),
+        sceneTree("tree-canopy-c", 17, 74, 1),
+        sceneTree("tree-canopy-a", 84, 74, 1),
+      ],
+      [
+        sceneMountain("mountain-range-b", 21, 42, 0.96, { opacity: 0.88 }),
+        sceneMountain("mountain-range-a", 81, 83, 0.82, { opacity: 0.88 }),
+      ],
+    ),
   },
 ]);
 
@@ -688,6 +860,7 @@ const app = {
   setupDeckId: "vanilla",
   setupChallenges: new Set(),
   selectedMapNodeId: null,
+  mapHoverNodeId: null,
   selection: null,
   inspect: null,
   menuSelection: "new-game",
@@ -1158,8 +1331,10 @@ function buildMapFromTemplate(run, template, mapIndex) {
   return {
     id: template.id,
     mapIndex,
+    viewBox: template.viewBox || "0 0 100 100",
     entryNodeIds: [...template.entryNodeIds],
     traversedEdgeIds: [],
+    decorations: (template.decorations || []).map((decoration) => ({ ...decoration })),
     nodes,
     edges,
   };
@@ -1203,12 +1378,27 @@ function getCurrentMapEdges(map = getCurrentMap()) {
   return map?.edges || [];
 }
 
+function getCurrentMapDecorations(map = getCurrentMap()) {
+  return map?.decorations || [];
+}
+
 function getNodeById(nodeId) {
   return getCurrentMapNodes().find((node) => node.id === nodeId) || null;
 }
 
 function getNodeMeta(node) {
   return NODE_TYPE_META[node.type] || NODE_TYPE_META.battle;
+}
+
+function getMapDecorationVisual(decoration) {
+  return MAP_DECORATION_VISUALS[`${decoration.kind}-${decoration.variant}`] || null;
+}
+
+function getMapTooltipNode(nodes = getCurrentMapNodes()) {
+  return nodes.find((node) => node.id === app.mapHoverNodeId)
+    || nodes.find((node) => node.id === app.selectedMapNodeId)
+    || nodes.find((node) => node.state === "available")
+    || null;
 }
 
 function applyOptions() {
@@ -1806,6 +1996,8 @@ function renderMap() {
     bossOrder.appendChild(chip);
   });
 
+  renderMapScene(currentMap);
+
   const nodeLayer = el("map-node-layer");
   clearElement(nodeLayer);
   const selectedNode = getNodeById(app.selectedMapNodeId) || currentNodes.find((node) => node.state === "available") || currentNodes[0] || null;
@@ -1816,13 +2008,33 @@ function renderMap() {
     buttonEl.className = `map-node${node.state === "available" ? " is-available" : ""}${node.id === app.selectedMapNodeId ? " is-selected" : ""}${node.state === "cleared" ? " is-cleared" : ""}`;
     buttonEl.dataset.type = node.type;
     buttonEl.dataset.nodeId = node.id;
+    buttonEl.dataset.state = node.state;
     if (node.bossId) buttonEl.dataset.boss = node.bossId;
     buttonEl.style.left = `${node.x}%`;
     buttonEl.style.top = `${node.y}%`;
-    buttonEl.disabled = node.state !== "available";
+    buttonEl.setAttribute("aria-disabled", node.state === "available" ? "false" : "true");
     buttonEl.addEventListener("click", () => {
       app.selectedMapNodeId = node.id;
+       app.mapHoverNodeId = null;
       renderMap();
+    });
+    buttonEl.addEventListener("mouseenter", () => {
+      app.mapHoverNodeId = node.id;
+      buttonEl.classList.add("is-hovered");
+      renderMapTooltip(node);
+    });
+    buttonEl.addEventListener("mouseleave", () => {
+      if (app.mapHoverNodeId === node.id) app.mapHoverNodeId = null;
+      buttonEl.classList.remove("is-hovered");
+      renderMapTooltip(getMapTooltipNode(currentNodes));
+    });
+    buttonEl.addEventListener("focus", () => {
+      app.mapHoverNodeId = node.id;
+      renderMapTooltip(node);
+    });
+    buttonEl.addEventListener("blur", () => {
+      if (app.mapHoverNodeId === node.id) app.mapHoverNodeId = null;
+      renderMapTooltip(getMapTooltipNode(currentNodes));
     });
     const visual = getMapNodeVisual(node);
     buttonEl.setAttribute("aria-label", visual.label);
@@ -1839,43 +2051,92 @@ function renderMap() {
 
   const lineSvg = el("map-lines");
   clearElement(lineSvg);
+  lineSvg.setAttribute("viewBox", currentMap.viewBox || "0 0 100 100");
   currentEdges.forEach((edge) => {
     const child = currentNodes.find((candidate) => candidate.id === edge.to);
     if (!child) return;
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", edge.d);
+    if (edge.branchGroupId) path.dataset.branchGroup = edge.branchGroupId;
     if ((currentMap.traversedEdgeIds || []).includes(edge.id)) path.classList.add("is-traversed");
     else if (child.state === "available" && child.unlockedFromEdgeId === edge.id) path.classList.add("is-frontier");
     lineSvg.appendChild(path);
   });
-  renderMapDetail(selectedNode);
+  renderMapTooltip(getMapTooltipNode(currentNodes));
 }
 
-function renderMapDetail(node) {
-  const detail = el("map-detail");
-  clearElement(detail);
+function renderMapScene(map) {
+  const parchment = el("map-parchment");
+  const sceneLayer = el("map-scene-layer");
+  if (!parchment || !sceneLayer) return;
+  clearElement(sceneLayer);
+  const decorations = getCurrentMapDecorations(map);
+  parchment.dataset.hasBorder = decorations.some((decoration) => decoration.kind === "border") ? "true" : "false";
+  parchment.dataset.hasGrid = decorations.some((decoration) => decoration.kind === "grid") ? "true" : "false";
+  decorations.forEach((decoration) => {
+    if (decoration.kind === "border" || decoration.kind === "grid") return;
+    const visual = getMapDecorationVisual(decoration);
+    if (!visual) return;
+    const element = document.createElement("div");
+    element.className = `map-decoration map-decoration--${decoration.kind}`;
+    element.dataset.variant = decoration.variant;
+    element.style.left = `${decoration.x}%`;
+    element.style.top = `${decoration.y}%`;
+    element.style.width = `${visual.baseWidth * (decoration.scale || 1)}%`;
+    element.style.aspectRatio = visual.aspectRatio;
+    element.style.opacity = String(decoration.opacity ?? 1);
+    element.style.transform = `translate(-50%, -50%) rotate(${decoration.rotation || 0}deg)`;
+    element.style.backgroundImage = `url("${visual.asset}")`;
+    sceneLayer.appendChild(element);
+  });
+}
+
+function renderMapTooltip(node) {
+  const tooltip = el("map-tooltip");
+  const parchment = el("map-parchment");
+  if (!tooltip || !parchment) return;
+  clearElement(tooltip);
   if (!node) {
-    detail.innerHTML = "<div class='panel-kicker'>Trail Note</div><p class='detail-copy'>Choose a marked stop.</p>";
-    detail.dataset.anchor = "right";
+    tooltip.classList.add("hidden");
+    tooltip.style.left = "";
+    tooltip.style.top = "";
     return;
   }
-  detail.dataset.anchor = node.panelAnchor || "right";
   const meta = getNodeMeta(node);
-  detail.innerHTML = `
-    <div class="panel-kicker">${node.type === "boss" ? "Boss" : "Trail Stop"}</div>
-    <h3>${node.type === "boss" ? titleCase(node.bossId) : meta.label}</h3>
-    <p class="detail-copy">${node.type === "boss" ? `Face ${titleCase(node.bossId)}.` : meta.copy}</p>
-    <div class="map-detail-meta">
-      <span>${node.state === "available" ? "Open" : titleCase(node.state)}</span>
+  const title = node.type === "boss" ? titleCase(node.bossId) : (node.tooltipTitle || meta.label);
+  const copy = node.type === "boss" ? `Face ${titleCase(node.bossId)}.` : (node.tooltipCopy || meta.copy);
+  tooltip.innerHTML = `
+    <div class="panel-kicker">${node.state === "available" ? "Trail Stop" : titleCase(node.state)}</div>
+    <h3>${title}</h3>
+    <p class="detail-copy">${copy}</p>
+    <div class="map-tooltip-meta">
       <span>Stop ${node.depth + 1}</span>
+      <span>${node.state === "available" ? "Open" : titleCase(node.state)}</span>
     </div>
   `;
   const actions = document.createElement("div");
-  actions.className = "map-detail-actions";
-  const travel = button(node.state === "available" ? "Travel" : "Blocked", "inscry-btn", () => enterNode(node.id));
+  actions.className = "map-tooltip-actions";
+  const travel = button(node.state === "available" ? "Travel" : "Blocked", "inscry-btn map-tooltip-btn", () => enterNode(node.id));
   travel.disabled = node.state !== "available";
   actions.appendChild(travel);
-  detail.appendChild(actions);
+  tooltip.appendChild(actions);
+  tooltip.classList.remove("hidden");
+  tooltip.style.visibility = "hidden";
+  const parchmentRect = parchment.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  const nodeX = (node.x / 100) * parchmentRect.width;
+  const nodeY = (node.y / 100) * parchmentRect.height;
+  let left = nodeX + 26;
+  if (left + tooltipRect.width > parchmentRect.width - 18) left = nodeX - tooltipRect.width - 26;
+  let top = nodeY - (tooltipRect.height / 2);
+  if (top < 18) top = nodeY + 22;
+  if (top + tooltipRect.height > parchmentRect.height - 18) top = nodeY - tooltipRect.height - 22;
+  left = clamp(left, 18, Math.max(18, parchmentRect.width - tooltipRect.width - 18));
+  top = clamp(top, 18, Math.max(18, parchmentRect.height - tooltipRect.height - 18));
+  tooltip.dataset.anchor = left < nodeX ? "left" : "right";
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  tooltip.style.visibility = "";
 }
 
 function startNewGameFromSetup() {
@@ -1894,6 +2155,7 @@ function startNewGameFromSetup() {
   saveProfile();
   app.run = createNewRun(chosenDeck.id, selectedChallenges);
   app.selectedMapNodeId = getCurrentMapNodes().find((node) => node.state === "available")?.id || null;
+  app.mapHoverNodeId = null;
   app.selection = null;
   app.inspect = null;
   app.endingState = null;
@@ -2994,6 +3256,7 @@ function completeNodeAndReturnToMap(nodeId) {
   app.run.scene = "map";
   app.run.event = null;
   app.selectedMapNodeId = getCurrentMapNodes().find((entry) => entry.state === "available")?.id || null;
+  app.mapHoverNodeId = null;
   saveRun();
   renderMap();
 }
