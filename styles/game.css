@@ -5180,12 +5180,16 @@ body::before {
   z-index: 3;
 }
 
-#battle-screen .lane-slot.is-lunging-player .card {
-  animation: attack-lunge-player 0.19s cubic-bezier(0.24, 0.84, 0.22, 1) 1;
+#battle-screen .lane-slot.is-lunging-player .card,
+#battle-screen .lane-slot.is-lunging-player::before,
+#battle-screen .lane-slot.is-lunging-player::after {
+  animation: attack-lunge-player 0.22s cubic-bezier(0.24, 0.84, 0.22, 1) 1;
 }
 
-#battle-screen .lane-slot.is-lunging-enemy .card {
-  animation: attack-lunge-enemy 0.19s cubic-bezier(0.24, 0.84, 0.22, 1) 1;
+#battle-screen .lane-slot.is-lunging-enemy .card,
+#battle-screen .lane-slot.is-lunging-enemy::before,
+#battle-screen .lane-slot.is-lunging-enemy::after {
+  animation: attack-lunge-enemy 0.22s cubic-bezier(0.24, 0.84, 0.22, 1) 1;
 }
 
 #battle-screen .card-portrait,
@@ -5527,13 +5531,13 @@ body::before {
 
 @keyframes attack-lunge-player {
   0% { transform: translateY(-2px) scale(1); }
-  45% { transform: translateY(-24px) scale(1.02); }
+  45% { transform: translateY(-72px) scale(1.03); }
   100% { transform: translateY(-2px) scale(1); }
 }
 
 @keyframes attack-lunge-enemy {
   0% { transform: translateY(-2px) scale(1); }
-  45% { transform: translateY(18px) scale(1.02); }
+  45% { transform: translateY(54px) scale(1.03); }
   100% { transform: translateY(-2px) scale(1); }
 }
 

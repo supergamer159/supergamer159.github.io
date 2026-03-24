@@ -1176,9 +1176,9 @@ async function animateAttackLunge(side, lane) {
   slot.classList.remove("is-lunging-player", "is-lunging-enemy");
   void card.offsetWidth;
   slot.classList.add(lungeClass);
-  await sleep(190);
+  await sleep(220);
   slot.classList.remove(lungeClass);
-  await sleep(40);
+  await sleep(50);
 }
 
 function resetDragGhost() {
