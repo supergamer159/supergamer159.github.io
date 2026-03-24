@@ -4590,6 +4590,10 @@ body::before {
   width: 72px;
 }
 
+#battle-screen .queue-slot.is-deploying .queue-cardback {
+  animation: queue-send 0.19s cubic-bezier(0.2, 0.82, 0.24, 1) 1 forwards;
+}
+
 #battle-screen .scale-track {
   min-height: 38px;
 }
@@ -5176,8 +5180,15 @@ body::before {
 }
 
 #battle-screen .lane-slot.is-lunging-player,
+#battle-screen .lane-slot.is-deploying-enemy,
 #battle-screen .lane-slot.is-lunging-enemy {
   z-index: 3;
+}
+
+#battle-screen .lane-slot.is-deploying-enemy .card,
+#battle-screen .lane-slot.is-deploying-enemy::before,
+#battle-screen .lane-slot.is-deploying-enemy::after {
+  animation: enemy-deploy 0.22s cubic-bezier(0.18, 0.84, 0.22, 1) 1;
 }
 
 #battle-screen .lane-slot.is-lunging-player .card,
@@ -5529,15 +5540,26 @@ body::before {
   50% { transform: translateY(-5px); }
 }
 
+@keyframes queue-send {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(64px) scale(0.9); opacity: 0; }
+}
+
+@keyframes enemy-deploy {
+  0% { transform: translateY(-62px) scale(0.92); opacity: 0.24; }
+  62% { transform: translateY(6px) scale(1.01); opacity: 1; }
+  100% { transform: translateY(-2px) scale(1); opacity: 1; }
+}
+
 @keyframes attack-lunge-player {
   0% { transform: translateY(-2px) scale(1); }
-  45% { transform: translateY(-72px) scale(1.03); }
+  45% { transform: translateY(-108px) scale(1.04); }
   100% { transform: translateY(-2px) scale(1); }
 }
 
 @keyframes attack-lunge-enemy {
   0% { transform: translateY(-2px) scale(1); }
-  45% { transform: translateY(54px) scale(1.03); }
+  45% { transform: translateY(84px) scale(1.04); }
   100% { transform: translateY(-2px) scale(1); }
 }
 

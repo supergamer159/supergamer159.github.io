@@ -1,6 +1,6 @@
 const STORAGE_KEYS = {
   profile: "inscryption_profile_v2",
-  run: "inscryption_run_v2",
+  run: "inscryption_run_v3",
 };
 
 const MAX_LANES = 4;
@@ -199,44 +199,173 @@ const MAP_NODE_GLYPHS = Object.freeze({
   leshy: "L",
 });
 
-const MAP_BLUEPRINTS = [
-  [
-    ["battle", "campfire", "backpack"],
-    ["battle", "trapper", "battle"],
-    ["battle", "sacrificial-stones", "deck-trial"],
-    ["battle", "trader", "campfire"],
-    ["battle", "battle"],
-    ["boss"],
-  ],
-  [
-    ["battle", "backpack", "battle"],
-    ["battle", "campfire", "trapper"],
-    ["battle", "deck-trial", "sacrificial-stones"],
-    ["battle", "trader", "battle"],
-    ["battle", "campfire"],
-    ["boss"],
-  ],
-  [
-    ["battle", "campfire", "battle"],
-    ["battle", "trapper", "backpack"],
-    ["battle", "sacrificial-stones", "deck-trial"],
-    ["battle", "trader", "campfire"],
-    ["battle", "battle"],
-    ["boss"],
-  ],
-  [["boss"]],
-];
+function createMapNodeDef(id, type, x, y, depth, extra = {}) {
+  return {
+    id,
+    type,
+    x,
+    y,
+    depth,
+    iconKey: extra.iconKey || type,
+    panelAnchor: extra.panelAnchor || "right",
+    bossId: extra.bossId || null,
+  };
+}
 
-const MAP_ROUTE_LINKS = Object.freeze({
-  "1-1": [[0, [0]]],
-  "1-2": [[0, [0, 1]]],
-  "1-3": [[0, [0, 1, 2]]],
-  "2-1": [[0, [0]], [1, [0]]],
-  "2-2": [[0, [0]], [1, [1]]],
-  "2-3": [[0, [0, 1]], [1, [1, 2]]],
-  "3-1": [[0, [0]], [1, [0]], [2, [0]]],
-  "3-2": [[0, [0]], [1, [0, 1]], [2, [1]]],
-  "3-3": [[0, [0, 1]], [1, [1]], [2, [1, 2]]],
+function createMapEdgeDef(id, from, to, d) {
+  return { id, from, to, d };
+}
+
+const MAP_REGION_TEMPLATES = Object.freeze([
+  {
+    id: "woodland",
+    entryNodeIds: ["woodland-start-left", "woodland-start-mid", "woodland-start-right"],
+    nodes: [
+      createMapNodeDef("woodland-start-left", "battle", 15, 14, 0),
+      createMapNodeDef("woodland-start-mid", "campfire", 38, 14, 0),
+      createMapNodeDef("woodland-start-right", "backpack", 63, 14, 0, { panelAnchor: "left" }),
+      createMapNodeDef("woodland-trapper", "trapper", 28, 32, 1),
+      createMapNodeDef("woodland-fight-a", "battle", 52, 32, 1, { panelAnchor: "left" }),
+      createMapNodeDef("woodland-stones", "sacrificial-stones", 18, 50, 2),
+      createMapNodeDef("woodland-trial", "deck-trial", 40, 50, 2),
+      createMapNodeDef("woodland-camp", "campfire", 62, 50, 2, { panelAnchor: "left" }),
+      createMapNodeDef("woodland-fight-b", "battle", 30, 68, 3),
+      createMapNodeDef("woodland-trader", "trader", 52, 68, 3, { panelAnchor: "left" }),
+      createMapNodeDef("woodland-fight-c", "battle", 40, 84, 4),
+      createMapNodeDef("woodland-boss", "boss", 40, 97, 5, { panelAnchor: "left" }),
+    ],
+    edges: [
+      createMapEdgeDef("woodland-e1", "woodland-start-left", "woodland-trapper", "M 15 14 C 16 22, 19 27, 28 32"),
+      createMapEdgeDef("woodland-e2", "woodland-start-mid", "woodland-trapper", "M 38 14 C 35 21, 32 26, 28 32"),
+      createMapEdgeDef("woodland-e3", "woodland-start-mid", "woodland-fight-a", "M 38 14 C 43 21, 47 26, 52 32"),
+      createMapEdgeDef("woodland-e4", "woodland-start-right", "woodland-fight-a", "M 63 14 C 60 21, 57 26, 52 32"),
+      createMapEdgeDef("woodland-e5", "woodland-trapper", "woodland-stones", "M 28 32 C 24 38, 20 44, 18 50"),
+      createMapEdgeDef("woodland-e6", "woodland-trapper", "woodland-trial", "M 28 32 C 31 39, 35 45, 40 50"),
+      createMapEdgeDef("woodland-e7", "woodland-fight-a", "woodland-trial", "M 52 32 C 48 39, 44 45, 40 50"),
+      createMapEdgeDef("woodland-e8", "woodland-fight-a", "woodland-camp", "M 52 32 C 55 39, 59 45, 62 50"),
+      createMapEdgeDef("woodland-e9", "woodland-stones", "woodland-fight-b", "M 18 50 C 20 57, 24 63, 30 68"),
+      createMapEdgeDef("woodland-e10", "woodland-trial", "woodland-fight-b", "M 40 50 C 36 57, 33 63, 30 68"),
+      createMapEdgeDef("woodland-e11", "woodland-trial", "woodland-trader", "M 40 50 C 43 57, 47 63, 52 68"),
+      createMapEdgeDef("woodland-e12", "woodland-camp", "woodland-trader", "M 62 50 C 58 57, 55 63, 52 68"),
+      createMapEdgeDef("woodland-e13", "woodland-fight-b", "woodland-fight-c", "M 30 68 C 32 75, 35 81, 40 84"),
+      createMapEdgeDef("woodland-e14", "woodland-trader", "woodland-fight-c", "M 52 68 C 49 75, 45 81, 40 84"),
+      createMapEdgeDef("woodland-e15", "woodland-fight-c", "woodland-boss", "M 40 84 C 40 89, 40 93, 40 97"),
+    ],
+  },
+  {
+    id: "marsh",
+    entryNodeIds: ["marsh-start-left", "marsh-start-mid", "marsh-start-right"],
+    nodes: [
+      createMapNodeDef("marsh-start-left", "battle", 18, 15, 0),
+      createMapNodeDef("marsh-start-mid", "backpack", 42, 15, 0),
+      createMapNodeDef("marsh-start-right", "battle", 66, 15, 0, { panelAnchor: "left" }),
+      createMapNodeDef("marsh-fight-a", "battle", 24, 33, 1),
+      createMapNodeDef("marsh-fire", "campfire", 50, 33, 1),
+      createMapNodeDef("marsh-trapper", "trapper", 72, 33, 1, { panelAnchor: "left" }),
+      createMapNodeDef("marsh-trial", "deck-trial", 32, 51, 2),
+      createMapNodeDef("marsh-stones", "sacrificial-stones", 56, 51, 2, { panelAnchor: "left" }),
+      createMapNodeDef("marsh-fight-b", "battle", 22, 69, 3),
+      createMapNodeDef("marsh-trader", "trader", 46, 69, 3),
+      createMapNodeDef("marsh-camp", "campfire", 68, 69, 3, { panelAnchor: "left" }),
+      createMapNodeDef("marsh-fight-c", "battle", 46, 85, 4),
+      createMapNodeDef("marsh-boss", "boss", 46, 97, 5, { panelAnchor: "left" }),
+    ],
+    edges: [
+      createMapEdgeDef("marsh-e1", "marsh-start-left", "marsh-fight-a", "M 18 15 C 19 22, 21 28, 24 33"),
+      createMapEdgeDef("marsh-e2", "marsh-start-mid", "marsh-fight-a", "M 42 15 C 37 22, 31 28, 24 33"),
+      createMapEdgeDef("marsh-e3", "marsh-start-mid", "marsh-fire", "M 42 15 C 45 22, 48 27, 50 33"),
+      createMapEdgeDef("marsh-e4", "marsh-start-right", "marsh-fire", "M 66 15 C 61 22, 56 27, 50 33"),
+      createMapEdgeDef("marsh-e5", "marsh-start-right", "marsh-trapper", "M 66 15 C 69 22, 71 27, 72 33"),
+      createMapEdgeDef("marsh-e6", "marsh-fight-a", "marsh-trial", "M 24 33 C 25 39, 28 45, 32 51"),
+      createMapEdgeDef("marsh-e7", "marsh-fire", "marsh-trial", "M 50 33 C 45 39, 38 45, 32 51"),
+      createMapEdgeDef("marsh-e8", "marsh-fire", "marsh-stones", "M 50 33 C 52 39, 54 45, 56 51"),
+      createMapEdgeDef("marsh-e9", "marsh-trapper", "marsh-stones", "M 72 33 C 67 39, 61 45, 56 51"),
+      createMapEdgeDef("marsh-e10", "marsh-trial", "marsh-fight-b", "M 32 51 C 28 57, 24 63, 22 69"),
+      createMapEdgeDef("marsh-e11", "marsh-trial", "marsh-trader", "M 32 51 C 36 57, 40 63, 46 69"),
+      createMapEdgeDef("marsh-e12", "marsh-stones", "marsh-trader", "M 56 51 C 53 57, 50 63, 46 69"),
+      createMapEdgeDef("marsh-e13", "marsh-stones", "marsh-camp", "M 56 51 C 60 57, 64 63, 68 69"),
+      createMapEdgeDef("marsh-e14", "marsh-fight-b", "marsh-fight-c", "M 22 69 C 28 75, 36 81, 46 85"),
+      createMapEdgeDef("marsh-e15", "marsh-trader", "marsh-fight-c", "M 46 69 C 46 75, 46 80, 46 85"),
+      createMapEdgeDef("marsh-e16", "marsh-camp", "marsh-fight-c", "M 68 69 C 62 75, 55 81, 46 85"),
+      createMapEdgeDef("marsh-e17", "marsh-fight-c", "marsh-boss", "M 46 85 C 46 90, 46 94, 46 97"),
+    ],
+  },
+  {
+    id: "snowline",
+    entryNodeIds: ["snow-start-left", "snow-start-mid", "snow-start-right"],
+    nodes: [
+      createMapNodeDef("snow-start-left", "battle", 16, 14, 0),
+      createMapNodeDef("snow-start-mid", "campfire", 40, 14, 0),
+      createMapNodeDef("snow-start-right", "battle", 64, 14, 0, { panelAnchor: "left" }),
+      createMapNodeDef("snow-trapper", "trapper", 26, 32, 1),
+      createMapNodeDef("snow-fight-a", "battle", 52, 32, 1, { panelAnchor: "left" }),
+      createMapNodeDef("snow-stones", "sacrificial-stones", 18, 50, 2),
+      createMapNodeDef("snow-pack", "backpack", 40, 50, 2),
+      createMapNodeDef("snow-trial", "deck-trial", 64, 50, 2, { panelAnchor: "left" }),
+      createMapNodeDef("snow-fight-b", "battle", 28, 68, 3),
+      createMapNodeDef("snow-trader", "trader", 52, 68, 3, { panelAnchor: "left" }),
+      createMapNodeDef("snow-fight-c", "battle", 40, 84, 4),
+      createMapNodeDef("snow-boss", "boss", 40, 97, 5, { panelAnchor: "left" }),
+    ],
+    edges: [
+      createMapEdgeDef("snow-e1", "snow-start-left", "snow-trapper", "M 16 14 C 18 21, 22 27, 26 32"),
+      createMapEdgeDef("snow-e2", "snow-start-mid", "snow-trapper", "M 40 14 C 35 21, 30 27, 26 32"),
+      createMapEdgeDef("snow-e3", "snow-start-mid", "snow-fight-a", "M 40 14 C 44 21, 48 27, 52 32"),
+      createMapEdgeDef("snow-e4", "snow-start-right", "snow-fight-a", "M 64 14 C 60 21, 56 27, 52 32"),
+      createMapEdgeDef("snow-e5", "snow-trapper", "snow-stones", "M 26 32 C 22 38, 19 44, 18 50"),
+      createMapEdgeDef("snow-e6", "snow-trapper", "snow-pack", "M 26 32 C 30 39, 35 45, 40 50"),
+      createMapEdgeDef("snow-e7", "snow-fight-a", "snow-pack", "M 52 32 C 48 39, 44 45, 40 50"),
+      createMapEdgeDef("snow-e8", "snow-fight-a", "snow-trial", "M 52 32 C 57 39, 61 45, 64 50"),
+      createMapEdgeDef("snow-e9", "snow-stones", "snow-fight-b", "M 18 50 C 20 57, 23 63, 28 68"),
+      createMapEdgeDef("snow-e10", "snow-pack", "snow-fight-b", "M 40 50 C 36 57, 32 63, 28 68"),
+      createMapEdgeDef("snow-e11", "snow-pack", "snow-trader", "M 40 50 C 43 57, 47 63, 52 68"),
+      createMapEdgeDef("snow-e12", "snow-trial", "snow-trader", "M 64 50 C 60 57, 56 63, 52 68"),
+      createMapEdgeDef("snow-e13", "snow-fight-b", "snow-fight-c", "M 28 68 C 31 75, 35 81, 40 84"),
+      createMapEdgeDef("snow-e14", "snow-trader", "snow-fight-c", "M 52 68 C 49 75, 45 81, 40 84"),
+      createMapEdgeDef("snow-e15", "snow-fight-c", "snow-boss", "M 40 84 C 40 89, 40 94, 40 97"),
+    ],
+  },
+  {
+    id: "cabin-door",
+    entryNodeIds: ["cabin-boss"],
+    nodes: [
+      createMapNodeDef("cabin-boss", "boss", 42, 56, 0, { bossId: "leshy" }),
+    ],
+    edges: [],
+  },
+]);
+
+const BATTLE_LAYOUT = Object.freeze({
+  desktop: {
+    tableWidth: 986,
+    surfaceTop: 56,
+    surfaceBottom: 112,
+    queueTop: 42,
+    queueWidth: 632,
+    rowsWidth: 728,
+    enemyRowTop: 146,
+    scaleTop: 334,
+    scaleWidth: 468,
+    playerRowTop: 398,
+    laneHeight: 198,
+    handPaddingLeft: 128,
+    handPaddingRight: 128,
+    handPaddingBottom: 10,
+    drawBottom: 18,
+    drawInset: 24,
+    drawWidth: 104,
+    drawHeight: 142,
+    bellBottom: 28,
+  },
+});
+
+const BATTLE_SKIN_ASSETS = Object.freeze({
+  mainDeck: ASSETS.backs.normal,
+  sideDeck: ASSETS.backs.squirrel,
+  queueBack: ASSETS.backs.normal,
+  slot: ASSETS.slots.normal,
+  slotHost: ASSETS.slots.host,
+  slotSacrifice: ASSETS.slots.sacrifice,
 });
 
 const SIGIL_DEFS = Object.freeze({
@@ -1006,7 +1135,7 @@ function getItemCapacity(run) {
 
 function createNewRun(deckId, challengeIds) {
   const run = {
-    version: 2,
+    version: 3,
     seed: randomSeed(),
     rngState: randomSeed(),
     uidCounter: 0,
@@ -1042,75 +1171,79 @@ function createNewRun(deckId, challengeIds) {
   }
   run.bossOrder = [...shuffle(run, ["prospector", "angler", "trapper-trader"]), "leshy"];
   run.maps = generateMaps(run);
-  unlockAvailableNodes(run.maps[0], []);
+  initializeMapProgress(run.maps[0]);
   markDiscovered(run.deck.map((entry) => entry.cardId));
   return run;
 }
 
-function generateMaps(run) {
-  return MAP_BLUEPRINTS.map((rows, mapIndex) => {
-    const map = [];
-    let previousRow = [];
-    rows.forEach((rowTypes, rowIndex) => {
-      const xPositions = mapRowXPositions(rowTypes.length);
-      const yBase = mapRowYPosition(rows.length, rowIndex);
-      const row = rowTypes.map((type, laneIndex) => {
-        const xBase = xPositions[laneIndex] ?? 50;
-        const jitter = mapAnchorJitter(mapIndex, rowIndex, laneIndex);
-        const node = {
-          id: `map-${mapIndex}-node-${rowIndex}-${laneIndex}`,
-          mapIndex,
-          depth: rowIndex,
-          rowIndex,
-          laneIndex,
-          anchorX: xBase,
-          anchorY: yBase,
-          type,
-          x: clamp(xBase + jitter.x, 16, 84),
-          y: clamp(yBase + jitter.y, 12, 86),
-          parentIds: [],
-          childIds: [],
-          state: "future",
-          bossId: type === "boss" ? run.bossOrder[mapIndex] : null,
-        };
-        map.push(node);
-        return node;
-      });
-      if (previousRow.length) {
-        getMapRouteLinks(previousRow.length, row.length).forEach(([prevIndex, targetIndexes]) => {
-          const prevNode = previousRow[prevIndex];
-          if (!prevNode) return;
-          targetIndexes.forEach((targetIndex) => {
-            const nextNode = row[targetIndex];
-            if (!nextNode) return;
-            if (!nextNode.parentIds.includes(prevNode.id)) nextNode.parentIds.push(prevNode.id);
-            if (!prevNode.childIds.includes(nextNode.id)) prevNode.childIds.push(nextNode.id);
-          });
-        });
-      }
-      previousRow = row;
-    });
-    return map;
+function buildMapFromTemplate(run, template, mapIndex) {
+  const nodes = template.nodes.map((node) => ({
+    ...node,
+    mapIndex,
+    parentIds: [],
+    childIds: [],
+    state: "future",
+    unlockedFromEdgeId: null,
+    bossId: node.type === "boss" ? (node.bossId || run.bossOrder[mapIndex]) : null,
+  }));
+  const edges = template.edges.map((edge) => ({ ...edge }));
+  edges.forEach((edge) => {
+    const from = nodes.find((node) => node.id === edge.from);
+    const to = nodes.find((node) => node.id === edge.to);
+    if (!from || !to) return;
+    if (!from.childIds.includes(to.id)) from.childIds.push(to.id);
+    if (!to.parentIds.includes(from.id)) to.parentIds.push(from.id);
   });
+  return {
+    id: template.id,
+    mapIndex,
+    entryNodeIds: [...template.entryNodeIds],
+    traversedEdgeIds: [],
+    nodes,
+    edges,
+  };
 }
 
-function unlockAvailableNodes(map, clearedNodeIds) {
-  map.forEach((node) => {
+function initializeMapProgress(map) {
+  unlockAvailableNodes(map, (map?.entryNodeIds || []).map((nodeId) => ({ nodeId, edgeId: null })));
+}
+
+function generateMaps(run) {
+  return MAP_REGION_TEMPLATES.map((template, mapIndex) => buildMapFromTemplate(run, template, mapIndex));
+}
+
+function unlockAvailableNodes(map, frontierEntries) {
+  if (!map) return;
+  const frontier = Array.isArray(frontierEntries) && frontierEntries.length
+    ? frontierEntries
+    : (map.entryNodeIds || []).map((nodeId) => ({ nodeId, edgeId: null }));
+  const frontierById = new Map(frontier.map((entry) => [entry.nodeId, entry.edgeId || null]));
+  map.nodes.forEach((node) => {
     if (node.state === "cleared") return;
-    if (!node.parentIds.length) {
+    if (frontierById.has(node.id)) {
       node.state = "available";
+      node.unlockedFromEdgeId = frontierById.get(node.id);
       return;
     }
-    node.state = node.parentIds.some((parentId) => clearedNodeIds.includes(parentId)) ? "available" : "future";
+    node.state = "future";
+    node.unlockedFromEdgeId = null;
   });
 }
 
 function getCurrentMap() {
-  return app.run?.maps[app.run.mapIndex] || [];
+  return app.run?.maps?.[app.run.mapIndex] || null;
+}
+
+function getCurrentMapNodes(map = getCurrentMap()) {
+  return map?.nodes || [];
+}
+
+function getCurrentMapEdges(map = getCurrentMap()) {
+  return map?.edges || [];
 }
 
 function getNodeById(nodeId) {
-  return getCurrentMap().find((node) => node.id === nodeId) || null;
+  return getCurrentMapNodes().find((node) => node.id === nodeId) || null;
 }
 
 function getNodeMeta(node) {
@@ -1165,6 +1298,36 @@ function guardBattleInteraction(showMessage = true) {
 
 function getLaneSlotElement(side, lane) {
   return el("battle-screen")?.querySelector(`.lane-slot[data-side="${side}"][data-lane="${lane}"]`) || null;
+}
+
+function getQueueSlotElement(lane) {
+  return el("enemy-queue")?.querySelector(`.queue-slot[data-lane="${lane}"]`) || null;
+}
+
+async function animateQueueTakeoff(lane) {
+  if (app.profile?.options?.reducedMotion) return;
+  const slot = getQueueSlotElement(lane);
+  const cardback = slot?.querySelector(".queue-cardback");
+  if (!slot || !cardback) return;
+  slot.classList.remove("is-deploying");
+  void cardback.offsetWidth;
+  slot.classList.add("is-deploying");
+  await sleep(190);
+  slot.classList.remove("is-deploying");
+  await sleep(35);
+}
+
+async function animateEnemyDeployment(lane) {
+  if (app.profile?.options?.reducedMotion) return;
+  const slot = getLaneSlotElement("enemy", lane);
+  const card = slot?.querySelector(".card");
+  if (!slot || !card) return;
+  slot.classList.remove("is-deploying-enemy");
+  void card.offsetWidth;
+  slot.classList.add("is-deploying-enemy");
+  await sleep(220);
+  slot.classList.remove("is-deploying-enemy");
+  await sleep(50);
 }
 
 async function animateAttackLunge(side, lane) {
@@ -1967,9 +2130,10 @@ function renderItemBar() {
 function renderQueue() {
   const queue = el("enemy-queue");
   clearElement(queue);
-  app.run.battle.queue.forEach((cardId) => {
+  app.run.battle.queue.forEach((cardId, lane) => {
     const slot = document.createElement("div");
     slot.className = `queue-slot${app.run.battle.bossId ? " is-boss" : ""}`;
+    slot.dataset.lane = String(lane);
     if (cardId) {
       const back = document.createElement("div");
       back.className = "queue-cardback pixel-image";
@@ -2568,14 +2732,30 @@ function handleMovementForSide(side) {
   });
 }
 
-function deployQueue() {
+function deployQueuedCard(lane) {
   const battle = app.run.battle;
-  battle.queue.forEach((cardId, lane) => {
-    if (!cardId || battle.enemyBoard[lane]) return;
-    battle.enemyBoard[lane] = createEnemyUnit(app.run, battle, cardId, lane);
-    battle.queue[lane] = null;
-    reactGuardian("player", lane);
-  });
+  const cardId = battle.queue[lane];
+  if (!cardId || battle.enemyBoard[lane]) return null;
+  const unit = createEnemyUnit(app.run, battle, cardId, lane);
+  battle.enemyBoard[lane] = unit;
+  battle.queue[lane] = null;
+  reactGuardian("player", lane);
+  return unit;
+}
+
+async function deployQueueSequentially() {
+  const battle = app.run.battle;
+  for (let lane = 0; lane < MAX_LANES; lane += 1) {
+    if (!battle.queue[lane] || battle.enemyBoard[lane]) continue;
+    await animateQueueTakeoff(lane);
+    const deployed = deployQueuedCard(lane);
+    if (!deployed) continue;
+    if (app.run?.scene !== "battle" || app.run.battle !== battle) return true;
+    renderBattle();
+    await animateEnemyDeployment(lane);
+    if (app.run?.scene !== "battle" || app.run.battle !== battle) return true;
+  }
+  return false;
 }
 
 function queueNextWaveIfNeeded() {
@@ -2740,8 +2920,7 @@ async function handleBell() {
   renderBattle();
   try {
     if (await runAttackStep("player")) return;
-    deployQueue();
-    if (app.run?.scene === "battle" && app.run.battle === battle) renderBattle();
+    if (await deployQueueSequentially()) return;
     if (battle.skipEnemyAttack > 0) {
       battle.skipEnemyAttack -= 1;
       logBattle(battle, "The enemy attack step is skipped.");
