@@ -75,6 +75,7 @@ const ASSETS = Object.freeze({
   sigils: {
     airborne: "game assets/Sigils/ability_flying.png",
     "mighty-leap": "game assets/Sigils/ability_reach.png",
+    "omni-strike": "game assets/Sigils/ability_allstrike.png",
     waterborne: "game assets/Sigils/ability_submerge.png",
     guardian: "game assets/Sigils/ability_guarddog.png",
     burrower: "game assets/Sigils/ability_whackamole.png",
@@ -241,6 +242,7 @@ const MAP_ROUTE_LINKS = Object.freeze({
 const SIGIL_DEFS = Object.freeze({
   airborne: { name: "Airborne", text: "Strikes past creatures unless blocked by Mighty Leap." },
   "mighty-leap": { name: "Mighty Leap", text: "Blocks Airborne strikes." },
+  "omni-strike": { name: "Omni Strike", text: "Strikes every opposing lane." },
   waterborne: { name: "Waterborne", text: "Submerges during the opposing attack step." },
   guardian: { name: "Guardian", text: "Moves to oppose a creature played across from it." },
   burrower: { name: "Burrower", text: "Moves to defend an open lane before damage lands." },
@@ -270,6 +272,26 @@ const SIGIL_DEFS = Object.freeze({
   brittle: { name: "Brittle", text: "Dies after striking." },
   sentry: { name: "Sentry", text: "Pings the opposing lane for 1 damage on play." },
   "steel-trap": { name: "Steel Trap", text: "Kills the creature that strikes it and leaves a pelt." },
+});
+
+const TABLE_CHATTER = Object.freeze({
+  stoat: {
+    draw: "Stoat sizes up the opening hand with visible contempt.",
+    play: "Stoat mutters that the lane had better be worth it.",
+    sacrifice: "Stoat does not appreciate becoming blood again.",
+  },
+  bossPhases: {
+    "prospector-0": "The Prospector taps his pan against the table and grins.",
+    "prospector-1": "Gold glitters across the table as the Prospector laughs.",
+    "angler-0": "The Angler watches the last card you trust the most.",
+    "angler-1": "Buckets slam down across the board. Something thrashes beneath them.",
+    "trapper-trader-0": "Steel jaws snap open in the dark.",
+    "trapper-trader-1": "Pelts are spread across the table for a cruel bargain.",
+    "leshy-0": "Leshy leans forward. The masks are close at hand.",
+    "leshy-1": "Leshy opens his ledger of the dead.",
+    "leshy-2": "The moon rises over the cabin and stares back at you.",
+  },
+  moon: "The moon drags the smallest creatures beneath the tide.",
 });
 
 function el(id) {
@@ -345,7 +367,7 @@ const CARD_LIST = [
   createCard("rabbit-pelt", "Rabbit Pelt", "portrait_pelt_hare", 0, 0, 0, 1, [], { text: "Traded away for new cards.", tags: ["pelt"], canSacrifice: false }),
   createCard("wolf-pelt", "Wolf Pelt", "portrait_pelt_wolf", 0, 0, 0, 2, [], { text: "Traded for stronger offers.", tags: ["pelt"], canSacrifice: false }),
   createCard("golden-pelt", "Golden Pelt", "portrait_pelt_golden", 0, 0, 0, 3, [], { text: "A gilded pelt fit for rare cards.", tags: ["pelt"], canSacrifice: false, rare: true }),
-  createCard("stoat", "Stoat", "portrait_stoat", 1, 0, 1, 3, [], { tribe: "canine", text: "A sturdy one-blood opener." }),
+  createCard("stoat", "Stoat", "portrait_stoat", 1, 0, 1, 2, [], { tribe: "canine", text: "A stubborn one-blood opener." }),
   createCard("bullfrog", "Bullfrog", "portrait_bullfrog", 1, 0, 1, 2, ["mighty-leap"], { tribe: "reptile" }),
   createCard("wolf", "Wolf", "portrait_wolf", 2, 0, 3, 2, [], { tribe: "canine", text: "Three power for two blood." }),
   createCard("black-goat", "Black Goat", "portrait_goat", 1, 0, 0, 1, ["worthy-sacrifice"], { tribe: "hooved" }),
@@ -394,21 +416,22 @@ const CARD_LIST = [
   createCard("great-white", "Great White", "portrait_shark", 0, 0, 4, 2, ["waterborne"], { text: "It waits under the waterline.", disableEmission: true }),
   createCard("strange-frog", "Strange Frog", "portrait_trapfrog", 1, 0, 0, 2, [], { text: "It leaves a trap when it dies.", special: "strange-frog", disableEmission: true }),
   createCard("leaping-trap", "Leaping Trap", "portrait_trap", 0, 0, 0, 1, ["mighty-leap", "steel-trap"], { text: "A trap that kills what strikes it.", tags: ["terrain"], canSacrifice: false, disableEmission: true }),
-  createCard("deathcard-woods", "Deathcard Of Wood", "portrait_stoat_bloated", 2, 0, 3, 4, ["guardian"], { rare: true, text: "A premade deathcard from Leshy's book." }),
-  createCard("deathcard-moon", "Deathcard Of Ash", "portrait_stoat_bloated", 2, 0, 2, 5, ["sharp-quills"], { rare: true, text: "A second deathcard carved for the finale." }),
-  createCard("deathcard-bone", "Deathcard Of Bone", "portrait_stoat_bloated", 0, 6, 4, 3, ["airborne"], { rare: true, text: "A third deathcard with too much reach." }),
-  createCard("moon", "The Moon", "moon_portrait", 0, 0, 1, 40, [], { rare: true, text: "The last thing Leshy places on the board.", portraitPath: "game assets/Portraits/moon_portrait.png", emissionPath: "" }),
+  createCard("deathcard-louis", "Louis", "portrait_stoat_bloated", 1, 0, 1, 1, ["sprinter", "waterborne"], { rare: true, text: "One of Leshy's premade deathcards." }),
+  createCard("deathcard-kaycee", "Kaycee", "portrait_stoat_bloated", 1, 0, 1, 2, ["bifurcated", "sharp-quills"], { rare: true, text: "One of Leshy's premade deathcards." }),
+  createCard("deathcard-kaminski", "Kaminski", "portrait_stoat_bloated", 0, 1, 0, 1, ["guardian", "sharp-quills"], { rare: true, text: "One of Leshy's premade deathcards." }),
+  createCard("deathcard-reginald", "Reginald", "portrait_stoat_bloated", 0, 3, 1, 3, ["touch-of-death"], { rare: true, text: "One of Leshy's premade deathcards." }),
+  createCard("moon", "The Moon", "moon_portrait", 0, 0, 1, 40, ["mighty-leap", "omni-strike"], { rare: true, text: "It strikes every lane and drowns your squirrels and rabbits.", portraitPath: "game assets/Portraits/moon_portrait.png", emissionPath: "", special: "moon", canSacrifice: false }),
 ];
 
 const CARD_DEFS = Object.freeze(Object.fromEntries(CARD_LIST.map((card) => [card.id, card])));
 
 const STARTER_DECKS = [
-  { id: "vanilla", name: "Vanilla", summary: "Stoat, Bullfrog, Wolf, and two Rabbit Pelts.", cards: ["stoat", "bullfrog", "wolf", "rabbit-pelt", "rabbit-pelt"], preview: ["stoat", "bullfrog", "wolf", "rabbit-pelt", "rabbit-pelt"] },
-  { id: "high-cost", name: "High Cost", summary: "Black Goat, Moose Buck, Mole, and two Rabbit Pelts.", cards: ["black-goat", "moose-buck", "mole", "rabbit-pelt", "rabbit-pelt"], preview: ["black-goat", "mole", "moose-buck", "rabbit-pelt", "rabbit-pelt"] },
-  { id: "ants", name: "Ants", summary: "Ant Queen, Flying Ant, Skunk, and two Rabbit Pelts.", cards: ["ant-queen", "flying-ant", "skunk", "rabbit-pelt", "rabbit-pelt"], preview: ["ant-queen", "flying-ant", "worker-ant", "rabbit-pelt", "rabbit-pelt"] },
-  { id: "one-true-god", name: "One True God", summary: "Mantis God, two Ring Worms, and two Rabbit Pelts.", cards: ["mantis-god", "ring-worm", "ring-worm", "rabbit-pelt", "rabbit-pelt"], preview: ["mantis-god", "ring-worm", "ring-worm", "rabbit-pelt", "rabbit-pelt"] },
-  { id: "no-cost", name: "No Cost", summary: "Rabbit, Tadpole, Geck, and two Rabbit Pelts.", cards: ["rabbit", "tadpole", "geck", "rabbit-pelt", "rabbit-pelt"], preview: ["rabbit", "tadpole", "geck", "rabbit-pelt", "rabbit-pelt"] },
-  { id: "bones", name: "Bones", summary: "Opossum, Rat King, Coyote, and two Rabbit Pelts.", cards: ["opossum", "rat-king", "coyote", "rabbit-pelt", "rabbit-pelt"], preview: ["opossum", "rat-king", "coyote", "rabbit-pelt", "rabbit-pelt"] },
+  { id: "vanilla", name: "Vanilla", summary: "Stoat, Bullfrog, and Wolf. Balanced and honest.", cards: ["stoat", "bullfrog", "wolf"], preview: ["stoat", "bullfrog", "wolf"] },
+  { id: "high-cost", name: "High Cost", summary: "Black Goat, Moose Buck, and Mole. Built for Fair Hand abuse.", cards: ["black-goat", "moose-buck", "mole"], preview: ["black-goat", "moose-buck", "mole"] },
+  { id: "ants", name: "Ants", summary: "Ant Queen, Flying Ant, and Skunk. Lean into swarm synergies.", cards: ["ant-queen", "flying-ant", "skunk"], preview: ["ant-queen", "flying-ant", "skunk"] },
+  { id: "one-true-god", name: "Mantis God", summary: "Mantis God and two Ring Worms. Brutal if the opener lines up.", cards: ["mantis-god", "ring-worm", "ring-worm"], preview: ["mantis-god", "ring-worm", "ring-worm"] },
+  { id: "no-cost", name: "No Cost", summary: "Rabbit, Tadpole, and Geck. Free bodies and flexible turns.", cards: ["rabbit", "tadpole", "geck"], preview: ["rabbit", "tadpole", "geck"] },
+  { id: "bones", name: "Bones", summary: "Opossum, Rat King, and Coyote. Start the run with a bone plan.", cards: ["opossum", "rat-king", "coyote"], preview: ["opossum", "rat-king", "coyote"] },
 ];
 
 const DECK_BY_ID = Object.freeze(Object.fromEntries(STARTER_DECKS.map((deck) => [deck.id, deck])));
@@ -518,7 +541,7 @@ const BOSS_ENCOUNTERS = {
     copy: "No boons. No mercy. Only the moon after the masks.",
     phases: [
       { name: "Leshy", copy: "The rare cards arrive first.", waves: [["mole-man", null, "pack-rat", null], [null, "grizzly", null, "urayuli"], [null, "amalgam", null, null]] },
-      { name: "Deathcards", copy: "He carves fresh dead into the next hand.", waves: [["deathcard-woods", null, "deathcard-moon", null], [null, "deathcard-bone", null, "deathcard-woods"], [null, "grizzly", null, null]] },
+      { name: "Deathcards", copy: "He carves fresh dead into the next hand.", waves: [["deathcard-louis", null, "deathcard-kaycee", null], [null, "deathcard-kaminski", null, "deathcard-reginald"], [null, "grizzly", null, null]] },
       { name: "The Moon", copy: "The last phase rises all at once.", waves: [[null, "moon", null, null]] },
     ],
   },
@@ -560,6 +583,8 @@ function defaultProfile() {
     unlockedChallengeIds: ["tipped-scales"],
     winsByDeck: {},
     discoveredCardIds: ["stoat", "bullfrog", "wolf", "rabbit-pelt", "squirrel"],
+    deathcards: [],
+    deathcardCounter: 0,
     options: {
       reducedMotion: false,
       pixelScaling: true,
@@ -586,6 +611,8 @@ function loadProfile() {
       unlockedDeckIds: unique([...(parsed.unlockedDeckIds || ["vanilla"])]),
       unlockedChallengeIds: unique([...(parsed.unlockedChallengeIds || ["tipped-scales"])]),
       discoveredCardIds: unique([...(parsed.discoveredCardIds || [])]),
+      deathcards: [...(parsed.deathcards || [])].filter((card) => card && card.id),
+      deathcardCounter: Number(parsed.deathcardCounter) || 0,
       winsByDeck: { ...(parsed.winsByDeck || {}) },
     };
   } catch (error) {
@@ -662,6 +689,126 @@ function sample(run, values) {
 
 function takeRandomDistinct(run, values, count) {
   return shuffle(run, values).slice(0, Math.min(count, values.length));
+}
+
+function getProfileDeathcards() {
+  return Array.isArray(app.profile?.deathcards) ? app.profile.deathcards.filter((card) => card && card.id) : [];
+}
+
+function isFairHandCandidate(entry) {
+  const model = entry?.cardId ? getEntryModel(entry) : getCardDef(entry?.id);
+  if (!model || model.playable === false) return false;
+  if ((model.tags || []).includes("pelt") || (model.tags || []).includes("terrain")) return false;
+  return model.costBlood === 1 && model.costBones === 0;
+}
+
+function buildBattleMainDeck(run) {
+  const deck = shuffle(run, run.deck.map((entry) => cloneEntryForBattle(entry)));
+  const candidateIndexes = deck
+    .map((entry, index) => isFairHandCandidate(entry) ? index : -1)
+    .filter((index) => index >= 0);
+  if (!candidateIndexes.length) return deck;
+  const candidateIndex = sample(run, candidateIndexes);
+  const [candidate] = deck.splice(candidateIndex, 1);
+  const insertAt = randInt(run, 0, Math.min(2, deck.length + 1));
+  deck.splice(insertAt, 0, candidate);
+  return deck;
+}
+
+function noteUniqueBattleLine(battle, key, message) {
+  if (!battle || !message) return;
+  battle.chatterSeen = battle.chatterSeen || [];
+  if (battle.chatterSeen.includes(key)) return;
+  battle.chatterSeen.push(key);
+  logBattle(battle, message);
+}
+
+function maybeNoteCardChatter(battle, source, eventType) {
+  const cardId = source?.cardId || source?.id;
+  if (cardId !== "stoat") return;
+  const line = TABLE_CHATTER.stoat[eventType];
+  if (!line) return;
+  noteUniqueBattleLine(battle, `stoat-${eventType}`, line);
+}
+
+function maybeNoteBossPhaseChatter(battle) {
+  if (!battle?.bossId) return;
+  const key = `${battle.bossId}-${battle.phaseIndex}`;
+  noteUniqueBattleLine(battle, `boss-${key}`, TABLE_CHATTER.bossPhases[key]);
+}
+
+function getDeathcardFallbackIds() {
+  return ["deathcard-louis", "deathcard-kaycee", "deathcard-kaminski", "deathcard-reginald"];
+}
+
+function getDeathcardRewardPool() {
+  return unique([...getProfileDeathcards().map((card) => card.id), ...getDeathcardFallbackIds()]).filter((cardId) => getCardDef(cardId));
+}
+
+function buildLeshyDeathcardWaves(run) {
+  const pool = getDeathcardRewardPool();
+  const chosen = takeRandomDistinct(run, pool, Math.min(3, pool.length));
+  while (chosen.length < 3 && pool.length) chosen.push(pool[chosen.length % pool.length]);
+  return [
+    [chosen[0], null, chosen[1], null],
+    [null, chosen[2], null, chosen[0]],
+    [null, "grizzly", null, null],
+  ];
+}
+
+function buildDeathcardName(run, model) {
+  const prefixes = ["Ashen", "Stitched", "Gnarled", "Hollow", "Grim"];
+  const baseName = String(model.name || "Remnant").split(/\s+/)[0];
+  return `${sample(run, prefixes)} ${baseName}`;
+}
+
+function createDeathcardFromRun(run) {
+  const entries = (run.deck || []).filter((entry) => {
+    const model = getEntryModel(entry);
+    return model && model.playable !== false && !(model.tags || []).includes("pelt") && !(model.tags || []).includes("terrain");
+  });
+  if (!entries.length) return null;
+
+  const nameSource = sample(run, entries);
+  const costPool = entries.filter((entry) => {
+    const model = getEntryModel(entry);
+    return model.costBlood > 0 || model.costBones > 0;
+  });
+  const costSource = costPool.length ? sample(run, costPool) : nameSource;
+  const statSource = [...entries].sort((left, right) => {
+    const leftModel = getEntryModel(left);
+    const rightModel = getEntryModel(right);
+    return (rightModel.attack + rightModel.health) - (leftModel.attack + leftModel.health);
+  })[0] || nameSource;
+  const sigilPool = entries.filter((entry) => getEntryModel(entry).sigils.length);
+  const sigilSource = sigilPool.length
+    ? [...sigilPool].sort((left, right) => getEntryModel(right).sigils.length - getEntryModel(left).sigils.length)[0]
+    : nameSource;
+
+  const nameModel = getEntryModel(nameSource);
+  const costModel = getEntryModel(costSource);
+  const statModel = getEntryModel(statSource);
+  const sigilModel = getEntryModel(sigilSource);
+  const nextId = `deathcard-player-${(app.profile?.deathcardCounter || 0) + 1}`;
+
+  return createCard(nextId, buildDeathcardName(run, nameModel), "portrait_stoat_bloated", costModel.costBlood, costModel.costBones, statModel.attack, statModel.health, unique([...(sigilModel.sigils || [])]).slice(0, 2), {
+    portraitPath: nameModel.portrait || portraitPath("portrait_stoat_bloated"),
+    emissionPath: nameModel.emission || "",
+    rare: true,
+    frame: "rare",
+    text: `Carved from ${nameModel.name}, ${costModel.name}, and ${sigilModel.name}.`,
+    special: "deathcard",
+  });
+}
+
+function recordDeathcardFromRun(run) {
+  const deathcard = createDeathcardFromRun(run);
+  if (!deathcard) return null;
+  app.profile.deathcardCounter = (app.profile.deathcardCounter || 0) + 1;
+  app.profile.deathcards = [deathcard, ...getProfileDeathcards()].slice(0, 8);
+  app.profile.discoveredCardIds = unique([...(app.profile.discoveredCardIds || []), deathcard.id]).filter((cardId) => getCardDef(cardId));
+  saveProfile();
+  return deathcard;
 }
 
 function mapRowXPositions(count) {
@@ -744,7 +891,7 @@ function getRequiredCp() {
 
 function markDiscovered(cardIds) {
   const merged = unique([...(app.profile.discoveredCardIds || []), ...cardIds.filter(Boolean)]);
-  app.profile.discoveredCardIds = merged.filter((cardId) => CARD_DEFS[cardId]);
+  app.profile.discoveredCardIds = merged.filter((cardId) => getCardDef(cardId));
   saveProfile();
 }
 
@@ -790,7 +937,7 @@ function cloneEntryForBattle(entry) {
 }
 
 function getCardDef(cardId) {
-  return CARD_DEFS[cardId];
+  return CARD_DEFS[cardId] || getProfileDeathcards().find((card) => card.id === cardId) || null;
 }
 
 function getEntryModel(entry) {
@@ -1345,6 +1492,7 @@ function renderTitle() {
   [
     ["Ascension", String(app.profile.ascensionLevel)],
     ["Highest CP", app.profile.highestClearedCP >= 0 ? String(app.profile.highestClearedCP) : "-"],
+    ["Deathcards", String(getProfileDeathcards().length)],
     ["Run", app.run ? "Continue" : "Empty"],
   ].forEach(([label, value]) => {
     const row = document.createElement("div");
@@ -1598,7 +1746,7 @@ function getRewardPoolForMap(mapIndex) {
 }
 
 function pickRewardCards(run, pool, count, extra = {}) {
-  const candidates = pool.filter((cardId) => CARD_DEFS[cardId]);
+  const candidates = pool.filter((cardId) => getCardDef(cardId));
   return takeRandomDistinct(run, candidates, count).map((cardId) => ({
     cardId,
     attackBuff: extra.attackBuff || 0,
@@ -1623,6 +1771,7 @@ function buildStandardEncounter() {
 function buildBossEncounter(node) {
   const bossId = node.bossId || app.run.bossOrder[app.run.mapIndex];
   const template = clone(BOSS_ENCOUNTERS[bossId]);
+  if (bossId === "leshy" && template.phases[1]) template.phases[1].waves = buildLeshyDeathcardWaves(app.run);
   return {
     id: template.id,
     title: template.title,
@@ -1650,7 +1799,7 @@ function createBattleState(node, encounter) {
     playerBoard: Array(MAX_LANES).fill(null),
     enemyBoard: Array(MAX_LANES).fill(null),
     hand: [],
-    mainDeck: shuffle(run, run.deck.map((entry) => cloneEntryForBattle(entry))),
+    mainDeck: buildBattleMainDeck(run),
     sideDeck: Array.from({ length: 10 }, () => createRuntimeEntry(run, "squirrel")),
     playerBones: 0,
     scale: hasChallenge(run, "tipped-scales") ? -1 : 0,
@@ -1658,6 +1807,7 @@ function createBattleState(node, encounter) {
     mustDraw: true,
     skipEnemyAttack: 0,
     logs: [],
+    chatterSeen: [],
     lastPlayedLane: null,
     starvations: 0,
   };
@@ -1675,6 +1825,7 @@ function beginBattlePhase(battle, phaseIndex) {
   battle.upcomingWaves = (battle.phases[phaseIndex].waves.slice(1) || []).map((wave) => [...wave]);
   clearBoardSide(battle, "enemy");
   logBattle(battle, battle.phases[phaseIndex].copy);
+  maybeNoteBossPhaseChatter(battle);
 }
 
 function clearBoardSide(battle, side) {
@@ -1999,6 +2150,7 @@ function resolveSacrifices(lanes) {
       logBattle(battle, `${unit.name} endures the sacrifice.`);
       return;
     }
+    maybeNoteCardChatter(battle, unit, "sacrifice");
     killUnit("player", lane, { reason: "sacrifice" });
   });
 }
@@ -2022,6 +2174,7 @@ function playSelectedCardToLane(lane) {
   reactGuardian("enemy", lane);
   handleOnPlayEffects(unit, entry, lane);
   logBattle(battle, `${model.name} enters lane ${lane + 1}.`);
+  maybeNoteCardChatter(battle, unit, "play");
   app.selection = null;
   app.inspect = unit;
   saveRun();
@@ -2141,8 +2294,10 @@ function drawFromMainDeck(battle, silent = false) {
     battle.mustDraw = false;
     return;
   }
-  battle.hand.push(battle.mainDeck.shift());
+  const drawn = battle.mainDeck.shift();
+  battle.hand.push(drawn);
   battle.mustDraw = false;
+  maybeNoteCardChatter(battle, drawn, "draw");
 }
 
 function drawFromSideDeck(battle, silent = false) {
@@ -2209,9 +2364,22 @@ function prepareDefender(attacker, targetLane) {
 }
 
 function strikeLanes(unit) {
+  if (unit.sigils.includes("omni-strike")) return [0, 1, 2, 3];
   if (unit.sigils.includes("trifurcated")) return [unit.lane - 1, unit.lane, unit.lane + 1];
   if (unit.sigils.includes("bifurcated")) return [unit.lane - 1, unit.lane + 1];
   return [unit.lane];
+}
+
+function applyMoonTidalLock() {
+  const battle = app.run.battle;
+  const moonIsAwake = battle.enemyBoard.some((unit) => unit && unit.cardId === "moon");
+  if (!moonIsAwake) return;
+  const removableLanes = battle.playerBoard
+    .map((unit, lane) => unit && ["squirrel", "rabbit"].includes(unit.cardId) ? lane : -1)
+    .filter((lane) => lane >= 0);
+  if (!removableLanes.length) return;
+  removableLanes.forEach((lane) => killUnit("player", lane, { reason: "moon-tide" }));
+  noteUniqueBattleLine(battle, "moon-tidal-lock", TABLE_CHATTER.moon);
 }
 
 function resolveStrike(attacker, targetLane) {
@@ -2430,7 +2598,11 @@ function handleBossPhaseAdvance() {
 function loseCandle() {
   app.run.candles -= 1;
   if (app.run.candles <= 0) {
-    endRun(false, "The last candle has gone out.", "The Candle Fails");
+    const deathcard = recordDeathcardFromRun(app.run);
+    const copy = deathcard
+      ? `The last candle has gone out. Leshy carves ${deathcard.name} into his book.`
+      : "The last candle has gone out.";
+    endRun(false, copy, "The Candle Fails");
     return;
   }
   showToast("A candle has gone out. The battle begins again.");
@@ -2524,6 +2696,7 @@ function handleBell() {
   }
   evolveUnits();
   queueNextWaveIfNeeded();
+  applyMoonTidalLock();
   battle.mustDraw = true;
   battle.turn += 1;
   app.inspect = null;
@@ -2681,22 +2854,39 @@ function renderEvent() {
     }
     actions.appendChild(button("Leave", "inscry-btn", () => completeNodeAndReturnToMap(event.nodeId)));
   } else if (event.kind === "backpack") {
-    const grid = document.createElement("div");
-    grid.className = "event-choices";
-    event.items.forEach((itemId) => {
-      const item = ITEM_BY_ID[itemId];
-      const choice = document.createElement("button");
-      choice.type = "button";
-      choice.className = "item-choice";
-      choice.innerHTML = `<strong>${item.name}</strong><small>${item.description}</small>`;
-      choice.addEventListener("click", () => {
-        if (app.run.items.length >= getItemCapacity(app.run)) app.run.items.shift();
-        app.run.items.push(itemId);
+    if (app.run.items.length >= getItemCapacity(app.run)) {
+      const note = document.createElement("div");
+      note.className = "event-note";
+      note.textContent = "Your pack is full. Instead of a tool, a Pack Rat scurries into your deck.";
+      body.appendChild(note);
+      const reward = document.createElement("div");
+      reward.className = "reward-grid";
+      const card = createCardElement(getCardDef("pack-rat"), {});
+      card.addEventListener("click", () => {
+        app.run.deck.push(createDeckEntry(app.run, "pack-rat"));
+        app.run.stats.cardsAdded += 1;
+        markDiscovered(["pack-rat"]);
         completeNodeAndReturnToMap(event.nodeId);
       });
-      grid.appendChild(choice);
-    });
-    body.appendChild(grid);
+      reward.appendChild(card);
+      body.appendChild(reward);
+    } else {
+      const grid = document.createElement("div");
+      grid.className = "event-choices";
+      event.items.forEach((itemId) => {
+        const item = ITEM_BY_ID[itemId];
+        const choice = document.createElement("button");
+        choice.type = "button";
+        choice.className = "item-choice";
+        choice.innerHTML = `<strong>${item.name}</strong><small>${item.description}</small>`;
+        choice.addEventListener("click", () => {
+          app.run.items.push(itemId);
+          completeNodeAndReturnToMap(event.nodeId);
+        });
+        grid.appendChild(choice);
+      });
+      body.appendChild(grid);
+    }
   } else if (event.kind === "sacrificial-stones") {
     const grid = document.createElement("div");
     grid.className = "reward-grid";
@@ -2855,13 +3045,16 @@ function renderCodex() {
   if (app.codexTab === "current" && app.run) {
     summary.innerHTML = `<div class="panel-kicker">Current Run</div><p class="detail-copy">Deck size: ${app.run.deck.length}. Teeth: ${app.run.teeth}. Candles: ${app.run.candles}. Items: ${app.run.items.length}/${getItemCapacity(app.run)}.</p>`;
   } else {
-    summary.innerHTML = `<div class="panel-kicker">Collection</div><p class="detail-copy">Discovered cards: ${app.profile.discoveredCardIds.length}. Unlocked decks: ${app.profile.unlockedDeckIds.length}. Unlocked challenges: ${app.profile.unlockedChallengeIds.length}.</p>`;
+    summary.innerHTML = `<div class="panel-kicker">Collection</div><p class="detail-copy">Discovered cards: ${app.profile.discoveredCardIds.length}. Deathcards carved: ${getProfileDeathcards().length}. Unlocked decks: ${app.profile.unlockedDeckIds.length}. Unlocked challenges: ${app.profile.unlockedChallengeIds.length}.</p>`;
   }
   const grid = el("codex-grid");
   clearElement(grid);
   const cards = app.codexTab === "current" && app.run
     ? app.run.deck
-    : app.profile.discoveredCardIds.sort().map((cardId) => getCardDef(cardId)).filter(Boolean);
+    : unique([...(app.profile.discoveredCardIds || []), ...getProfileDeathcards().map((card) => card.id)])
+      .map((cardId) => getCardDef(cardId))
+      .filter(Boolean)
+      .sort((left, right) => left.name.localeCompare(right.name));
   cards.forEach((cardLike) => {
     const model = cardLike.cardId ? getEntryModel(cardLike) : cardLike;
     const wrapper = document.createElement("div");
