@@ -561,6 +561,7 @@ const app = {
   endingState: null,
   toastTimer: null,
   battleFxTimer: null,
+  battleAnimating: false,
   dragState: null,
   dragSuppressUid: null,
   dragSuppressUntil: 0,
@@ -1148,6 +1149,38 @@ function triggerBattleFx(fxId) {
   }, 260);
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function isBattleAnimating() {
+  return Boolean(app.run?.battle && app.battleAnimating);
+}
+
+function guardBattleInteraction(showMessage = true) {
+  if (!isBattleAnimating()) return false;
+  if (showMessage) showToast("Wait for the strike to finish.");
+  return true;
+}
+
+function getLaneSlotElement(side, lane) {
+  return el("battle-screen")?.querySelector(`.lane-slot[data-side="${side}"][data-lane="${lane}"]`) || null;
+}
+
+async function animateAttackLunge(side, lane) {
+  if (app.profile?.options?.reducedMotion) return;
+  const slot = getLaneSlotElement(side, lane);
+  const card = slot?.querySelector(".card");
+  if (!slot || !card) return;
+  const lungeClass = side === "player" ? "is-lunging-player" : "is-lunging-enemy";
+  slot.classList.remove("is-lunging-player", "is-lunging-enemy");
+  void card.offsetWidth;
+  slot.classList.add(lungeClass);
+  await sleep(190);
+  slot.classList.remove(lungeClass);
+  await sleep(40);
+}
+
 function resetDragGhost() {
   const dragCard = el("drag-card");
   clearElement(dragCard);
@@ -1281,6 +1314,7 @@ function attemptHandCardDrop(handUid, lane) {
 function beginHandCardDrag(event, handUid) {
   if (event.button !== undefined && event.button !== 0) return;
   if (!app.run?.battle) return;
+  if (guardBattleInteraction(false)) return;
   const sourceEl = event.currentTarget;
   app.dragState = {
     handUid,
@@ -1861,11 +1895,13 @@ function renderBattle() {
   if (app.dragState) resetHandCardDrag(true);
   showScreen("battle-screen");
   const battle = app.run.battle;
+  const battleBusy = app.battleAnimating;
   const battleScreen = el("battle-screen");
   const scaleLean = clamp(battle.scale, -SCALE_LIMIT, SCALE_LIMIT);
   battleScreen.dataset.boss = battle.bossId || "encounter";
   battleScreen.dataset.phase = String(battle.phaseIndex);
   battleScreen.dataset.mustDraw = battle.mustDraw ? "true" : "false";
+  battleScreen.dataset.busy = battleBusy ? "true" : "false";
   battleScreen.dataset.selection = app.selection?.type || "";
   battleScreen.style.setProperty("--scale-tilt", `${scaleLean * 4.5}deg`);
   battleScreen.style.setProperty("--enemy-pan-shift", `${-scaleLean * 4}px`);
@@ -1880,9 +1916,10 @@ function renderBattle() {
   el("ring-bell-btn").textContent = "Bell";
   el("draw-main-btn").dataset.count = String(battle.mainDeck.length);
   el("draw-side-btn").dataset.count = String(battle.sideDeck.length);
-  el("draw-main-btn").disabled = !battle.mustDraw;
-  el("draw-side-btn").disabled = !battle.mustDraw;
-  el("ring-bell-btn").disabled = battle.mustDraw || Boolean(app.selection);
+  el("draw-main-btn").disabled = !battle.mustDraw || battleBusy;
+  el("draw-side-btn").disabled = !battle.mustDraw || battleBusy;
+  el("ring-bell-btn").disabled = battle.mustDraw || Boolean(app.selection) || battleBusy;
+  el("selection-cancel-btn").disabled = !app.selection || battleBusy;
   renderItemBar();
   renderQueue();
   renderLaneRow("enemy-row", "enemy");
@@ -1904,7 +1941,7 @@ function renderItemBar() {
     slot.type = "button";
     slot.className = `item-slot${itemId ? "" : " is-empty"}`;
     slot.dataset.item = itemId || "empty";
-    slot.disabled = !itemId || Boolean(app.selection);
+    slot.disabled = !itemId || Boolean(app.selection) || app.battleAnimating;
     if (itemId) {
       const item = ITEM_BY_ID[itemId];
       const abbreviation = item.name
@@ -1953,6 +1990,7 @@ function renderLaneRow(containerId, side) {
     slot.className = "lane-slot";
     slot.dataset.side = side;
     slot.dataset.lane = String(lane);
+    slot.disabled = app.battleAnimating;
     if (side === "player" && app.selection?.type === "play-card" && !unit) slot.classList.add("can-host");
     if (side === "player" && !unit && app.selection?.pendingLane === lane) slot.classList.add("is-reserved-target");
     if (side === "player" && app.selection?.type === "sacrifice" && unit && canSacrificeUnit(unit)) slot.classList.add("sacrifice-target");
@@ -1984,7 +2022,7 @@ function renderHand() {
     const card = createCardElement(entry, {
       compact: true,
       selected: app.selection?.handUid === entry.uid,
-      disabled: app.run.battle.mustDraw,
+      disabled: app.run.battle.mustDraw || app.battleAnimating,
     });
     card.dataset.handUid = entry.uid;
     card.addEventListener("pointerdown", (event) => beginHandCardDrag(event, entry.uid));
@@ -2072,12 +2110,14 @@ function sacrificeValue(unit) {
 }
 
 function handleHandCardClick(handUid) {
+  if (guardBattleInteraction()) return;
   if (shouldSuppressHandClick(handUid)) return;
   if (!selectHandCardForPlay(handUid)) return;
   renderBattle();
 }
 
 function handleLaneClick(side, lane) {
+  if (guardBattleInteraction()) return;
   const battle = app.run.battle;
   const board = getBoard(battle, side);
   const unit = board[lane];
@@ -2127,6 +2167,7 @@ function handleLaneClick(side, lane) {
 }
 
 function cancelSelection() {
+  if (guardBattleInteraction()) return;
   app.selection = null;
   renderBattle();
 }
@@ -2211,6 +2252,7 @@ function consumeItem(itemId) {
 }
 
 function handleItemUse(itemId) {
+  if (guardBattleInteraction()) return;
   const item = ITEM_BY_ID[itemId];
   if (!item) return;
   if (item.target === "none") {
@@ -2314,12 +2356,14 @@ function drawFromSideDeck(battle, silent = false) {
 }
 
 function handleDrawMain() {
+  if (guardBattleInteraction()) return;
   drawFromMainDeck(app.run.battle);
   saveRun();
   renderBattle();
 }
 
 function handleDrawSide() {
+  if (guardBattleInteraction()) return;
   drawFromSideDeck(app.run.battle);
   saveRun();
   renderBattle();
@@ -2561,17 +2605,20 @@ function evolveUnits() {
   });
 }
 
-function runAttackStep(side) {
+async function runAttackStep(side) {
   const battle = app.run.battle;
   for (let lane = 0; lane < MAX_LANES; lane += 1) {
     const unit = getBoard(battle, side)[lane];
     if (!unit || unit.lane !== lane) continue;
+    const hasStrikeLane = strikeLanes(unit).some((targetLane) => targetLane >= 0 && targetLane < MAX_LANES);
+    if (hasStrikeLane && getUnitBaseAttack(battle, unit) > 0) await animateAttackLunge(side, lane);
     strikeLanes(unit).forEach((targetLane) => resolveStrike(unit, targetLane));
     const stillHere = getBoard(battle, side)[lane];
     if (stillHere && stillHere.uid === unit.uid && unit.sigils.includes("brittle")) killUnit(side, lane, { reason: "brittle" });
-    if (checkBattleOutcome()) return;
+    if (checkBattleOutcome()) return true;
   }
   handleMovementForSide(side);
+  return false;
 }
 
 function handleBossPhaseAdvance() {
@@ -2678,8 +2725,9 @@ function handleBattleVictory() {
   renderEvent();
 }
 
-function handleBell() {
+async function handleBell() {
   const battle = app.run.battle;
+  if (guardBattleInteraction(false)) return;
   if (battle.mustDraw) {
     showToast("Draw first.");
     return;
@@ -2688,24 +2736,29 @@ function handleBell() {
     showToast("Finish the current selection first.");
     return;
   }
-  runAttackStep("player");
-  if (checkBattleOutcome()) return;
-  deployQueue();
-  if (battle.skipEnemyAttack > 0) {
-    battle.skipEnemyAttack -= 1;
-    logBattle(battle, "The enemy attack step is skipped.");
-  } else {
-    runAttackStep("enemy");
-    if (checkBattleOutcome()) return;
-  }
-  evolveUnits();
-  queueNextWaveIfNeeded();
-  applyMoonTidalLock();
-  battle.mustDraw = true;
-  battle.turn += 1;
-  app.inspect = null;
-  saveRun();
+  app.battleAnimating = true;
   renderBattle();
+  try {
+    if (await runAttackStep("player")) return;
+    deployQueue();
+    if (app.run?.scene === "battle" && app.run.battle === battle) renderBattle();
+    if (battle.skipEnemyAttack > 0) {
+      battle.skipEnemyAttack -= 1;
+      logBattle(battle, "The enemy attack step is skipped.");
+    } else if (await runAttackStep("enemy")) {
+      return;
+    }
+    evolveUnits();
+    queueNextWaveIfNeeded();
+    applyMoonTidalLock();
+    battle.mustDraw = true;
+    battle.turn += 1;
+    app.inspect = null;
+    saveRun();
+  } finally {
+    app.battleAnimating = false;
+    if (app.run?.scene === "battle" && app.run.battle) renderBattle();
+  }
 }
 
 function startEventForNode(node) {
