@@ -1,236 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Infinite Inscryption Act 1</title>
-<link rel="stylesheet" href="styles/game.css">
-</head>
-<body>
-<div id="app-shell">
-  <canvas id="atmosphere-canvas" aria-hidden="true"></canvas>
-  <div id="three-root" aria-hidden="true"></div>
-  <div id="toast" class="toast" aria-live="polite"></div>
-  <div id="drag-card" class="drag-card hidden" aria-hidden="true"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Night Circuit Coliseum</title>
+    <link rel="stylesheet" href="styles/game.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell" aria-live="polite"></div>
 
-  <section id="title-screen" class="screen active">
-    <div class="screen-stage title-stage">
-      <div class="title-cabin">
-        <div class="title-table">
-          <div id="menu-startscreen" class="menu-startscreen pixel-image" aria-hidden="true"></div>
-          <div id="title-menu-cards" class="menu-card-cluster" role="menu" aria-label="Main menu"></div>
-          <div id="title-meta-plaque" class="title-meta-plaque"></div>
-        </div>
-      </div>
+    <div id="options-modal" class="modal-shell" hidden>
+      <div class="modal-backdrop" data-action="close-options"></div>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="options-title">
+        <header class="modal-header">
+          <p class="eyebrow">System Utilities</p>
+          <h2 id="options-title">Options</h2>
+          <button class="ghost-button" type="button" data-action="close-options">Close</button>
+        </header>
+
+        <div id="options-content" class="modal-body"></div>
+      </section>
     </div>
-  </section>
 
-  <section id="setup-screen" class="screen">
-    <div class="screen-stage setup-stage">
-      <div class="setup-topbar">
-        <button id="setup-back-btn" class="stone-btn" type="button">Back</button>
-        <div class="setup-heading">
-          <div class="panel-kicker">Kaycee Selection</div>
-          <h2>Choose Your Deck</h2>
-        </div>
-        <button id="setup-options-btn" class="stone-btn" type="button">Options</button>
-      </div>
-      <div class="setup-columns">
-        <div class="ledger-panel">
-          <div class="panel-kicker">Starter Decks</div>
-          <div id="setup-deck-list" class="selection-stack"></div>
-        </div>
-        <div class="parchment-panel setup-center">
-          <div id="setup-deck-detail"></div>
-          <div id="setup-deck-preview" class="card-preview-strip"></div>
-        </div>
-        <div class="ledger-panel">
-          <div class="panel-kicker">Challenges</div>
-          <div id="setup-challenge-list" class="selection-stack compact"></div>
-        </div>
-      </div>
-      <div class="setup-footer">
-        <div id="setup-requirements" class="setup-requirements"></div>
-        <button id="setup-start-btn" class="inscry-btn" type="button">Begin Run</button>
-      </div>
-    </div>
-  </section>
+    <div id="toast" class="toast" hidden></div>
 
-  <section id="map-screen" class="screen">
-    <div class="screen-stage map-stage">
-      <aside class="map-prop-cluster map-prop-cluster--left">
-        <div id="map-run-summary" class="map-prop-stack"></div>
-      </aside>
-
-      <div class="map-board">
-        <div class="map-title-plaque">
-          <div class="panel-kicker" id="map-region-kicker">Map I</div>
-          <h2 id="map-region-title">Trail Of Smoke</h2>
-          <p id="map-region-copy" class="detail-copy"></p>
-        </div>
-        <div id="map-parchment" class="map-parchment">
-          <div id="map-scene-layer" class="map-scene-layer" aria-hidden="true"></div>
-          <svg id="map-lines" class="map-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div id="map-node-layer" class="map-node-layer"></div>
-          <aside id="map-tooltip" class="map-tooltip hidden"></aside>
-        </div>
-      </div>
-
-      <aside class="map-prop-cluster map-prop-cluster--right">
-        <div id="map-boss-order" class="boss-order"></div>
-        <div class="map-actions">
-          <button id="map-codex-btn" class="stone-btn" type="button">Ledger</button>
-          <button id="map-pause-btn" class="stone-btn" type="button">Pause</button>
-        </div>
-      </aside>
-    </div>
-  </section>
-
-  <section id="battle-screen" class="screen">
-    <div class="screen-stage battle-stage">
-      <div class="battle-cabin-backdrop" aria-hidden="true">
-        <div class="leshy-presence">
-          <div class="leshy-mask"></div>
-          <div class="leshy-eyes"><span></span><span></span></div>
-          <div class="leshy-hands">
-            <span class="leshy-hand leshy-hand--left"></span>
-            <span class="leshy-hand leshy-hand--right"></span>
-          </div>
-        </div>
-      </div>
-
-      <aside class="battle-props battle-props-left">
-        <div class="battle-prop-stack">
-          <div class="battle-prop battle-prop--tall" data-prop="candles">
-            <div class="prop-kicker">Candles</div>
-            <div id="battle-candles" class="prop-value">2</div>
-          </div>
-          <div class="battle-prop" data-prop="teeth">
-            <div class="prop-kicker">Teeth</div>
-            <div id="battle-teeth" class="prop-value">0</div>
-          </div>
-          <div class="battle-prop" data-prop="bones">
-            <div class="prop-kicker">Bones</div>
-            <div id="battle-bones" class="prop-value">0</div>
-          </div>
-        </div>
-        <div id="item-bar" class="item-bar"></div>
-      </aside>
-
-      <div class="battle-table">
-        <div class="battle-title-plaque">
-          <div id="battle-encounter-kicker" class="panel-kicker">Encounter</div>
-          <h2 id="battle-encounter-title">The Table Waits</h2>
-        </div>
-
-        <div id="selection-banner" class="selection-banner hidden">
-          <span id="selection-text">Choose a lane.</span>
-          <button id="selection-cancel-btn" class="stone-btn" type="button">Cancel</button>
-        </div>
-
-        <div class="battle-surface">
-          <button id="battle-codex-btn" class="stone-btn" type="button">Ledger</button>
-          <button id="pause-btn" class="stone-btn" type="button">Pause</button>
-          <div class="queue-band">
-            <div id="enemy-queue" class="queue-row"></div>
-          </div>
-          <div id="enemy-row" class="lane-row enemy-row"></div>
-          <div class="scale-band">
-            <div class="scale-ornament" aria-hidden="true">
-              <span class="scale-pan scale-pan--enemy"></span>
-              <span class="scale-beam"></span>
-              <span class="scale-post"></span>
-              <span class="scale-pan scale-pan--player"></span>
-            </div>
-            <div id="scale-track" class="scale-track"></div>
-          </div>
-          <div id="player-row" class="lane-row player-row"></div>
-          <div class="hand-band">
-            <div id="hand-row" class="hand-row"></div>
-          </div>
-          <button id="draw-main-btn" class="stone-btn draw-pile" type="button">Deck</button>
-          <button id="ring-bell-btn" class="inscry-btn" type="button">Bell</button>
-          <button id="draw-side-btn" class="stone-btn draw-pile" type="button">Squirrel</button>
-        </div>
-      </div>
-
-      <aside class="battle-props battle-props-right">
-        <div id="inspect-panel" class="note-panel"></div>
-      </aside>
-
-      <div class="battle-log-hidden" aria-hidden="true">
-        <div id="battle-log" class="battle-log"></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="event-screen" class="screen">
-    <div class="screen-stage event-stage">
-      <div id="event-panel" class="event-panel"></div>
-    </div>
-  </section>
-
-  <section id="codex-screen" class="screen">
-    <div class="screen-stage codex-stage">
-      <div class="codex-topbar">
-        <div>
-          <div class="panel-kicker">Ledger</div>
-          <h2>Bestiary And Deck</h2>
-        </div>
-        <div class="codex-actions">
-          <button id="codex-current-tab" class="stone-btn is-active" type="button">Current Run</button>
-          <button id="codex-discovered-tab" class="stone-btn" type="button">Collection</button>
-          <button id="codex-close-btn" class="inscry-btn" type="button">Close</button>
-        </div>
-      </div>
-      <div id="codex-summary" class="note-panel codex-summary"></div>
-      <div id="codex-grid" class="codex-grid"></div>
-    </div>
-  </section>
-
-  <section id="ending-screen" class="screen">
-    <div class="screen-stage ending-stage">
-      <div class="ending-panel">
-        <div id="ending-kicker" class="panel-kicker">The Candle Fails</div>
-        <h2 id="ending-title">Run Over</h2>
-        <p id="ending-copy" class="detail-copy"></p>
-        <div id="ending-stats" class="ending-stats"></div>
-        <div class="ending-actions">
-          <button id="ending-new-run-btn" class="inscry-btn" type="button">Return To Menu</button>
-          <button id="ending-codex-btn" class="stone-btn" type="button">Ledger</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div id="options-overlay" class="overlay hidden">
-    <div class="overlay-panel">
-      <div class="panel-kicker">Options</div>
-      <h3>Cabin Settings</h3>
-      <div id="options-list" class="options-list"></div>
-      <div class="overlay-actions">
-        <button id="reset-profile-btn" class="stone-btn warning" type="button">Reset Profile</button>
-        <button id="options-close-btn" class="inscry-btn" type="button">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="pause-overlay" class="overlay hidden">
-    <div class="overlay-panel pause-panel">
-      <div class="panel-kicker">Paused</div>
-      <h3>The Table Waits</h3>
-      <p class="detail-copy">Resume the run, inspect your ledger, alter options, or concede this journey.</p>
-      <div class="pause-actions">
-        <button id="resume-btn" class="inscry-btn" type="button">Resume</button>
-        <button id="pause-codex-btn" class="stone-btn" type="button">Ledger</button>
-        <button id="pause-options-btn" class="stone-btn" type="button">Options</button>
-      </div>
-      <div id="pause-concede-card" class="pause-concede-card pixel-image" aria-hidden="true"></div>
-      <button id="concede-btn" class="concede-btn" type="button">Concede Run</button>
-    </div>
-  </div>
-</div>
-<script src="scripts/game.js"></script>
-<script type="module" src="scripts/three/main.js"></script>
-</body>
+    <script type="module" src="scripts/game.js"></script>
+  </body>
 </html>
