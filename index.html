@@ -1,215 +1,174 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ashen Reliquary</title>
-  <meta
-    name="description"
-    content="A playable HTML room-based roguelite prototype built from the provided dungeon and enemy asset packs."
-  >
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcade Megavault</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="game-page">
-    <header class="game-header">
-      <div class="title-block">
-        <p class="eyebrow">Playable HTML Roguelite Prototype</p>
-        <h1>Ashen Reliquary</h1>
-        <p class="header-copy">
-          Enter a room, seal the doors, weaponize the dungeon, and carve a path through three corrupted districts.
+  <div class="page-shell">
+    <div class="backdrop"></div>
+
+    <header class="hero panel">
+      <div class="hero-copy">
+        <p class="eyebrow">1,048,576 remixable mini-game cabinets</p>
+        <h1>Arcade Megavault</h1>
+        <p class="hero-text">
+          A giant instant-play arcade with wild remixes, daily runs, rapid-fire playlists,
+          and a vault of endlessly re-seeded mini-games that keeps feeling fresh.
         </p>
+
+        <div class="hero-actions">
+          <button class="button button-accent" id="random-launch" type="button">Launch Random Hit</button>
+          <button class="button button-ghost" id="daily-launch" type="button">Play Daily Challenge</button>
+        </div>
+
+        <form class="search-bar" id="search-form">
+          <label class="sr-only" for="search-input">Search games</label>
+          <input
+            id="search-input"
+            name="search"
+            type="search"
+            placeholder="Search by title, genre, mission, biome, or mutator"
+            autocomplete="off"
+          >
+          <button class="button button-solid" type="submit">Find Games</button>
+        </form>
+
+        <div class="filter-row" id="genre-filters" aria-label="Game genres"></div>
       </div>
 
-      <div class="vault-panel">
-        <div class="vault-item">
-          <span class="vault-label">Ash Vault</span>
-          <strong id="metaAshValue">0</strong>
+      <aside class="hero-stats panel inset">
+        <p class="eyebrow">Tonight's Numbers</p>
+        <div class="stat-grid">
+          <article class="stat-card">
+            <span class="stat-label">Possible Cabinets</span>
+            <strong class="stat-value" id="stat-total">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Live Catalog Slice</span>
+            <strong class="stat-value" id="stat-slice">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Favorites Saved</span>
+            <strong class="stat-value" id="stat-favorites">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Arcade Streak</span>
+            <strong class="stat-value" id="stat-streak">0 days</strong>
+          </article>
         </div>
-        <div class="vault-item">
-          <span class="vault-label">Current Vessel</span>
-          <strong id="activeVesselName">Votive Warden</strong>
+
+        <div class="playlist-panel">
+          <p class="eyebrow">Quick Decks</p>
+          <div class="playlist-buttons">
+            <button class="button button-solid small" data-playlist="chaos" type="button">Chaos Deck</button>
+            <button class="button button-solid small" data-playlist="brain" type="button">Brain Burners</button>
+            <button class="button button-solid small" data-playlist="reflex" type="button">Reflex Rush</button>
+            <button class="button button-solid small" data-playlist="favorites" type="button">Favorites Only</button>
+          </div>
         </div>
-      </div>
+      </aside>
     </header>
 
-    <main class="game-layout">
-      <section class="arena-panel">
-        <div class="canvas-frame">
-          <canvas id="gameCanvas" width="960" height="540" aria-label="Ashen Reliquary game arena"></canvas>
-          <div id="banner" class="floating-banner hidden"></div>
+    <main class="content-grid">
+      <section class="focus panel">
+        <div class="section-top">
+          <div>
+            <p class="eyebrow">Featured Cabinet</p>
+            <h2 id="focus-title">Loading Cabinet</h2>
+            <p class="focus-summary" id="focus-summary"></p>
+          </div>
 
-          <section id="menuOverlay" class="screen-overlay">
-            <div class="overlay-card menu-card">
-              <div class="menu-hero">
-                <img src="2D Pixel Dungeon Asset Pack/character and tileset/demonstration.png" alt="Ashen Reliquary splash art">
-              </div>
-              <div class="menu-copy">
-                <p class="eyebrow">Last Ember Priory</p>
-                <h2>Choose A Vessel</h2>
-                <p>
-                  This prototype focuses on the real room-clearing loop: movement, attacks, dodge, parry, consecrate,
-                  elites, bosses, sanctuary choices, and persistent Ash upgrades.
-                </p>
+          <div class="focus-actions">
+            <button class="button button-accent" id="launch-current" type="button">Launch Cabinet</button>
+            <button class="button button-ghost" id="favorite-current" type="button">Save To Vault</button>
+            <button class="button button-solid" id="remix-current" type="button">Remix This Game</button>
+          </div>
+        </div>
 
-                <div class="selection-grid">
-                  <button class="selection-card is-selected" data-vessel="warden" type="button">
-                    <img src="2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Character.png" alt="Votive Warden sheet">
-                    <strong>Votive Warden</strong>
-                    <span>Ash Blade, Ward Circle, safer defenses</span>
-                  </button>
-                  <button class="selection-card" data-vessel="courier" type="button">
-                    <img src="2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Character_2.png" alt="Red Courier sheet">
-                    <strong>Red Courier</strong>
-                    <span>Hand Crossbow, Chain Pull, faster movement</span>
-                  </button>
-                </div>
+        <div class="focus-meta" id="focus-meta"></div>
 
-                <div class="meta-grid" id="metaUpgradeGrid"></div>
+        <div class="play-area">
+          <div class="hud">
+            <article class="hud-pill">
+              <span>Score</span>
+              <strong id="hud-score">0</strong>
+            </article>
+            <article class="hud-pill">
+              <span>Best</span>
+              <strong id="hud-best">0</strong>
+            </article>
+            <article class="hud-pill">
+              <span>Remix</span>
+              <strong id="hud-mode">-</strong>
+            </article>
+            <article class="hud-pill">
+              <span>Status</span>
+              <strong id="hud-status">Pick a cabinet</strong>
+            </article>
+          </div>
 
-                <div class="controls-grid">
-                  <article class="controls-card">
-                    <h3>Controls</h3>
-                    <ul>
-                      <li><kbd>WASD</kbd> Move</li>
-                      <li><kbd>Mouse</kbd> Aim</li>
-                      <li><kbd>Left Click</kbd> Attack</li>
-                      <li><kbd>Right Click</kbd> Parry</li>
-                      <li><kbd>Shift</kbd> Dash</li>
-                      <li><kbd>E</kbd> Consecrate nearest trap</li>
-                      <li><kbd>Q</kbd> Use rite</li>
-                    </ul>
-                  </article>
-                  <article class="controls-card">
-                    <h3>Run Goal</h3>
-                    <ul>
-                      <li>Clear 15 rooms across 3 districts.</li>
-                      <li>Use torches, arrows, flames, and spikes as allied tools.</li>
-                      <li>Beat the Warden, Choir, and Crimson Prior.</li>
-                      <li>Bank Ash on death or victory for permanent upgrades.</li>
-                    </ul>
-                  </article>
-                </div>
+          <div class="game-stage" id="game-stage" aria-live="polite"></div>
 
-                <button id="startRunButton" class="primary-button" type="button">Enter The Reliquary</button>
-              </div>
-            </div>
-          </section>
-
-          <section id="rewardOverlay" class="screen-overlay hidden">
-            <div class="overlay-card modal-card">
-              <p class="eyebrow">Room Cleared</p>
-              <h2>Choose One Reward</h2>
-              <div id="rewardChoices" class="choice-grid"></div>
-            </div>
-          </section>
-
-          <section id="sanctuaryOverlay" class="screen-overlay hidden">
-            <div class="overlay-card modal-card">
-              <p class="eyebrow">Sanctuary Strip</p>
-              <h2>The Priests Offer Aid</h2>
-              <p>Pick one service before descending into the next district.</p>
-              <div id="sanctuaryChoices" class="choice-grid priest-grid"></div>
-            </div>
-          </section>
-
-          <section id="summaryOverlay" class="screen-overlay hidden">
-            <div class="overlay-card modal-card">
-              <p class="eyebrow" id="summaryKicker">Run Complete</p>
-              <h2 id="summaryTitle">The Reliquary Claims Another</h2>
-              <p id="summaryText"></p>
-              <div class="summary-stats">
-                <div><span>Rooms Cleared</span><strong id="summaryRooms">0</strong></div>
-                <div><span>Bosses Defeated</span><strong id="summaryBosses">0</strong></div>
-                <div><span>Ash Earned</span><strong id="summaryAsh">0</strong></div>
-              </div>
-              <button id="restartButton" class="primary-button" type="button">Return To The Priory</button>
-            </div>
-          </section>
+          <div class="game-controls">
+            <p class="control-hint" id="control-hint">
+              Launch a cabinet to drop into the featured stage.
+            </p>
+            <div class="touch-controls" id="touch-controls"></div>
+          </div>
         </div>
       </section>
 
-      <aside class="hud-panel">
-        <section class="hud-card">
-          <p class="eyebrow">Run Status</p>
-          <div class="hud-stat-row">
-            <span>District</span>
-            <strong id="districtName">Ember Gate</strong>
+      <aside class="sidebar">
+        <section class="panel sidebar-panel">
+          <div class="section-top compact">
+            <div>
+              <p class="eyebrow">Now Trending</p>
+              <h3>Instant Queue</h3>
+            </div>
           </div>
-          <div class="hud-stat-row">
-            <span>Room</span>
-            <strong id="roomCounter">1 / 15</strong>
-          </div>
-          <div class="hud-stat-row">
-            <span>Type</span>
-            <strong id="roomType">Combat</strong>
-          </div>
-          <div class="hud-stat-row">
-            <span>Modifier</span>
-            <strong id="roomModifier">Bell Chamber</strong>
-          </div>
+          <div class="stack-list" id="queue-list"></div>
         </section>
 
-        <section class="hud-card">
-          <p class="eyebrow">Resources</p>
-          <div class="bar-group">
-            <label for="hpFill">Health</label>
-            <div class="meter"><div id="hpFill" class="meter-fill hp-fill"></div></div>
-            <strong id="hpLabel">7 / 7</strong>
+        <section class="panel sidebar-panel">
+          <div class="section-top compact">
+            <div>
+              <p class="eyebrow">Your Vault</p>
+              <h3>Saved Favorites</h3>
+            </div>
           </div>
-          <div class="bar-group">
-            <label for="resolveFill">Resolve</label>
-            <div class="meter"><div id="resolveFill" class="meter-fill resolve-fill"></div></div>
-            <strong id="resolveLabel">110 / 110</strong>
-          </div>
-          <div class="bar-group">
-            <label for="heatFill">Heat</label>
-            <div class="meter"><div id="heatFill" class="meter-fill heat-fill"></div></div>
-            <strong id="heatLabel">0 / 100</strong>
-          </div>
-        </section>
-
-        <section class="hud-card">
-          <p class="eyebrow">Loadout</p>
-          <div class="hud-stat-row">
-            <span>Weapon</span>
-            <strong id="weaponName">Ash Blade</strong>
-          </div>
-          <div class="hud-stat-row">
-            <span>Rite</span>
-            <strong id="riteName">Ward Circle</strong>
-          </div>
-          <div class="hud-stat-row">
-            <span>Coins</span>
-            <strong id="coinCount">0</strong>
-          </div>
-          <div class="hud-stat-row">
-            <span>Keys</span>
-            <strong id="keyCount">0</strong>
-          </div>
-          <div class="hud-stat-row">
-            <span>Ash This Run</span>
-            <strong id="runAshCount">0</strong>
-          </div>
-        </section>
-
-        <section class="hud-card">
-          <p class="eyebrow">Active Relics</p>
-          <ul id="relicList" class="relic-list">
-            <li>No relics yet. Clear rooms to build your run.</li>
-          </ul>
-        </section>
-
-        <section class="hud-card">
-          <p class="eyebrow">Current Objective</p>
-          <p id="objectiveText">
-            Defeat every enemy in the room. Consecrate nearby torches, arrows, or spikes with <kbd>E</kbd> to turn the arena in your favor.
-          </p>
+          <div class="stack-list" id="favorites-list"></div>
         </section>
       </aside>
     </main>
+
+    <section class="catalog panel">
+      <div class="section-top">
+        <div>
+          <p class="eyebrow">Mega Catalog</p>
+          <h2>Endless Cabinets</h2>
+          <p class="catalog-copy">
+            The site samples a giant procedural library of remixed cabinets, then keeps it moving
+            with new waves, filters, and instant launch buttons.
+          </p>
+        </div>
+
+        <div class="catalog-actions">
+          <button class="button button-solid" id="reroll-catalog" type="button">Remix Wave</button>
+        </div>
+      </div>
+
+      <div class="catalog-grid" id="catalog-grid"></div>
+
+      <div class="catalog-footer">
+        <p class="catalog-status" id="catalog-status"></p>
+        <button class="button button-accent" id="load-more" type="button">Load More Cabinets</button>
+      </div>
+    </section>
   </div>
 
-  <script type="module" src="game/main.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
