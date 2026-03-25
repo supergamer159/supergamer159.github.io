@@ -8,10 +8,21 @@ New-Item -ItemType Directory -Force -Path $docs | Out-Null
 $itemsToSync = @(
   "index.html",
   "styles.css",
-  "script.js",
+  "game",
   "2D Pixel Dungeon Asset Pack",
   "Enemy_Animations_Set"
 )
+
+$staleItems = @(
+  "script.js"
+)
+
+foreach ($item in $staleItems) {
+  $stalePath = Join-Path $docs $item
+  if (Test-Path $stalePath) {
+    Remove-Item $stalePath -Recurse -Force
+  }
+}
 
 foreach ($item in $itemsToSync) {
   $source = Join-Path $root $item

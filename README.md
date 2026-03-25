@@ -1,20 +1,22 @@
-# Ashen Reliquary Site
+# Ashen Reliquary
 
-This repo contains a static site for the `Ashen Reliquary` game design presentation.
+This repo contains a playable HTML roguelite prototype for `Ashen Reliquary`.
 
 ## Repo Layout
 
 - `docs/`
-  - GitHub Pages-ready site
+  - GitHub Pages-ready copy of the game
   - This is the easiest folder to publish
-- `index.html`, `styles.css`, `script.js`
-  - Working source files at the repo root
+- `index.html`, `styles.css`
+  - Main site shell and UI styling
+- `game/`
+  - Game code and content data
 - `2D Pixel Dungeon Asset Pack/`
   - Provided dungeon art pack
 - `Enemy_Animations_Set/`
   - Provided enemy animation pack
 - `sync-docs.ps1`
-  - Copies the root site files and asset folders into `docs/`
+  - Copies the playable build and asset folders into `docs/`
 
 ## Quick GitHub Setup
 
@@ -27,11 +29,11 @@ This repo contains a static site for the `Ashen Reliquary` game design presentat
    - `Folder`: `/docs`
 5. Save.
 
-GitHub Pages will publish the site from the `docs/` folder.
+GitHub Pages will publish the game from the `docs/` folder.
 
-## Updating The Site Later
+## Updating The Game Later
 
-If you edit the root `index.html`, `styles.css`, or `script.js`, run:
+If you edit the root `index.html`, `styles.css`, or anything in `game/`, run:
 
 ```powershell
 .\sync-docs.ps1
@@ -45,5 +47,5 @@ You can open `docs/index.html` directly in a browser, or run any simple static f
 
 ## Notes
 
-- The site uses relative paths, so it works from a normal GitHub Pages project URL.
-- The asset folders are already included in `docs/`, so the published version is self-contained.
+- The game uses only relative paths, so it works from a normal GitHub Pages project URL.
+- The asset folders and `game/` code are included in `docs/`, so the published version is self-contained.

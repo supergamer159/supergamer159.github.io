@@ -3,1417 +3,213 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ashen Reliquary | Room-Based Roguelite Design Site</title>
+  <title>Ashen Reliquary</title>
   <meta
     name="description"
-    content="Ashen Reliquary is a production-ready room-based roguelite concept built around consecrating dungeon traps and clearing rooms with tactical, fast-paced combat."
+    content="A playable HTML room-based roguelite prototype built from the provided dungeon and enemy asset packs."
   >
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="page-shell">
-    <header class="hero" id="top">
-      <div class="hero-backdrop"></div>
-      <nav class="topbar" aria-label="Primary">
-        <a class="brand" href="#top">
-          <span class="brand-mark"></span>
-          <span class="brand-text">Ashen Reliquary</span>
-        </a>
-        <div class="topbar-links">
-          <a href="#concept">Concept</a>
-          <a href="#loop">Loop</a>
-          <a href="#enemies">Enemies</a>
-          <a href="#bosses">Bosses</a>
-          <a href="#technical">Technical</a>
-          <a href="#example-run">Example Run</a>
+  <div class="game-page">
+    <header class="game-header">
+      <div class="title-block">
+        <p class="eyebrow">Playable HTML Roguelite Prototype</p>
+        <h1>Ashen Reliquary</h1>
+        <p class="header-copy">
+          Enter a room, seal the doors, weaponize the dungeon, and carve a path through three corrupted districts.
+        </p>
+      </div>
+
+      <div class="vault-panel">
+        <div class="vault-item">
+          <span class="vault-label">Ash Vault</span>
+          <strong id="metaAshValue">0</strong>
         </div>
-      </nav>
-
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <p class="eyebrow">Production-ready game design site</p>
-          <h1>Ashen Reliquary</h1>
-          <p class="hero-lede">
-            A top-down room-based roguelite where every locked chamber becomes a tactical arena and every
-            torch, arrow slit, spike bed, and flamethrower can be turned into a holy weapon.
-          </p>
-
-          <div class="hero-callouts">
-            <div class="callout">
-              <span class="callout-kicker">Hook</span>
-              <strong>Consecrate the room itself</strong>
-              <p>Weaponize dungeon fixtures mid-fight instead of treating traps as passive scenery.</p>
-            </div>
-            <div class="callout">
-              <span class="callout-kicker">Scope</span>
-              <strong>Built to the provided packs</strong>
-              <p>One dungeon tileset, two vessels, three priest NPCs, four enemy silhouettes, and three bosses.</p>
-            </div>
-          </div>
-
-          <div class="metric-strip">
-            <article class="metric-card">
-              <span class="metric-value">30-40 min</span>
-              <span class="metric-label">Run Length</span>
-            </article>
-            <article class="metric-card">
-              <span class="metric-value">PC</span>
-              <span class="metric-label">Target Platform</span>
-            </article>
-            <article class="metric-card">
-              <span class="metric-value">3</span>
-              <span class="metric-label">Districts</span>
-            </article>
-            <article class="metric-card">
-              <span class="metric-value">3</span>
-              <span class="metric-label">Boss Fights</span>
-            </article>
-          </div>
-
-          <div class="hero-pills">
-            <span>Fast room clears</span>
-            <span>Trap mastery</span>
-            <span>Compact buildcraft</span>
-            <span>Strict asset-bound scope</span>
-          </div>
-        </div>
-
-        <div class="hero-stage" aria-hidden="true">
-          <div class="stage-frame">
-            <img
-              class="hero-artwork"
-              src="2D Pixel Dungeon Asset Pack/character and tileset/demonstration.png"
-              alt="Dungeon asset demonstration art"
-            >
-            <div class="stage-sprite vessel-one"></div>
-            <div class="stage-sprite vessel-two"></div>
-            <div class="stage-sprite skeleton-one"></div>
-            <div class="stage-sprite skeleton-two"></div>
-            <div class="stage-sprite vampire"></div>
-            <img
-              class="floating-prop floating-torch"
-              src="2D Pixel Dungeon Asset Pack/items and trap_animation/torch/torch_1.png"
-              alt=""
-            >
-            <img
-              class="floating-prop floating-coin"
-              src="2D Pixel Dungeon Asset Pack/items and trap_animation/coin/coin_1.png"
-              alt=""
-            >
-            <img
-              class="floating-prop floating-key"
-              src="2D Pixel Dungeon Asset Pack/items and trap_animation/keys/keys_2_1.png"
-              alt=""
-            >
-          </div>
+        <div class="vault-item">
+          <span class="vault-label">Current Vessel</span>
+          <strong id="activeVesselName">Votive Warden</strong>
         </div>
       </div>
     </header>
 
-    <div class="content-grid">
-      <aside class="side-nav">
-        <div class="side-nav-frame">
-          <p class="side-nav-label">Sections</p>
-          <a href="#concept" class="nav-link is-active">01 Concept</a>
-          <a href="#loop" class="nav-link">02 Loop</a>
-          <a href="#player" class="nav-link">03 Player</a>
-          <a href="#rooms" class="nav-link">04 Rooms</a>
-          <a href="#enemies" class="nav-link">05 Enemies</a>
-          <a href="#bosses" class="nav-link">06 Bosses</a>
-          <a href="#items" class="nav-link">07 Weapons &amp; Items</a>
-          <a href="#progression" class="nav-link">08 Progression</a>
-          <a href="#uiux" class="nav-link">09 UI/UX</a>
-          <a href="#art-audio" class="nav-link">10 Art &amp; Audio</a>
-          <a href="#monetization" class="nav-link">11 Monetization</a>
-          <a href="#technical" class="nav-link">12 Technical</a>
-          <a href="#replayability" class="nav-link">13 Replayability</a>
-          <a href="#example-run" class="nav-link">14 Example Run</a>
-          <a href="#asset-matrix" class="nav-link">Appendix</a>
-        </div>
-      </aside>
+    <main class="game-layout">
+      <section class="arena-panel">
+        <div class="canvas-frame">
+          <canvas id="gameCanvas" width="960" height="540" aria-label="Ashen Reliquary game arena"></canvas>
+          <div id="banner" class="floating-banner hidden"></div>
 
-      <main class="main-content">
-        <section id="concept" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">01</span>
-            <div>
-              <p class="section-kicker">Core Game Concept</p>
-              <h2>A brutal reliquary reclaimed one room at a time</h2>
-            </div>
-          </div>
-
-          <div class="summary-table">
-            <article class="summary-cell">
-              <span class="cell-label">Title</span>
-              <strong>Ashen Reliquary</strong>
-            </article>
-            <article class="summary-cell">
-              <span class="cell-label">Genre</span>
-              <strong>Top-down room-based action roguelite</strong>
-            </article>
-            <article class="summary-cell">
-              <span class="cell-label">Subgenre</span>
-              <strong>Trap-tactics dungeon crawler</strong>
-            </article>
-            <article class="summary-cell">
-              <span class="cell-label">Target</span>
-              <strong>Single-player PC</strong>
-            </article>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>High Concept</h3>
-              <p>
-                The Last Ember Priory sends living vessels into a desecrated underground cathedral known as the
-                Reliquary. Every chamber seals shut on entry. To survive, the player must read the room, defeat its
-                wave composition, and convert the chamber's fixtures into temporary holy weapons before moving deeper.
-              </p>
-              <p>
-                The fantasy is not just "fight through a dungeon." It is "win by mastering the dungeon itself." The
-                most powerful moments come from baiting a skeleton captain into a consecrated flamethrower lane, pulling
-                a vampire through spikes, or turning a row of wall torches into a burn-heavy control zone.
-              </p>
-            </div>
-
-            <div class="text-card">
-              <h3>Design Pillars</h3>
-              <ul class="feature-list">
-                <li>Every room is readable in under two seconds.</li>
-                <li>The environment is part of the combat kit, not background art.</li>
-                <li>Build diversity comes from systems interacting, not a huge asset burden.</li>
-                <li>Strict asset ceilings push remixing, variation, and polish over content sprawl.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="card-grid three-up">
-            <article class="mini-card">
-              <h3>Target Audience</h3>
-              <p>Players who love aggressive action roguelites but also want positional play, room planning, and clean combat reads.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Session Goal</h3>
-              <p>45 to 70 seconds per standard room, 2 to 4 minutes per boss, and a full victory run in 30 to 40 minutes.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Market Position</h3>
-              <p>Premium indie action game with the replay loop of a roguelite and the authored clarity of a tactical dungeon brawler.</p>
-            </article>
-          </div>
-
-          <div class="asset-strip">
-            <article class="asset-card">
-              <img src="2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" alt="Dungeon tileset">
-              <div>
-                <strong>Dungeon Tileset</strong>
-                <p>All architecture, room topology, and collision language comes from one 16x16 gothic tile source.</p>
+          <section id="menuOverlay" class="screen-overlay">
+            <div class="overlay-card menu-card">
+              <div class="menu-hero">
+                <img src="2D Pixel Dungeon Asset Pack/character and tileset/demonstration.png" alt="Ashen Reliquary splash art">
               </div>
-            </article>
-            <article class="asset-card">
-              <img src="2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Character.png" alt="Character sheet one">
-              <div>
-                <strong>Two Vessels</strong>
-                <p>The two player character sheets become two playable vessels with different starting loadouts and pacing.</p>
-              </div>
-            </article>
-            <article class="asset-card">
-              <img src="2D Pixel Dungeon Asset Pack/Character_animation/priests_idle/priest1/v1/priest1_v1_1.png" alt="Priest sprite">
-              <div>
-                <strong>Priests as Anchors</strong>
-                <p>Three priest sprite families define the sanctuary, blessings, healing, unlocks, and codex systems.</p>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section id="loop" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">02</span>
-            <div>
-              <p class="section-kicker">Core Gameplay Loop</p>
-              <h2>Enter, read, weaponize, clear, route</h2>
-            </div>
-          </div>
-
-          <div class="loop-rail">
-            <article class="loop-step">
-              <span class="loop-index">1</span>
-              <h3>Room Entry</h3>
-              <p>The player crosses a threshold, doors seal, the room modifier banner appears, and neutral fixtures pulse with a faint gold tell.</p>
-            </article>
-            <article class="loop-step">
-              <span class="loop-index">2</span>
-              <h3>Threat Read</h3>
-              <p>Enemy spawn pads ignite, cover and trap lanes become readable, and the player chooses whether to open aggressively or kite toward a fixture.</p>
-            </article>
-            <article class="loop-step">
-              <span class="loop-index">3</span>
-              <h3>Combat Flow</h3>
-              <p>Primary attacks, dash movement, parries, and the heat economy create openings. Consecrated traps are the run's force multiplier.</p>
-            </article>
-            <article class="loop-step">
-              <span class="loop-index">4</span>
-              <h3>Room Clear</h3>
-              <p>When the last wave falls, doors unseal, a flag or chest marker rises, rewards spill into the room, and the minimap exposes the next choice.</p>
-            </article>
-            <article class="loop-step">
-              <span class="loop-index">5</span>
-              <h3>Meta Decision</h3>
-              <p>The player picks one reward, optionally spends coins or keys, then commits to the next node type and district route.</p>
-            </article>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>Room Resolution Rules</h3>
-              <ul class="feature-list">
-                <li>Standard combat rooms spawn 1 to 2 waves and target a 45 to 70 second clear time.</li>
-                <li>Elite rooms guarantee one Rare-or-better reward and a larger Ash payout.</li>
-                <li>Treasury rooms are low threat but key-gated.</li>
-                <li>Boss rooms clear the district, award a seal, and return the player to the sanctuary strip.</li>
-              </ul>
-            </div>
-
-            <div class="text-card">
-              <h3>Death and Restart</h3>
-              <p>
-                Coins, keys, temporary relics, devotions, and route progress are lost on death. Ash is banked for
-                sanctuary upgrades. Victory applies a 1.5x Ash multiplier and unlocks higher challenge tiers.
-              </p>
-              <p class="formula">
-                Ash payout formula: <code>(rooms x 3) + (elites x 8) + (bosses x 20) + no-hit bonuses</code>
-              </p>
-            </div>
-          </div>
-
-          <div class="chip-row">
-            <span class="rule-chip">Doors lock on entry</span>
-            <span class="rule-chip">Room modifier every chamber</span>
-            <span class="rule-chip">Two-exit routing after most clears</span>
-            <span class="rule-chip">Sanctuary returns after bosses</span>
-            <span class="rule-chip">Meta bank on death or victory</span>
-          </div>
-        </section>
-
-        <section id="player" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">03</span>
-            <div>
-              <p class="section-kicker">Player Mechanics</p>
-              <h2>Two vessels, one shared combat language</h2>
-            </div>
-          </div>
-
-          <div class="card-grid two-up">
-            <article class="vessel-card">
-              <div class="vessel-media">
-                <div class="sheet-sprite vessel-sheet-one"></div>
-              </div>
-              <div class="vessel-body">
-                <span class="badge">Dungeon_Character.png</span>
-                <h3>Votive Warden</h3>
-                <p>The heavier starter. Stronger guard economy, tighter melee cadence, and safer trap setup windows.</p>
-                <ul class="feature-list">
-                  <li>Starting weapon: Ash Blade</li>
-                  <li>Starting rite: Ward Circle</li>
-                  <li>Passive trait: Brass Lung (+15 max Heat before burnout)</li>
-                  <li>Base stats: 7 Health, 110 Resolve, 100 Heat cap</li>
-                </ul>
-              </div>
-            </article>
-
-            <article class="vessel-card">
-              <div class="vessel-media">
-                <div class="sheet-sprite vessel-sheet-two"></div>
-              </div>
-              <div class="vessel-body">
-                <span class="badge">Dungeon_Character_2.png</span>
-                <h3>Red Courier</h3>
-                <p>The skirmisher. Faster repositioning, stronger pull combos, and better ranged trap conversion lines.</p>
-                <ul class="feature-list">
-                  <li>Starting weapon: Hand Crossbow</li>
-                  <li>Starting rite: Chain Pull</li>
-                  <li>Passive trait: Grave Step (+20% dash distance)</li>
-                  <li>Base stats: 6 Health, 100 Resolve, 100 Heat cap</li>
-                </ul>
-              </div>
-            </article>
-          </div>
-
-          <div class="card-grid three-up">
-            <article class="mini-card">
-              <h3>Movement</h3>
-              <p>Free 8-direction movement on a 16x16 collision grid. Keyboard and mouse or twin-stick supported. Base move speed targets 105 world units per second.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Dash</h3>
-              <p>0.22 seconds of invulnerability, 25 Resolve cost, 1.6 second cooldown on repeated use through stamina gating instead of a hard timer.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Parry and Brace</h3>
-              <p>8-frame parry window. Holding the input after the window converts it into a brace stance that reduces incoming damage by 60% while draining Resolve.</p>
-            </article>
-          </div>
-
-          <div class="table-card">
-            <h3>Shared Combat Verbs</h3>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Verb</th>
-                    <th>Base Input</th>
-                    <th>Function</th>
-                    <th>Tuning Target</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Primary Attack</td>
-                    <td>Left mouse / right stick fire</td>
-                    <td>Weapon combo or projectile string</td>
-                    <td>4 to 8 Heat generated per completed attack action</td>
-                  </tr>
-                  <tr>
-                    <td>Consecrate</td>
-                    <td>Interact near fixture</td>
-                    <td>Converts a neutral trap or light source into an allied hazard</td>
-                    <td>20 Heat, 0.35 second channel, 8 second active duration</td>
-                  </tr>
-                  <tr>
-                    <td>Dash</td>
-                    <td>Space / dodge button</td>
-                    <td>Reposition, avoid telegraphs, cross flame lanes</td>
-                    <td>25 Resolve cost</td>
-                  </tr>
-                  <tr>
-                    <td>Parry / Brace</td>
-                    <td>Right mouse / left trigger</td>
-                    <td>Reflects projectiles, stuns melee, or soft-blocks when held</td>
-                    <td>20 Resolve start cost, 15 Resolve per second while bracing</td>
-                  </tr>
-                  <tr>
-                    <td>Rite Slot</td>
-                    <td>Q / shoulder button</td>
-                    <td>Supplemental active power such as Lantern Burst or Chain Pull</td>
-                    <td>20 to 40 Heat depending on rite</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="resource-grid">
-            <article class="resource-card">
-              <h3>Health</h3>
-              <p>Persistent through the run. Standard start is 6 to 7 pips. Healing is scarce and mostly tied to sanctuaries, blessings, and flask pickups.</p>
-            </article>
-            <article class="resource-card">
-              <h3>Resolve</h3>
-              <p>Regenerating defensive stamina used by dash, parry, and brace. Starts refilling 0.75 seconds after last spend. Taking damage removes 15 Resolve immediately.</p>
-            </article>
-            <article class="resource-card">
-              <h3>Censer Heat</h3>
-              <p>Offensive ritual fuel generated by attacks and room control. Reaching 100 triggers Burnout, locking rites for 5 seconds and dropping all active consecrations.</p>
-            </article>
-            <article class="resource-card">
-              <h3>Run Progression</h3>
-              <p>Every 4 cleared rooms grants a Devotion pick from 3 options: max Health, max Resolve, Heat efficiency, trap damage, or economy.</p>
-            </article>
-          </div>
-        </section>
-
-        <section id="rooms" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">04</span>
-            <div>
-              <p class="section-kicker">Room and Level Design</p>
-              <h2>One tileset, three districts, many tactical moods</h2>
-            </div>
-          </div>
-
-          <div class="district-grid">
-            <article class="district-card ember">
-              <span class="district-label">District I</span>
-              <h3>Ember Gate</h3>
-              <p>Onboarding district focused on arrow lanes, boxes, small torch clusters, and readable enemy pairings.</p>
-              <ul class="feature-list">
-                <li>Threat budget: 5 to 8</li>
-                <li>Enemy cap: 4 active</li>
-                <li>Fixture focus: arrows, torches, crates</li>
-              </ul>
-            </article>
-            <article class="district-card ossuary">
-              <span class="district-label">District II</span>
-              <h3>Ossuary Vaults</h3>
-              <p>Dense skeleton formations, spike fields, locked rewards, and skull support units that force better lane control.</p>
-              <ul class="feature-list">
-                <li>Threat budget: 8 to 12</li>
-                <li>Enemy cap: 6 active</li>
-                <li>Fixture focus: peaks, keys, mini chests</li>
-              </ul>
-            </article>
-            <article class="district-card crimson">
-              <span class="district-label">District III</span>
-              <h3>Crimson Reliquary</h3>
-              <p>Faster elites, flamethrower lanes, trap reversals, and vampire pressure built around mobility and timing.</p>
-              <ul class="feature-list">
-                <li>Threat budget: 12 to 16</li>
-                <li>Enemy cap: 7 active</li>
-                <li>Fixture focus: flames, side torches, high-value chests</li>
-              </ul>
-            </article>
-          </div>
-
-          <div class="table-card">
-            <h3>Room Types</h3>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>Purpose</th>
-                    <th>Frequency</th>
-                    <th>Reward Pattern</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Combat</td>
-                    <td>Standard kill room with one modifier and one fixture focus</td>
-                    <td>8 per district</td>
-                    <td>Pick 1 of 2 upgrades or currency bundles</td>
-                  </tr>
-                  <tr>
-                    <td>Hazard</td>
-                    <td>Lower enemy count but denser trap layouts</td>
-                    <td>Mixed into combat pool</td>
-                    <td>Higher Heat economy and trap-themed rewards</td>
-                  </tr>
-                  <tr>
-                    <td>Elite</td>
-                    <td>One elite plus support enemies</td>
-                    <td>1 per district</td>
-                    <td>Guaranteed Rare or Relic</td>
-                  </tr>
-                  <tr>
-                    <td>Treasury</td>
-                    <td>Optional treasure room with key expenditure</td>
-                    <td>0 to 1 per district</td>
-                    <td>Mini chest clusters or one large chest</td>
-                  </tr>
-                  <tr>
-                    <td>Blessing</td>
-                    <td>Priory echo shrine with healing and rule-bending boons</td>
-                    <td>1 per district path</td>
-                    <td>Heal, cleanse Burnout, or gain a district-long modifier</td>
-                  </tr>
-                  <tr>
-                    <td>Reliquary Shop</td>
-                    <td>Unmanned altar-shop with coin expenditure</td>
-                    <td>0 to 1 per district</td>
-                    <td>Buy flasks, keys, rerolls, or one curated relic</td>
-                  </tr>
-                  <tr>
-                    <td>Boss</td>
-                    <td>Hand-authored district climax</td>
-                    <td>1 per district</td>
-                    <td>District Seal, heal burst, boss relic choice</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>Procedural Generation Rules</h3>
-              <ul class="feature-list">
-                <li>Each district uses an 11-node route template: 8 standard rooms, 1 elite, 1 service node, 1 boss.</li>
-                <li>Room layouts pull from modular templates between 10x8 and 18x12 tiles with fixed door, trap, spawn, and cover sockets.</li>
-                <li>Each room guarantees at least one consecratable object and one safe opening path from the entry threshold.</li>
-                <li>Spawn pads stay at least 3 tiles away from the player entry tile to preserve readability.</li>
-              </ul>
-            </div>
-
-            <div class="text-card">
-              <h3>Difficulty Scaling</h3>
-              <ul class="feature-list">
-                <li>Scaling favors enemy composition and room rules before raw health inflation.</li>
-                <li>Every district adds a new pressure layer: support enemies, key gates, or trap reversal behavior.</li>
-                <li>Elite rooms increase move complexity and telegraph density rather than simply doubling stats.</li>
-                <li>Bosses are hand-authored so the run always ends in escalating, memorable set pieces.</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <section id="enemies" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">05</span>
-            <div>
-              <p class="section-kicker">Enemies and AI</p>
-              <h2>Small roster, sharp roles, remixable behavior</h2>
-            </div>
-          </div>
-
-          <div class="enemy-grid">
-            <article class="enemy-card">
-              <div class="enemy-portrait enemy-sprite skeleton-raider"></div>
-              <h3>Rattlebone</h3>
-              <p class="enemy-role">Basic chaser | Skeleton 1</p>
-              <ul class="feature-list">
-                <li>HP 45, fast approach, 0.55 second slash tell</li>
-                <li>Backpedals from active flames but commits through spike lanes</li>
-                <li>Used to teach trap baiting and parry timing early</li>
-              </ul>
-            </article>
-
-            <article class="enemy-card">
-              <div class="enemy-portrait enemy-sprite skeleton-warden"></div>
-              <h3>Ossuary Warder</h3>
-              <p class="enemy-role">Blocker | Skeleton 2</p>
-              <ul class="feature-list">
-                <li>HP 80, frontal guard reduces 70% damage</li>
-                <li>Shield bash displaces the player into hazard lanes</li>
-                <li>Designed to make flanks, pull effects, and spikes matter</li>
-              </ul>
-            </article>
-
-            <article class="enemy-card">
-              <div class="enemy-portrait floaty">
-                <img src="2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skull/v1/skull_v1_1.png" alt="Skull sprite">
-              </div>
-              <h3>Reliquary Skull</h3>
-              <p class="enemy-role">Turret and support | Skull</p>
-              <ul class="feature-list">
-                <li>HP 35, hovering bolt caster with short hover drift</li>
-                <li>Overcharges nearby traps to increase fire rate or pulse speed</li>
-                <li>Ignores dormant spikes but is vulnerable to consecrated ones</li>
-              </ul>
-            </article>
-
-            <article class="enemy-card">
-              <div class="enemy-portrait enemy-sprite vampire-stalker"></div>
-              <h3>Crimson Kin</h3>
-              <p class="enemy-role">Assassin | Vampire</p>
-              <ul class="feature-list">
-                <li>HP 70, blink slash, retreat leap, short life-drain bite</li>
-                <li>Prefers dark corners and broken line-of-sight</li>
-                <li>Enters late runs as the mobility check enemy</li>
-              </ul>
-            </article>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>Elite Variants</h3>
-              <ul class="feature-list">
-                <li><strong>Bone Captain:</strong> Skeleton 2 commander with command aura and arrow volley triggers.</li>
-                <li><strong>Bellringer Skull:</strong> Skull variant that periodically accelerates all room hazards for 4 seconds.</li>
-                <li><strong>Blood Acolyte:</strong> Vampire elite that marks the player and gains life steal on marked hits.</li>
-              </ul>
-            </div>
-
-            <div class="text-card">
-              <h3>Scaling Philosophy</h3>
-              <ul class="feature-list">
-                <li>Difficulty rises through enemy synergies, trap coordination, and less forgiving room modifiers.</li>
-                <li>Basic enemies gain new support patterns across districts rather than huge health inflation.</li>
-                <li>Late rooms mix blockers, skull amplifiers, and blink units to test route planning and target priority.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="status-grid">
-            <article class="status-card">
-              <h3>Burn</h3>
-              <p>Applied by torches and flamethrowers. Deals ticking damage and increases Heat gain from hitting the target.</p>
-            </article>
-            <article class="status-card">
-              <h3>Fracture</h3>
-              <p>Applied by parries, heavy blade hits, and spikes. Reduces poise and increases trap damage taken.</p>
-            </article>
-            <article class="status-card">
-              <h3>Marked</h3>
-              <p>Applied by vampires and some relics. Marked enemies are easier to pull and take bonus damage from consecrated attacks.</p>
-            </article>
-            <article class="status-card">
-              <h3>Suppressed</h3>
-              <p>Applied to skulls when hit by a consecrated arrow volley, temporarily shutting down their trap-overcharge aura.</p>
-            </article>
-          </div>
-        </section>
-
-        <section id="bosses" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">06</span>
-            <div>
-              <p class="section-kicker">Boss Design</p>
-              <h2>Three fights that rewrite how the room behaves</h2>
-            </div>
-          </div>
-
-          <div class="boss-tabs" role="tablist" aria-label="Boss details">
-            <button class="boss-tab is-active" type="button" data-boss="warden" role="tab" aria-selected="true">Warden of the Gate</button>
-            <button class="boss-tab" type="button" data-boss="choir" role="tab" aria-selected="false">Choir of Cinders</button>
-            <button class="boss-tab" type="button" data-boss="prior" role="tab" aria-selected="false">The Crimson Prior</button>
-          </div>
-
-          <div class="boss-panels">
-            <article class="boss-panel is-active" data-boss-panel="warden">
-              <div class="boss-visual">
-                <div class="enemy-portrait enemy-sprite skeleton-warden"></div>
-              </div>
-              <div class="boss-copy">
-                <span class="badge">District I Boss</span>
-                <h3>Warden of the Gate</h3>
+              <div class="menu-copy">
+                <p class="eyebrow">Last Ember Priory</p>
+                <h2>Choose A Vessel</h2>
                 <p>
-                  A hulking skeleton captain who treats the arena as a shield corridor. This fight teaches the player
-                  to reposition between cover, punish frontal defense through trap use, and respect lane telegraphs.
+                  This prototype focuses on the real room-clearing loop: movement, attacks, dodge, parry, consecrate,
+                  elites, bosses, sanctuary choices, and persistent Ash upgrades.
                 </p>
-                <ul class="feature-list">
-                  <li><strong>Phase 1:</strong> Shield walk, arrow lane calls, summon pairs of Rattlebones.</li>
-                  <li><strong>Phase 2:</strong> Shield shatters at 60% health. Gains charge rushes and manual trap reversals.</li>
-                  <li><strong>Unique rule:</strong> Arrow slits only become allied if consecrated after a successful parry.</li>
-                  <li><strong>Reward:</strong> Gate Seal, full heal burst, choice of 1 boss relic.</li>
-                </ul>
-              </div>
-            </article>
 
-            <article class="boss-panel" data-boss-panel="choir">
-              <div class="boss-visual">
-                <div class="trio-skulls">
-                  <img src="2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skull/v1/skull_v1_1.png" alt="Skull one">
-                  <img src="2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skull/v1/skull_v1_2.png" alt="Skull two">
-                  <img src="2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skull/v1/skull_v1_3.png" alt="Skull three">
+                <div class="selection-grid">
+                  <button class="selection-card is-selected" data-vessel="warden" type="button">
+                    <img src="2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Character.png" alt="Votive Warden sheet">
+                    <strong>Votive Warden</strong>
+                    <span>Ash Blade, Ward Circle, safer defenses</span>
+                  </button>
+                  <button class="selection-card" data-vessel="courier" type="button">
+                    <img src="2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Character_2.png" alt="Red Courier sheet">
+                    <strong>Red Courier</strong>
+                    <span>Hand Crossbow, Chain Pull, faster movement</span>
+                  </button>
                 </div>
-              </div>
-              <div class="boss-copy">
-                <span class="badge">District II Boss</span>
-                <h3>Choir of Cinders</h3>
-                <p>
-                  Three linked skulls orbit a central pyre and sing different hazard patterns into the room. The fight
-                  is about target ordering, area denial, and using torches to expose vulnerability windows.
-                </p>
-                <ul class="feature-list">
-                  <li><strong>Phase 1:</strong> One skull fires lines, one summons spikes, one overcharges torches.</li>
-                  <li><strong>Phase 2:</strong> Shared health breaks at 50%; all three sweep the arena with staggered fire arcs.</li>
-                  <li><strong>Phase 3:</strong> Final skull enrages and mirrors the last player-used trap type.</li>
-                  <li><strong>Reward:</strong> Vault Seal, 2-key payout, guaranteed Profane-tier choice.</li>
-                </ul>
-              </div>
-            </article>
 
-            <article class="boss-panel" data-boss-panel="prior">
-              <div class="boss-visual">
-                <div class="enemy-portrait enemy-sprite vampire-stalker"></div>
+                <div class="meta-grid" id="metaUpgradeGrid"></div>
+
+                <div class="controls-grid">
+                  <article class="controls-card">
+                    <h3>Controls</h3>
+                    <ul>
+                      <li><kbd>WASD</kbd> Move</li>
+                      <li><kbd>Mouse</kbd> Aim</li>
+                      <li><kbd>Left Click</kbd> Attack</li>
+                      <li><kbd>Right Click</kbd> Parry</li>
+                      <li><kbd>Shift</kbd> Dash</li>
+                      <li><kbd>E</kbd> Consecrate nearest trap</li>
+                      <li><kbd>Q</kbd> Use rite</li>
+                    </ul>
+                  </article>
+                  <article class="controls-card">
+                    <h3>Run Goal</h3>
+                    <ul>
+                      <li>Clear 15 rooms across 3 districts.</li>
+                      <li>Use torches, arrows, flames, and spikes as allied tools.</li>
+                      <li>Beat the Warden, Choir, and Crimson Prior.</li>
+                      <li>Bank Ash on death or victory for permanent upgrades.</li>
+                    </ul>
+                  </article>
+                </div>
+
+                <button id="startRunButton" class="primary-button" type="button">Enter The Reliquary</button>
               </div>
-              <div class="boss-copy">
-                <span class="badge">Final Boss</span>
-                <h3>The Crimson Prior</h3>
-                <p>
-                  The vampire architect of the corrupted reliquary. This fight evolves from a duelist encounter into a
-                  room-control war where the boss steals and reverses the player's best tools.
-                </p>
-                <ul class="feature-list">
-                  <li><strong>Phase 1:</strong> Blink slash, blood clones, short grab punish on greedy swings.</li>
-                  <li><strong>Phase 2:</strong> Summons skeleton and skull support while reversing one active trap every cycle.</li>
-                  <li><strong>Phase 3:</strong> Darkens the room, ignites all side torches, and gains life drain on marked targets.</li>
-                  <li><strong>Reward:</strong> Credits clear, Ascension unlock, victory Ash multiplier, codex completion update.</li>
-                </ul>
+            </div>
+          </section>
+
+          <section id="rewardOverlay" class="screen-overlay hidden">
+            <div class="overlay-card modal-card">
+              <p class="eyebrow">Room Cleared</p>
+              <h2>Choose One Reward</h2>
+              <div id="rewardChoices" class="choice-grid"></div>
+            </div>
+          </section>
+
+          <section id="sanctuaryOverlay" class="screen-overlay hidden">
+            <div class="overlay-card modal-card">
+              <p class="eyebrow">Sanctuary Strip</p>
+              <h2>The Priests Offer Aid</h2>
+              <p>Pick one service before descending into the next district.</p>
+              <div id="sanctuaryChoices" class="choice-grid priest-grid"></div>
+            </div>
+          </section>
+
+          <section id="summaryOverlay" class="screen-overlay hidden">
+            <div class="overlay-card modal-card">
+              <p class="eyebrow" id="summaryKicker">Run Complete</p>
+              <h2 id="summaryTitle">The Reliquary Claims Another</h2>
+              <p id="summaryText"></p>
+              <div class="summary-stats">
+                <div><span>Rooms Cleared</span><strong id="summaryRooms">0</strong></div>
+                <div><span>Bosses Defeated</span><strong id="summaryBosses">0</strong></div>
+                <div><span>Ash Earned</span><strong id="summaryAsh">0</strong></div>
               </div>
-            </article>
+              <button id="restartButton" class="primary-button" type="button">Return To The Priory</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <aside class="hud-panel">
+        <section class="hud-card">
+          <p class="eyebrow">Run Status</p>
+          <div class="hud-stat-row">
+            <span>District</span>
+            <strong id="districtName">Ember Gate</strong>
+          </div>
+          <div class="hud-stat-row">
+            <span>Room</span>
+            <strong id="roomCounter">1 / 15</strong>
+          </div>
+          <div class="hud-stat-row">
+            <span>Type</span>
+            <strong id="roomType">Combat</strong>
+          </div>
+          <div class="hud-stat-row">
+            <span>Modifier</span>
+            <strong id="roomModifier">Bell Chamber</strong>
           </div>
         </section>
 
-        <section id="items" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">07</span>
-            <div>
-              <p class="section-kicker">Weapons and Items</p>
-              <h2>Compact arsenals built for strong synergies</h2>
-            </div>
+        <section class="hud-card">
+          <p class="eyebrow">Resources</p>
+          <div class="bar-group">
+            <label for="hpFill">Health</label>
+            <div class="meter"><div id="hpFill" class="meter-fill hp-fill"></div></div>
+            <strong id="hpLabel">7 / 7</strong>
           </div>
-
-          <div class="table-card">
-            <h3>Weapon Families</h3>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Weapon</th>
-                    <th>Combat Feel</th>
-                    <th>Strength</th>
-                    <th>Weakness</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Ash Blade</td>
-                    <td>3-hit combo with a forward finisher</td>
-                    <td>Reliable parry follow-ups and fracture output</td>
-                    <td>Short range, less safe into flaming lanes</td>
-                  </tr>
-                  <tr>
-                    <td>Chain Flail</td>
-                    <td>Heavy arcs and delayed crowd control</td>
-                    <td>Best knockback and trap setup tool</td>
-                    <td>Slower recovery windows</td>
-                  </tr>
-                  <tr>
-                    <td>Censer Lash</td>
-                    <td>Mid-range whip with strong Heat generation</td>
-                    <td>Easiest weapon for repeated consecration loops</td>
-                    <td>Weaker direct stagger</td>
-                  </tr>
-                  <tr>
-                    <td>Hand Crossbow</td>
-                    <td>Rhythmic single-shot ranged pressure</td>
-                    <td>Controls lines and punishes skulls safely</td>
-                    <td>Can overheat careless players quickly</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="bar-group">
+            <label for="resolveFill">Resolve</label>
+            <div class="meter"><div id="resolveFill" class="meter-fill resolve-fill"></div></div>
+            <strong id="resolveLabel">110 / 110</strong>
           </div>
-
-          <div class="card-grid four-up">
-            <article class="icon-card">
-              <img src="2D Pixel Dungeon Asset Pack/items and trap_animation/flasks/flasks_1_1.png" alt="Flask icon">
-              <h3>Amber Flask</h3>
-              <p>Heal 2 Health pips and cleanse Burn.</p>
-            </article>
-            <article class="icon-card">
-              <img src="2D Pixel Dungeon Asset Pack/items and trap_animation/flasks/flasks_2_1.png" alt="Flask icon">
-              <h3>Grey Flask</h3>
-              <p>Dump 40 Heat and shorten Burnout by 2 seconds.</p>
-            </article>
-            <article class="icon-card">
-              <img src="2D Pixel Dungeon Asset Pack/items and trap_animation/flasks/flasks_3_1.png" alt="Flask icon">
-              <h3>Sanguine Flask</h3>
-              <p>Gain 8 seconds of life steal on marked enemies.</p>
-            </article>
-            <article class="icon-card">
-              <img src="2D Pixel Dungeon Asset Pack/items and trap_animation/flasks/flasks_4_1.png" alt="Flask icon">
-              <h3>Smoke Flask</h3>
-              <p>Create a short blind cloud and break enemy lock-ons.</p>
-            </article>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>Active Rites</h3>
-              <ul class="feature-list">
-                <li><strong>Consecrate Trap:</strong> baseline room tool, 20 Heat, 8 second duration.</li>
-                <li><strong>Lantern Burst:</strong> 35 Heat, radial blind and burn pulse around the player.</li>
-                <li><strong>Ward Circle:</strong> 40 Heat, 3 second sanctuary ring that weakens enemy projectiles.</li>
-                <li><strong>Chain Pull:</strong> 20 Heat, yank one target or small object into a trap lane.</li>
-              </ul>
-            </div>
-
-            <div class="text-card">
-              <h3>Passive Families</h3>
-              <ul class="feature-list">
-                <li><strong>Bone:</strong> fracture, poise breaks, and parry synergies.</li>
-                <li><strong>Ember:</strong> burn spread, Heat manipulation, and torch interactions.</li>
-                <li><strong>Blood:</strong> sustain, mark effects, and risky health trades.</li>
-                <li><strong>Brass:</strong> economy, keys, rerolls, and cooldown efficiencies.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="rarity-bar">
-            <div class="rarity common">Common</div>
-            <div class="rarity rare">Rare</div>
-            <div class="rarity relic">Relic</div>
-            <div class="rarity profane">Profane</div>
-          </div>
-
-          <div class="card-grid three-up">
-            <article class="mini-card">
-              <h3>Synergy: Emberwright</h3>
-              <p>Lantern Burst + Furnace Link + Brass Lung turns every torch room into an expanding burn engine with low Burnout risk.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Synergy: Ossuary Counter</h3>
-              <p>Ash Blade + Grave Hook + fracture relics rewards parries that feed enemies directly into peaks and arrow slits.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Synergy: Crimson Sustain</h3>
-              <p>Marked-target life steal, crossbow pressure, and Blood relics create a mobile attrition build for late vampire rooms.</p>
-            </article>
+          <div class="bar-group">
+            <label for="heatFill">Heat</label>
+            <div class="meter"><div id="heatFill" class="meter-fill heat-fill"></div></div>
+            <strong id="heatLabel">0 / 100</strong>
           </div>
         </section>
 
-        <section id="progression" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">08</span>
-            <div>
-              <p class="section-kicker">Progression System</p>
-              <h2>Reset the run, keep the priory</h2>
-            </div>
+        <section class="hud-card">
+          <p class="eyebrow">Loadout</p>
+          <div class="hud-stat-row">
+            <span>Weapon</span>
+            <strong id="weaponName">Ash Blade</strong>
           </div>
-
-          <div class="comparison-grid">
-            <article class="compare-card">
-              <h3>Resets Every Run</h3>
-              <ul class="feature-list">
-                <li>Weapons and temporary weapon modifiers</li>
-                <li>Rite pickups and passive relics</li>
-                <li>Coins, keys, devotions, and route state</li>
-                <li>Current Health, Resolve, and Heat state</li>
-              </ul>
-            </article>
-            <article class="compare-card">
-              <h3>Persists Between Runs</h3>
-              <ul class="feature-list">
-                <li>Banked Ash currency</li>
-                <li>Unlocked vessels, weapons, and rites</li>
-                <li>Priest upgrade trees</li>
-                <li>Codex entries, challenge tiers, and achievements</li>
-              </ul>
-            </article>
+          <div class="hud-stat-row">
+            <span>Rite</span>
+            <strong id="riteName">Ward Circle</strong>
           </div>
-
-          <div class="priest-grid">
-            <article class="priest-card">
-              <img src="2D Pixel Dungeon Asset Pack/Character_animation/priests_idle/priest1/v1/priest1_v1_1.png" alt="Priest one">
-              <h3>Sister Calve</h3>
-              <p class="enemy-role">Hearthkeeper</p>
-              <p>Handles healing, flask unlocks, sanctuary recovery, and persistent survivability upgrades.</p>
-            </article>
-            <article class="priest-card">
-              <img src="2D Pixel Dungeon Asset Pack/Character_animation/priests_idle/priest2/v1/priest2_v1_1.png" alt="Priest two">
-              <h3>Archivist Nhal</h3>
-              <p class="enemy-role">Keeper of Ash</p>
-              <p>Unlocks codex entries, challenge seeds, lore, and modifier pools.</p>
-            </article>
-            <article class="priest-card">
-              <img src="2D Pixel Dungeon Asset Pack/Character_animation/priests_idle/priest3/v1/priest3_v1_1.png" alt="Priest three">
-              <h3>Father Rusk</h3>
-              <p class="enemy-role">Rite Smith</p>
-              <p>Unlocks weapons, rite variants, reroll charges, and the second vessel.</p>
-            </article>
+          <div class="hud-stat-row">
+            <span>Coins</span>
+            <strong id="coinCount">0</strong>
           </div>
-
-          <div class="text-card">
-            <h3>Meta Progression Philosophy</h3>
-            <p>
-              Permanent progression is horizontal-first. Players unlock more options, not runaway stat inflation.
-              Fully upgraded sanctuary bonuses should cap around +20% survivability and +15% economy so mastery stays
-              more important than grind.
-            </p>
+          <div class="hud-stat-row">
+            <span>Keys</span>
+            <strong id="keyCount">0</strong>
+          </div>
+          <div class="hud-stat-row">
+            <span>Ash This Run</span>
+            <strong id="runAshCount">0</strong>
           </div>
         </section>
 
-        <section id="uiux" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">09</span>
-            <div>
-              <p class="section-kicker">UI/UX Design</p>
-              <h2>Readable, compact, and built from the provided UI sprites</h2>
-            </div>
-          </div>
-
-          <div class="hud-mock">
-            <div class="hud-banner">Room Modifier: Bell Chamber</div>
-            <div class="hud-left">
-              <div class="hud-box">
-                <strong>HP</strong>
-                <span>7 pips</span>
-              </div>
-              <div class="hud-box">
-                <strong>Resolve</strong>
-                <span>100</span>
-              </div>
-            </div>
-            <div class="hud-center">
-              <div class="hud-box">
-                <strong>Weapon</strong>
-                <span>Chain Flail</span>
-              </div>
-              <div class="hud-box">
-                <strong>Rite</strong>
-                <span>Lantern Burst</span>
-              </div>
-            </div>
-            <div class="hud-right">
-              <div class="hud-box">
-                <strong>Heat</strong>
-                <span>63%</span>
-              </div>
-              <div class="hud-box">
-                <strong>Keys / Coin</strong>
-                <span>2 / 74</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>HUD Layout</h3>
-              <ul class="feature-list">
-                <li>Top-left: Health pips and Resolve meter.</li>
-                <li>Top-center: room name, modifier, and boss phase labels.</li>
-                <li>Top-right: Heat, keys, coin, and Ash counters.</li>
-                <li>Bottom-center: weapon, rite, interact prompts, and cooldown state.</li>
-                <li>Bottom-left: minimap strip with route icons.</li>
-              </ul>
-            </div>
-
-            <div class="text-card">
-              <h3>Feedback Rules</h3>
-              <ul class="feature-list">
-                <li>Heavy hits use 40ms hit-stop and low-amplitude camera shake.</li>
-                <li>Consecrated traps gain gold telegraphs, hostile traps stay crimson.</li>
-                <li>Parries play a clean bell-like impact and brief white flash.</li>
-                <li>All damage numbers are optional and off by default.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="card-grid three-up">
-            <article class="mini-card">
-              <h3>Menu Stack</h3>
-              <p>Title, sanctuary, codex, upgrades, pause, run summary, and challenge selection. No deep sub-menu nesting.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Navigation</h3>
-              <p>The provided arrow interface sprites become the selection cursor, minimap node indicators, and room-choice pointers.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Accessibility</h3>
-              <p>Rebinds, flash reduction, screen shake slider, colorblind telegraphs, aim assist, auto-fire option, and subtitle scaling.</p>
-            </article>
-          </div>
+        <section class="hud-card">
+          <p class="eyebrow">Active Relics</p>
+          <ul id="relicList" class="relic-list">
+            <li>No relics yet. Clear rooms to build your run.</li>
+          </ul>
         </section>
 
-        <section id="art-audio" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">10</span>
-            <div>
-              <p class="section-kicker">Art and Audio Direction</p>
-              <h2>Gothic pixel ritualism with warm light against dead stone</h2>
-            </div>
-          </div>
-
-          <div class="palette-grid">
-            <article class="palette-card">
-              <h3>Ember Gate</h3>
-              <div class="swatch-row">
-                <span class="swatch ember-one"></span>
-                <span class="swatch ember-two"></span>
-                <span class="swatch ember-three"></span>
-              </div>
-              <p>Charcoal, brass, ember orange, and warm torchlight for the introductory descent.</p>
-            </article>
-            <article class="palette-card">
-              <h3>Ossuary Vaults</h3>
-              <div class="swatch-row">
-                <span class="swatch bone-one"></span>
-                <span class="swatch bone-two"></span>
-                <span class="swatch bone-three"></span>
-              </div>
-              <p>Bone ivory, green-grey stone, and cold chapel teal to emphasize skeletal pressure and key routes.</p>
-            </article>
-            <article class="palette-card">
-              <h3>Crimson Reliquary</h3>
-              <div class="swatch-row">
-                <span class="swatch crimson-one"></span>
-                <span class="swatch crimson-two"></span>
-                <span class="swatch crimson-three"></span>
-              </div>
-              <p>Wine red, soot black, and candle gold for the final district's corrupted liturgy.</p>
-            </article>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>Visual Style</h3>
-              <p>
-                Ashen Reliquary uses 16x16 pixel art at a 4x presentation scale. It should feel intimate, severe, and
-                ceremonial rather than cartoonish. Light sources are emotional anchors. Rooms should read as stone,
-                ash, brass, and sacramental fire.
-              </p>
-            </div>
-            <div class="text-card">
-              <h3>Animation Priorities</h3>
-              <ul class="feature-list">
-                <li>Clear attack tells and reaction frames beat large frame counts.</li>
-                <li>Torches, candles, flames, arrows, and coins should always feel alive.</li>
-                <li>Enemy motion stays readable first and expressive second.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="card-grid three-up">
-            <article class="mini-card">
-              <h3>Combat Sound</h3>
-              <p>Dry metal, bone crack, chain drag, torch roar, and bell-like parry impacts.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Ambient Sound</h3>
-              <p>Low chapel air, braziers, distant chanting, rattling chains, and subtle room tone by district.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Music</h3>
-              <p>Layered percussion, bowed drones, low organ, and choir fragments that intensify when rooms lock and bosses phase.</p>
-            </article>
-          </div>
+        <section class="hud-card">
+          <p class="eyebrow">Current Objective</p>
+          <p id="objectiveText">
+            Defeat every enemy in the room. Consecrate nearby torches, arrows, or spikes with <kbd>E</kbd> to turn the arena in your favor.
+          </p>
         </section>
-
-        <section id="monetization" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">11</span>
-            <div>
-              <p class="section-kicker">Monetization</p>
-              <h2>Premium, clean, and expansion-friendly</h2>
-            </div>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>Core Model</h3>
-              <p>
-                Premium release priced in the <strong>$14.99 to $19.99</strong> range. No premium currency, no energy
-                systems, no paid power, and no content pacing tuned around retention extraction.
-              </p>
-            </div>
-
-            <div class="text-card">
-              <h3>Post-Launch</h3>
-              <p>
-                Suitable post-launch add-ons are an OST, artbook, or a later challenge-focused expansion. Core balance,
-                characters, and win conditions remain fully included in the base purchase.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section id="technical" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">12</span>
-            <div>
-              <p class="section-kicker">Technical Design</p>
-              <h2>Small-team friendly architecture in Godot 4.x</h2>
-            </div>
-          </div>
-
-          <div class="card-grid three-up">
-            <article class="mini-card">
-              <h3>Engine</h3>
-              <p>Godot 4.x for fast 2D iteration, tilemap tooling, data-driven scenes, and strong scriptability for a small indie team.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Camera</h3>
-              <p>Orthographic top-down camera locked to the current room with subtle screen shake and boss-specific framing zooms.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Mode</h3>
-              <p>Single-player only. No online systems, no co-op, and no network-dependent features in scope.</p>
-            </article>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>Runtime Systems</h3>
-              <ul class="feature-list">
-                <li><strong>Encounter Director:</strong> builds room waves from a district threat budget.</li>
-                <li><strong>Room State Controller:</strong> handles door lock, reward state, room modifiers, and exit reveal.</li>
-                <li><strong>Trap Controller:</strong> tracks dormant, primed, consecrated, and hostile reversal states.</li>
-                <li><strong>Loot Resolver:</strong> rolls reward tiers, shop stock, and devotion picks.</li>
-                <li><strong>Enemy Brain:</strong> lightweight state machine per role with shared perception hooks.</li>
-              </ul>
-            </div>
-
-            <div class="text-card">
-              <h3>Performance Targets</h3>
-              <ul class="feature-list">
-                <li>60 FPS on low-spec PC with 320x180 internal render scale.</li>
-                <li>Object pooling for projectiles, hit VFX, and recurring trap pulses.</li>
-                <li>Max 7 active enemies outside boss encounters.</li>
-                <li>No runtime navmesh rebuilds; grid-aware steering is enough.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="code-card">
-            <h3>Core Data Interfaces</h3>
-            <pre><code>RunStructure
-- seed: int
-- district_index: int
-- room_index: int
-- nodes: Array[RoomNode]
-- coin: int
-- keys: int
-- ash: int
-- devotions: Array[String]
-- relics: Array[String]
-
-RoomNode
-- tag: combat | hazard | elite | treasury | blessing | shop | boss
-- template_id: String
-- modifier_id: String
-- exits: Array[String]
-- encounter_budget: int
-
-TrapState
-- dormant
-- primed
-- consecrated
-- hostile_reversal
-
-PlayerResources
-- health: int
-- resolve: int
-- censer_heat: int
-- coin: int
-- keys: int
-- ash: int</code></pre>
-          </div>
-
-          <div class="text-card">
-            <h3>Pipeline Note</h3>
-            <p>
-              The <code>Enemy_Animations_Set/enemies.aseprite</code> file should be treated as the source-of-truth for
-              exported combat sheets and frame timing. Runtime sprites stay atlas-friendly, but source iteration remains
-              artist-safe.
-            </p>
-          </div>
-        </section>
-
-        <section id="replayability" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">13</span>
-            <div>
-              <p class="section-kicker">Replayability and Retention</p>
-              <h2>Runs stay fresh through combinations, not bloat</h2>
-            </div>
-          </div>
-
-          <div class="card-grid four-up">
-            <article class="mini-card">
-              <h3>Randomization</h3>
-              <p>Room templates, modifiers, reward offers, district branch choices, and elite placements all shift from seed to seed.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Build Diversity</h3>
-              <p>Two vessels, four weapons, four passive families, three districts, and trap-state play create many workable builds without overloading art needs.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Daily Run</h3>
-              <p>Fixed seed, one curated mutator package, leaderboard-compatible score rules, and no meta upgrades beyond unlock pool access.</p>
-            </article>
-            <article class="mini-card">
-              <h3>Weekly Challenge</h3>
-              <p>Boss rush, one-hit kills for the player, or "all traps hostile until parried" variants for highly engaged players.</p>
-            </article>
-          </div>
-
-          <div class="two-column">
-            <div class="text-card">
-              <h3>Achievements</h3>
-              <ul class="feature-list">
-                <li>Clear a district without taking trap damage.</li>
-                <li>Kill the Warden using only allied arrow slits.</li>
-                <li>Beat Choir of Cinders without extinguishing a torch.</li>
-                <li>Clear the game with each vessel.</li>
-                <li>Finish a run while triggering Burnout five times or less.</li>
-              </ul>
-            </div>
-
-            <div class="text-card">
-              <h3>Retention Philosophy</h3>
-              <p>
-                Retention comes from mastery, unlock discovery, and challenge modes. The game should invite "one more
-                run" through strong routing decisions and build experimentation, not through artificial daily chores.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section id="example-run" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">14</span>
-            <div>
-              <p class="section-kicker">Example Run</p>
-              <h2>A full victory path through the Reliquary</h2>
-            </div>
-          </div>
-
-          <div class="timeline">
-            <article class="timeline-step">
-              <span class="timeline-label">Sanctuary Start</span>
-              <h3>Pick the Red Courier</h3>
-              <p>The player enters the run with Hand Crossbow, Chain Pull, 6 Health, and a small Ash investment that unlocks Grey Flasks in shops.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Ember Gate</span>
-              <h3>Learn arrow lanes</h3>
-              <p>The first rooms teach kiting through boxes, consecrating torches, and using Chain Pull to drag Rattlebones into allied arrows.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Elite Room</span>
-              <h3>Fight a Bone Captain</h3>
-              <p>The player parries a shield bash, flips an arrow wall, and earns the Rare relic Brass Tally, boosting coin drops and reroll odds.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Boss I</span>
-              <h3>Defeat the Warden of the Gate</h3>
-              <p>By saving Heat for consecrations after parries, the player wins a clean first boss and chooses Furnace Link, a relic that spreads Burn from torches.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Sanctuary Return</span>
-              <h3>Buy safety and route forward</h3>
-              <p>Sister Calve restores 2 Health. Father Rusk offers Lantern Burst as the new active rite. The run pivots into burn-heavy control play.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Ossuary Vaults</span>
-              <h3>Shift into control</h3>
-              <p>Skulls begin overcharging peaks. The player uses Chain Pull to pin Warders onto spikes, then uses Lantern Burst to expose skull support safely.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Treasury Detour</span>
-              <h3>Spend two keys on a large chest</h3>
-              <p>A great chest yields Profane relic Pyre Tithe: +25% torch damage, but Burnout lasts one extra second. The build becomes riskier and much stronger.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Boss II</span>
-              <h3>Break the Choir of Cinders</h3>
-              <p>The player consecrates side torches to expose the support skull first, survives the triple flame sweep, and claims the Vault Seal plus a full heal.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Crimson Reliquary</span>
-              <h3>Late-run pressure test</h3>
-              <p>Vampires blink across flame lanes, hostile reversals force disciplined Heat spending, and one bad room nearly triggers a fatal Burnout chain.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Final Boss</span>
-              <h3>Win by stealing the room back</h3>
-              <p>The Crimson Prior reverses side torches in phase two, but the player saves Lantern Burst to interrupt a drain attempt, then uses two consecrated flamethrowers to secure the kill.</p>
-            </article>
-            <article class="timeline-step">
-              <span class="timeline-label">Victory</span>
-              <h3>Cash out and unlock Ascension</h3>
-              <p>The player banks the victory Ash multiplier, unlocks the first Ascension modifier, and returns to the sanctuary with new codex pages and a second vessel unlock path nearly complete.</p>
-            </article>
-          </div>
-        </section>
-
-        <section id="asset-matrix" class="content-panel scroll-panel">
-          <div class="panel-header">
-            <span class="panel-number">A</span>
-            <div>
-              <p class="section-kicker">Appendix</p>
-              <h2>Asset utilization matrix</h2>
-            </div>
-          </div>
-
-          <div class="table-card">
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Provided Asset</th>
-                    <th>In-Game Use</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>demonstration.png</td>
-                    <td>Title screen mural, codex splash art, and marketing key visual.</td>
-                  </tr>
-                  <tr>
-                    <td>Dungeon_Tileset.png</td>
-                    <td>All floor, wall, door, pillar, and chapel geometry.</td>
-                  </tr>
-                  <tr>
-                    <td>Dungeon_Character.png</td>
-                    <td>Votive Warden vessel sheet.</td>
-                  </tr>
-                  <tr>
-                    <td>Dungeon_Character_2.png</td>
-                    <td>Red Courier vessel sheet.</td>
-                  </tr>
-                  <tr>
-                    <td>Priests idle sheets</td>
-                    <td>Sanctuary NPCs: healing, codex, weapon unlocks.</td>
-                  </tr>
-                  <tr>
-                    <td>Monster idle folders</td>
-                    <td>Codex portraits, spawn tells, floating altar projections, and low-cost ambience loops.</td>
-                  </tr>
-                  <tr>
-                    <td>Enemy animation sheets</td>
-                    <td>Runtime combat animations for skeletons and vampire.</td>
-                  </tr>
-                  <tr>
-                    <td>enemies.aseprite</td>
-                    <td>Animation source file and export master for the combat pipeline.</td>
-                  </tr>
-                  <tr>
-                    <td>arrow assets</td>
-                    <td>Projectile lanes, trap telegraphs, and ranged hazard FX.</td>
-                  </tr>
-                  <tr>
-                    <td>box_1 / box_2</td>
-                    <td>Breakable cover and loot containers with distinct durability tiers.</td>
-                  </tr>
-                  <tr>
-                    <td>chest / mini_chest</td>
-                    <td>Large boss or treasury rewards and smaller side rewards.</td>
-                  </tr>
-                  <tr>
-                    <td>coin</td>
-                    <td>Run currency pickups and shop economy feedback.</td>
-                  </tr>
-                  <tr>
-                    <td>flag</td>
-                    <td>Room-clear markers, district checkpoint banners, and victory signage.</td>
-                  </tr>
-                  <tr>
-                    <td>flamethrower</td>
-                    <td>Directional flame sweep traps and boss arena control elements.</td>
-                  </tr>
-                  <tr>
-                    <td>flasks</td>
-                    <td>Consumables: healing, Heat purge, sustain, and smoke escape.</td>
-                  </tr>
-                  <tr>
-                    <td>keys</td>
-                    <td>Treasure access, reroll locks, and premium room rewards.</td>
-                  </tr>
-                  <tr>
-                    <td>mini_box_1 / mini_box_2</td>
-                    <td>Small breakables, hidden coin drops, and room clutter that supports line-of-sight play.</td>
-                  </tr>
-                  <tr>
-                    <td>peaks</td>
-                    <td>Spike traps, hazard emphasis rooms, and boss arena punish zones.</td>
-                  </tr>
-                  <tr>
-                    <td>candlestick / side_torch / torch</td>
-                    <td>Static lighting, burn auras, decorative ambience, and trap-conversion targets.</td>
-                  </tr>
-                  <tr>
-                    <td>interface arrows</td>
-                    <td>Menus, route pointers, minimap node indicators, and room choice prompts.</td>
-                  </tr>
-                  <tr>
-                    <td>square_left / square_right / square_up_down</td>
-                    <td>Modular HUD frames, codex panels, shop boxes, and pause menu chrome.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+      </aside>
+    </main>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="game/main.js"></script>
 </body>
 </html>
