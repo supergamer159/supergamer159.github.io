@@ -124,6 +124,21 @@ function validation() {
   return { squadIds, deckSize, availableCards, errors, ready: errors.length === 0 };
 }
 
+function renderFatal(error) {
+  appEl.innerHTML = `
+    <section class="screen screen-results">
+      <article class="results-card is-loss">
+        <p class="eyebrow">Startup Error</p>
+        <h1>Boot Failed</h1>
+        <p class="results-copy">The new app hit an initialization error before it could render.</p>
+        <div class="results-log">
+          <p class="log-line">${String(error?.message || error || "Unknown error")}</p>
+        </div>
+      </article>
+    </section>
+  `;
+}
+
 function typeLabel(type) {
   return TYPE_INFO[type]?.label || "Neutral";
 }
@@ -954,4 +969,9 @@ function init() {
   render();
 }
 
-init();
+try {
+  init();
+} catch (error) {
+  console.error(error);
+  renderFatal(error);
+}

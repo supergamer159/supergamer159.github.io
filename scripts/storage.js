@@ -25,7 +25,13 @@ function clone(value) {
 
 function canUseStorage() {
   try {
-    return typeof window !== "undefined" && !!window.localStorage;
+    if (typeof window === "undefined" || !window.localStorage) {
+      return false;
+    }
+    const probeKey = "__monstercard_storage_probe__";
+    window.localStorage.setItem(probeKey, "1");
+    window.localStorage.removeItem(probeKey);
+    return true;
   } catch (error) {
     return false;
   }
@@ -49,7 +55,11 @@ function writeJson(key, value) {
     return;
   }
 
-  window.localStorage.setItem(key, JSON.stringify(value));
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    return;
+  }
 }
 
 function sanitizeProfile(rawProfile) {
@@ -89,7 +99,13 @@ export function clearLegacyStorage() {
     return;
   }
 
-  LEGACY_KEYS.forEach((key) => window.localStorage.removeItem(key));
+  LEGACY_KEYS.forEach((key) => {
+    try {
+      window.localStorage.removeItem(key);
+    } catch (error) {
+      return;
+    }
+  });
 }
 
 export function loadProfile() {
@@ -120,4 +136,3 @@ export function resetAllStorage() {
   clearLegacyStorage();
   return { profile, loadout };
 }
-
