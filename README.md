@@ -1,71 +1,29 @@
 # Signal Forge
 
-Signal Forge is a Next.js + TypeScript intraday market screener built around a hybrid signal model:
+Signal Forge is now a GitHub Pages-friendly static market terminal.
 
-- deterministic pattern scoring creates the trade bias
-- server-side narrative generation explains the setup
-- Supabase handles auth and persistent watchlists when configured
+## What the live site does
 
-## Product shape
+- Tracks a wide browser-side market universe of US stocks and ETFs
+- Scores bullish, bearish, and neutral setups from intraday-style pattern data
+- Generates AI-style market direction copy and per-symbol trade plans
+- Lets you filter a screener, inspect detail charts, and save watchlists locally
 
-- Public landing page and app shell
-- Market Pulse overview with breadth and sector leadership
-- Wide screener for US stocks + ETFs
-- Symbol detail pages with candle chart, indicators, targets, and invalidation
-- Magic-link login page
-- Watchlists backed by Supabase or demo memory mode
-- Internal refresh endpoint for 15-minute snapshot regeneration
+## Files that power the site
 
-## Stack
+- [index.html](./index.html)
+- [styles/site.css](./styles/site.css)
+- [scripts/market-engine.js](./scripts/market-engine.js)
+- [scripts/app.js](./scripts/app.js)
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- Lightweight Charts
-- Supabase Auth + Postgres
-- Vitest for engine/store tests
+## Deployment
 
-## Getting started
+This version is designed to work directly on GitHub Pages with no server runtime.
 
-1. Install dependencies:
-
-```bash
-npm install
-```
-
-2. Copy `.env.example` to `.env.local` and add your values.
-
-3. Run the dev server:
-
-```bash
-npm run dev
-```
-
-4. Run tests:
-
-```bash
-npm run test
-```
-
-## Environment
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `REFRESH_SECRET`
-
-If Supabase is not configured, the app still runs in market-data demo mode with in-memory watchlists.
-
-## API
-
-- `GET /api/market/overview`
-- `GET /api/screener`
-- `GET /api/symbol/[ticker]`
-- `GET/POST/PATCH/DELETE /api/watchlists`
-- `POST /api/internal/refresh`
+If you push the repo with the new root `index.html`, Pages will serve the market site instead of rendering the README.
 
 ## Notes
 
-- Market data is currently generated through a deterministic seeded engine so the UI and APIs are runnable without a live provider.
-- The architecture already isolates the narrative layer and persistence layer so a live delayed-data provider can replace the seeded generator cleanly.
-- This project presents probabilistic trade research, not guaranteed market outcomes or brokerage automation.
+- The current market model runs entirely in the browser so the site works on static hosting.
+- Watchlists are saved in `localStorage`.
+- The market forecasts are probabilistic, not guarantees or brokerage advice.
