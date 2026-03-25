@@ -44,14 +44,52 @@
           </div>
 
           <div class="hero-side">
+            <div class="allocation-card">
+              <span class="eyebrow">Invest In This First</span>
+              <strong id="top-pick-symbol">--</strong>
+              <p id="top-pick-summary" class="muted">Scanning for the highest-conviction long idea.</p>
+              <div class="allocation-grid">
+                <div>
+                  <span>Desk Call</span>
+                  <strong id="top-pick-call">Waiting</strong>
+                </div>
+                <div>
+                  <span>Confidence</span>
+                  <strong id="top-pick-confidence">--%</strong>
+                </div>
+                <div>
+                  <span>Conviction Weight</span>
+                  <strong id="top-pick-weight">--</strong>
+                </div>
+              </div>
+              <p id="top-pick-action" class="directive-copy">
+                The model will surface one symbol as the clearest place to put long-side attention.
+              </p>
+            </div>
+
+            <div class="command-card">
+              <span class="eyebrow">Clear Desk Orders</span>
+              <div class="command-list">
+                <div class="command-row">
+                  <span>Market stance</span>
+                  <strong id="market-command">Reading tape...</strong>
+                </div>
+                <div class="command-row">
+                  <span>Best hedge / short</span>
+                  <strong id="hedge-command">Reading weakness...</strong>
+                </div>
+                <div class="command-row">
+                  <span>Execution note</span>
+                  <strong id="risk-command">Waiting for structure...</strong>
+                </div>
+              </div>
+              <p id="market-forecast" class="forecast-copy">Generating short-term market forecast...</p>
+            </div>
+
             <div class="confidence-tile">
               <span>Overall Confidence</span>
               <strong id="overall-confidence">--%</strong>
               <small id="snapshot-time">Waiting for first run</small>
-            </div>
-            <div class="forecast-card">
-              <span class="eyebrow">AI Lean</span>
-              <p id="market-forecast" class="forecast-copy">Generating short-term market forecast...</p>
             </div>
           </div>
 
@@ -127,6 +165,7 @@
                 <thead>
                   <tr>
                     <th>Symbol</th>
+                    <th>Desk Call</th>
                     <th>Bias</th>
                     <th>Confidence</th>
                     <th>Price</th>
@@ -151,6 +190,7 @@
               </div>
 
               <div id="detail-summary" class="detail-summary"></div>
+              <div id="detail-verdict" class="verdict-banner">Choose a symbol to see the clearest action plan.</div>
 
               <div class="chart-shell">
                 <canvas id="detail-chart" width="900" height="340" aria-label="Selected symbol candlestick chart"></canvas>
@@ -205,8 +245,9 @@
 
       <footer class="footer-note">
         <p>
-          Signal Forge runs entirely on GitHub Pages. It uses a browser-side market model to score patterns, forecast
-          short-term direction, and save watchlists locally in your browser.
+          Signal Forge runs entirely on GitHub Pages. It ranks setups, names the strongest long idea first, flags the
+          cleanest hedge, and saves watchlists locally in your browser. The output is model-driven guidance, not
+          personalized financial advice.
         </p>
       </footer>
     </div>

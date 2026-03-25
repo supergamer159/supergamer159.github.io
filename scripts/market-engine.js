@@ -41,6 +41,8 @@ const CURATED_UNIVERSE = [
   { symbol: "PLD", name: "Prologis, Inc.", sector: "Real Estate", assetType: "stock", description: "Industrial REIT leader tied to logistics and rates.", basePrice: 124, averageVolume: 4100000 }
 ];
 
+const CORE_SYMBOLS = new Set(CURATED_UNIVERSE.map((item) => item.symbol));
+
 const MARKET_INDEX_SYMBOLS = ["SPY", "QQQ", "IWM", "DIA", "XLK", "XLF", "XLE", "SMH"];
 const SYNTHETIC_SECTORS = [
   "Technology",
@@ -534,6 +536,15 @@ function marketNarrative(bias, sectors, topBullish, topBearish) {
   return `${leader} is showing relative resilience, but the tape is mixed and rotation-driven. The market is producing tradable names, just not a clean index-wide trend.`;
 }
 
+function featuredLeaders(signals, bias) {
+  const featured = signals.filter((signal) => CORE_SYMBOLS.has(signal.symbol) && signal.bias === bias);
+  if (featured.length >= 6) {
+    return featured.slice(0, 6);
+  }
+  const fallback = signals.filter((signal) => signal.bias === bias);
+  return [...featured, ...fallback.filter((signal) => !CORE_SYMBOLS.has(signal.symbol))].slice(0, 6);
+}
+
 export function buildMarketDataset(asOf = new Date()) {
   const bucket = bucketTime(asOf);
   const updatedAt = bucket.toISOString();
@@ -562,8 +573,8 @@ export function buildMarketDataset(asOf = new Date()) {
     .sort((left, right) => right.confidence - left.confidence);
   const indexes = marketIndexes(signals);
   const sectors = sectorSnapshots(signals);
-  const topBullish = signals.filter((signal) => signal.bias === "bullish").slice(0, 6);
-  const topBearish = signals.filter((signal) => signal.bias === "bearish").slice(0, 6);
+  const topBullish = featuredLeaders(signals, "bullish");
+  const topBearish = featuredLeaders(signals, "bearish");
   const breadth = {
     advancers: signals.filter((signal) => signal.changePct > 0).length,
     decliners: signals.filter((signal) => signal.changePct < 0).length,

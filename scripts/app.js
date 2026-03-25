@@ -8,8 +8,17 @@ const elements = {
   marketHeadline: document.getElementById("market-headline"),
   marketNarrative: document.getElementById("market-narrative"),
   marketForecast: document.getElementById("market-forecast"),
+  marketCommand: document.getElementById("market-command"),
+  hedgeCommand: document.getElementById("hedge-command"),
+  riskCommand: document.getElementById("risk-command"),
   overallConfidence: document.getElementById("overall-confidence"),
   snapshotTime: document.getElementById("snapshot-time"),
+  topPickSymbol: document.getElementById("top-pick-symbol"),
+  topPickSummary: document.getElementById("top-pick-summary"),
+  topPickCall: document.getElementById("top-pick-call"),
+  topPickConfidence: document.getElementById("top-pick-confidence"),
+  topPickWeight: document.getElementById("top-pick-weight"),
+  topPickAction: document.getElementById("top-pick-action"),
   metricStrip: document.getElementById("metric-strip"),
   bullishList: document.getElementById("bullish-list"),
   bearishList: document.getElementById("bearish-list"),
@@ -21,6 +30,7 @@ const elements = {
   screenerBody: document.getElementById("screener-body"),
   detailSymbol: document.getElementById("detail-symbol"),
   detailSummary: document.getElementById("detail-summary"),
+  detailVerdict: document.getElementById("detail-verdict"),
   detailNarrative: document.getElementById("detail-narrative"),
   tradePlan: document.getElementById("trade-plan"),
   indicatorGrid: document.getElementById("indicator-grid"),
@@ -106,6 +116,78 @@ function toneClass(bias) {
     return "down";
   }
   return "flat";
+}
+
+function topLongCandidate() {
+  return state.dataset.signals.find((signal) => signal.bias === "bullish") ?? state.dataset.signals[0];
+}
+
+function topShortCandidate() {
+  return state.dataset.signals.find((signal) => signal.bias === "bearish") ?? state.dataset.signals[1] ?? state.dataset.signals[0];
+}
+
+function convictionWeight(signal) {
+  if (signal.confidence >= 88) {
+    return "Maximum";
+  }
+  if (signal.confidence >= 80) {
+    return "Heavy";
+  }
+  if (signal.confidence >= 70) {
+    return "Standard";
+  }
+  return "Starter";
+}
+
+function deskCall(signal, marketBias = state.dataset?.overview.overallBias) {
+  if (signal.bias === "bullish") {
+    if (signal.confidence >= 84) {
+      return marketBias === "bearish" ? "Best long if risk improves" : "Build the largest long here";
+    }
+    if (signal.confidence >= 74) {
+      return "Best long candidate";
+    }
+    return "Long watch candidate";
+  }
+  if (signal.bias === "bearish") {
+    if (signal.confidence >= 82) {
+      return "Primary hedge / short";
+    }
+    return "Avoid on the long side";
+  }
+  return "Wait for confirmation";
+}
+
+function executionNote(signal) {
+  if (signal.bias === "bullish") {
+    return `Prioritize ${signal.symbol} first. In this snapshot it is the strongest long-side structure, so it deserves the most capital attention if you are buying.`;
+  }
+  if (signal.bias === "bearish") {
+    return `${signal.symbol} is the clearest downside setup right now. Treat it as the best hedge or as a warning against adding fresh longs.`;
+  }
+  return `${signal.symbol} is not ready for aggressive capital yet. Keep it on watch and wait for a cleaner break.`;
+}
+
+function marketStanceCopy() {
+  const bias = state.dataset.overview.overallBias;
+  if (bias === "bullish") {
+    return "Lean risk-on and press the strongest long.";
+  }
+  if (bias === "bearish") {
+    return "Stay defensive and protect capital.";
+  }
+  return "Trade selectively and size down.";
+}
+
+function riskCommandCopy(longSignal) {
+  const bias = state.dataset.overview.overallBias;
+  if (bias === "bullish") {
+    return `Execute near ${longSignal.tradeLevels.entryZone[0]}-${longSignal.tradeLevels.entryZone[1]} and respect ${longSignal.tradeLevels.invalidation}.`;
+  }
+  if (bias === "bearish") {
+    return "Only buy the best long names and keep sizing smaller until breadth repairs.";
+  }
+  return "Wait for cleaner confirmation before concentrating capital.";
 }
 
 function syncSectorOptions() {
@@ -220,12 +302,24 @@ function renderLeaders() {
 
 function renderPulse() {
   const overview = state.dataset.overview;
+  const longFocus = topLongCandidate();
+  const shortFocus = topShortCandidate();
+
   elements.freshnessLabel.textContent = `${overview.freshnessLabel} · ${state.dataset.universeSize} symbols tracked`;
   elements.marketHeadline.textContent = overview.headline;
   elements.marketNarrative.textContent = overview.narrative;
   elements.marketForecast.textContent = overview.forecast;
+  elements.marketCommand.textContent = marketStanceCopy();
+  elements.hedgeCommand.textContent = `${shortFocus.symbol} is the clearest hedge.`;
+  elements.riskCommand.textContent = riskCommandCopy(longFocus);
   elements.overallConfidence.textContent = `${overview.overallConfidence}%`;
   elements.snapshotTime.textContent = formatDateTime(overview.timestamp);
+  elements.topPickSymbol.textContent = longFocus.symbol;
+  elements.topPickSummary.textContent = `${longFocus.name} is the highest-conviction long in this snapshot. ${longFocus.shortThesis}`;
+  elements.topPickCall.textContent = deskCall(longFocus);
+  elements.topPickConfidence.textContent = `${longFocus.confidence}%`;
+  elements.topPickWeight.textContent = convictionWeight(longFocus);
+  elements.topPickAction.textContent = executionNote(longFocus);
   renderMetricStrip();
 }
 
@@ -241,6 +335,7 @@ function renderScreener() {
               <span>${signal.name}</span>
             </button>
           </td>
+          <td>${deskCall(signal)}</td>
           <td class="${toneClass(signal.bias)}">${signal.bias}</td>
           <td>${signal.confidence}%</td>
           <td>${formatCurrency(signal.price)}</td>
@@ -297,10 +392,12 @@ function renderIndicators(detail) {
 
 function renderDetailSummary(detail) {
   const tiles = [
+    ["Desk Call", deskCall(detail.snapshot)],
     ["Bias", `${detail.snapshot.bias} · ${detail.snapshot.confidence}%`],
     ["Last Price", formatCurrency(detail.snapshot.price)],
     ["Session Change", formatPercent(detail.snapshot.changePct)],
-    ["Sector", detail.snapshot.sector]
+    ["Sector", detail.snapshot.sector],
+    ["Focus Weight", convictionWeight(detail.snapshot)]
   ];
 
   elements.detailSummary.innerHTML = tiles
@@ -324,6 +421,7 @@ function renderDetail() {
   state.selectedSymbol = detail.snapshot.symbol;
   elements.detailSymbol.textContent = `${detail.snapshot.symbol} · ${detail.snapshot.name}`;
   elements.detailNarrative.textContent = detail.narrative;
+  elements.detailVerdict.textContent = executionNote(detail.snapshot);
   renderDetailSummary(detail);
   renderTradePlan(detail);
   renderIndicators(detail);
@@ -352,7 +450,7 @@ function drawChart(detail) {
 
   context.clearRect(0, 0, width, height);
 
-  context.strokeStyle = "rgba(255,255,255,0.08)";
+  context.strokeStyle = "rgba(239,228,201,0.16)";
   context.lineWidth = 1;
   for (let row = 0; row < 5; row += 1) {
     const y = padding.top + ((usableHeight / 4) * row);
@@ -371,7 +469,7 @@ function drawChart(detail) {
   });
 
   context.beginPath();
-  context.strokeStyle = "rgba(255, 207, 100, 0.92)";
+  context.strokeStyle = "rgba(182, 133, 29, 0.95)";
   context.lineWidth = 2;
   sma20.forEach((value, index) => {
     const x = padding.left + (step * index) + (step / 2);
@@ -392,8 +490,8 @@ function drawChart(detail) {
     const lowY = priceToY(candle.low);
     const rising = candle.close >= candle.open;
 
-    context.strokeStyle = rising ? "#71efc2" : "#ff8662";
-    context.fillStyle = rising ? "#71efc2" : "#ff8662";
+    context.strokeStyle = rising ? "#0f5f4b" : "#cf2c12";
+    context.fillStyle = rising ? "#0f5f4b" : "#cf2c12";
     context.lineWidth = 1.4;
     context.beginPath();
     context.moveTo(x, highY);
@@ -405,7 +503,7 @@ function drawChart(detail) {
     context.fillRect(x - Math.max(step * 0.26, 2), bodyTop, Math.max(step * 0.52, 4), bodyHeight);
   });
 
-  context.fillStyle = "rgba(255,255,255,0.5)";
+  context.fillStyle = "rgba(239,228,201,0.6)";
   context.font = "12px Sora";
   context.textAlign = "right";
   [max, (max + min) / 2, min].forEach((value, index) => {
