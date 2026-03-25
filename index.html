@@ -1,174 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arcade Megavault</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="page-shell">
-    <div class="backdrop"></div>
-
-    <header class="hero panel">
-      <div class="hero-copy">
-        <p class="eyebrow">1,048,576 remixable mini-game cabinets</p>
-        <h1>Arcade Megavault</h1>
-        <p class="hero-text">
-          A giant instant-play arcade with wild remixes, daily runs, rapid-fire playlists,
-          and a vault of endlessly re-seeded mini-games that keeps feeling fresh.
-        </p>
-
-        <div class="hero-actions">
-          <button class="button button-accent" id="random-launch" type="button">Launch Random Hit</button>
-          <button class="button button-ghost" id="daily-launch" type="button">Play Daily Challenge</button>
-        </div>
-
-        <form class="search-bar" id="search-form">
-          <label class="sr-only" for="search-input">Search games</label>
-          <input
-            id="search-input"
-            name="search"
-            type="search"
-            placeholder="Search by title, genre, mission, biome, or mutator"
-            autocomplete="off"
-          >
-          <button class="button button-solid" type="submit">Find Games</button>
-        </form>
-
-        <div class="filter-row" id="genre-filters" aria-label="Game genres"></div>
-      </div>
-
-      <aside class="hero-stats panel inset">
-        <p class="eyebrow">Tonight's Numbers</p>
-        <div class="stat-grid">
-          <article class="stat-card">
-            <span class="stat-label">Possible Cabinets</span>
-            <strong class="stat-value" id="stat-total">0</strong>
-          </article>
-          <article class="stat-card">
-            <span class="stat-label">Live Catalog Slice</span>
-            <strong class="stat-value" id="stat-slice">0</strong>
-          </article>
-          <article class="stat-card">
-            <span class="stat-label">Favorites Saved</span>
-            <strong class="stat-value" id="stat-favorites">0</strong>
-          </article>
-          <article class="stat-card">
-            <span class="stat-label">Arcade Streak</span>
-            <strong class="stat-value" id="stat-streak">0 days</strong>
-          </article>
-        </div>
-
-        <div class="playlist-panel">
-          <p class="eyebrow">Quick Decks</p>
-          <div class="playlist-buttons">
-            <button class="button button-solid small" data-playlist="chaos" type="button">Chaos Deck</button>
-            <button class="button button-solid small" data-playlist="brain" type="button">Brain Burners</button>
-            <button class="button button-solid small" data-playlist="reflex" type="button">Reflex Rush</button>
-            <button class="button button-solid small" data-playlist="favorites" type="button">Favorites Only</button>
-          </div>
-        </div>
-      </aside>
-    </header>
-
-    <main class="content-grid">
-      <section class="focus panel">
-        <div class="section-top">
-          <div>
-            <p class="eyebrow">Featured Cabinet</p>
-            <h2 id="focus-title">Loading Cabinet</h2>
-            <p class="focus-summary" id="focus-summary"></p>
-          </div>
-
-          <div class="focus-actions">
-            <button class="button button-accent" id="launch-current" type="button">Launch Cabinet</button>
-            <button class="button button-ghost" id="favorite-current" type="button">Save To Vault</button>
-            <button class="button button-solid" id="remix-current" type="button">Remix This Game</button>
-          </div>
-        </div>
-
-        <div class="focus-meta" id="focus-meta"></div>
-
-        <div class="play-area">
-          <div class="hud">
-            <article class="hud-pill">
-              <span>Score</span>
-              <strong id="hud-score">0</strong>
-            </article>
-            <article class="hud-pill">
-              <span>Best</span>
-              <strong id="hud-best">0</strong>
-            </article>
-            <article class="hud-pill">
-              <span>Remix</span>
-              <strong id="hud-mode">-</strong>
-            </article>
-            <article class="hud-pill">
-              <span>Status</span>
-              <strong id="hud-status">Pick a cabinet</strong>
-            </article>
-          </div>
-
-          <div class="game-stage" id="game-stage" aria-live="polite"></div>
-
-          <div class="game-controls">
-            <p class="control-hint" id="control-hint">
-              Launch a cabinet to drop into the featured stage.
-            </p>
-            <div class="touch-controls" id="touch-controls"></div>
-          </div>
-        </div>
-      </section>
-
-      <aside class="sidebar">
-        <section class="panel sidebar-panel">
-          <div class="section-top compact">
-            <div>
-              <p class="eyebrow">Now Trending</p>
-              <h3>Instant Queue</h3>
-            </div>
-          </div>
-          <div class="stack-list" id="queue-list"></div>
-        </section>
-
-        <section class="panel sidebar-panel">
-          <div class="section-top compact">
-            <div>
-              <p class="eyebrow">Your Vault</p>
-              <h3>Saved Favorites</h3>
-            </div>
-          </div>
-          <div class="stack-list" id="favorites-list"></div>
-        </section>
-      </aside>
-    </main>
-
-    <section class="catalog panel">
-      <div class="section-top">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arcade Vault</title>
+    <link rel="stylesheet" href="styles/game.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="site-header">
         <div>
-          <p class="eyebrow">Mega Catalog</p>
-          <h2>Endless Cabinets</h2>
-          <p class="catalog-copy">
-            The site samples a giant procedural library of remixed cabinets, then keeps it moving
-            with new waves, filters, and instant launch buttons.
-          </p>
+          <p class="eyebrow">Classic Arcade Collection</p>
+          <h1>Arcade Vault</h1>
         </div>
-
-        <div class="catalog-actions">
-          <button class="button button-solid" id="reroll-catalog" type="button">Remix Wave</button>
+        <div class="header-actions">
+          <button id="random-game-button" class="ghost-button" type="button">Random Game</button>
+          <button id="restart-button" class="primary-button" type="button">Restart</button>
+          <button id="pause-button" class="secondary-button" type="button">Pause</button>
         </div>
-      </div>
+      </header>
 
-      <div class="catalog-grid" id="catalog-grid"></div>
+      <main class="site-layout">
+        <aside class="library-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Game Library</p>
+              <h2>15 Playable Classics</h2>
+            </div>
+          </div>
+          <div id="game-list" class="game-list"></div>
+        </aside>
 
-      <div class="catalog-footer">
-        <p class="catalog-status" id="catalog-status"></p>
-        <button class="button button-accent" id="load-more" type="button">Load More Cabinets</button>
-      </div>
-    </section>
-  </div>
+        <section class="play-panel">
+          <div class="play-topbar">
+            <div>
+              <p class="eyebrow">Now Playing</p>
+              <h2 id="game-title">Loading…</h2>
+              <p id="game-tagline" class="muted"></p>
+            </div>
+            <div id="hud" class="hud-grid"></div>
+          </div>
 
-  <script src="script.js"></script>
-</body>
+          <div class="canvas-frame">
+            <canvas id="game-canvas" width="960" height="640" aria-label="Arcade game canvas"></canvas>
+            <div id="overlay" class="overlay-panel"></div>
+          </div>
+
+          <div class="play-bottom">
+            <article class="info-card">
+              <p class="eyebrow">How To Play</p>
+              <div id="instructions" class="instructions"></div>
+            </article>
+
+            <article class="info-card">
+              <p class="eyebrow">About This Cabinet</p>
+              <p id="game-description" class="muted"></p>
+              <div id="scoreboard" class="scoreboard"></div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="scripts/game.js"></script>
+  </body>
 </html>
